@@ -47,6 +47,7 @@ void Application::CreateGameWindow(HWND& hwnd, WNDCLASSEX& windowClass) {
   windowClass.hInstance = hinst;
   windowClass.hIcon = LoadIcon(hinst, IDI_APPLICATION);
   windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+  windowClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
   windowClass.lpszMenuName = nullptr;
   windowClass.lpszClassName = WINDOW_CLASS;
   windowClass.hIconSm = LoadIcon(hinst, IDI_APPLICATION);
@@ -109,12 +110,12 @@ void Application::Run() const {
       DispatchMessage(&msg);
     }
     else {
-      // direct3d_->BeginDraw();
-      //
-      // // TODO: On Update
-      //
-      // direct3d_->EndDraw();
-      // direct3d_->GetSwapchain()->Present(1, 0);
+      direct3d_->BeginDraw();
+
+      // TODO: On Update
+      direct3d_->Update();
+
+      direct3d_->EndDraw();
     }
   }
   while (msg.message != WM_QUIT);
@@ -122,9 +123,12 @@ void Application::Run() const {
 
 bool Application::Init() {
   (void)CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+
+  SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
   CreateGameWindow(hwnd_, window_class_);
 
-  // direct3d_.reset(new Dx11Wrapper(hwnd_));
+  direct3d_.reset(new Dx11Wrapper(hwnd_));
 
   return true;
 }
