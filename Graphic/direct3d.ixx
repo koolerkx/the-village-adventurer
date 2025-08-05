@@ -16,6 +16,8 @@ template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 import std;
+import graphic.render;
+import graphic.shader;
 
 export class Dx11Wrapper {
   SIZE win_size_;
@@ -37,7 +39,6 @@ export class Dx11Wrapper {
   ComPtr<ID3D11DepthStencilView> depth_stencil_view_ = nullptr;
   D3D11_TEXTURE2D_DESC back_buffer_desc_{};
 
-
   D3D11_VIEWPORT viewport_{};
 
   HRESULT CreateSwapChain(HWND hwnd);
@@ -48,6 +49,10 @@ export class Dx11Wrapper {
   void CreateDepthStencilState();
   void CreateViewport();
 
+  // Graphic Pipeline
+  std::shared_ptr<ShaderManager> shader_manager_ = nullptr;
+  std::shared_ptr<Renderer> renderer_ = nullptr;
+  
 public:
   Dx11Wrapper(HWND hwnd);
   ~Dx11Wrapper();

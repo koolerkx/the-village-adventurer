@@ -219,11 +219,17 @@ Dx11Wrapper::Dx11Wrapper(HWND hwnd) {
   }
   CreateBlendState();
   CreateDepthStencilState();
+
+  shader_manager_ = std::make_shared<ShaderManager>(device_.Get(), device_context_.Get());
+  renderer_ = std::make_shared<Renderer>(device_.Get(), device_context_.Get(),
+                                         shader_manager_, 12);
 }
 
 Dx11Wrapper::~Dx11Wrapper() {}
 
-void Dx11Wrapper::Update() {}
+void Dx11Wrapper::Update() {
+  renderer_->Draw();
+}
 
 void Dx11Wrapper::BeginDraw() {
   float clear_color[4] = {0.2f, 0.4f, 0.8f, 1.0f};
@@ -239,7 +245,6 @@ void Dx11Wrapper::BeginDraw() {
 void Dx11Wrapper::EndDraw() const {
   (void)swapchain_->Present(1, 0);
 }
-
 
 ComPtr<ID3D11Device> Dx11Wrapper::GetDevice() {
   return device_;
