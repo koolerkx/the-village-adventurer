@@ -68,4 +68,6 @@ public:
 
   static void SetBlendMultiply(ID3D11DeviceContext* ctx, ID3D11BlendState* state,
                                float r = 0, float g = 0, float b = 0, float a = 0);
+
+  SIZE GetWindowSize() const { return win_size_; }
 };

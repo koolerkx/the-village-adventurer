@@ -81,10 +81,6 @@ HRESULT Dx11Wrapper::InitializeDXGIDevice() {
 
 HRESULT Dx11Wrapper::CreateFinalRenderTargets() {
   HRESULT hr = S_FALSE;
-  DXGI_SWAP_CHAIN_DESC1 desc = {};
-  hr = swapchain_->GetDesc1(&desc);
-  if (FAILED(hr)) return hr;
-
 
   ComPtr<ID3D11Texture2D> back_buffer_pointer = nullptr;
 
@@ -103,13 +99,9 @@ HRESULT Dx11Wrapper::CreateFinalRenderTargets() {
 HRESULT Dx11Wrapper::CreateDepthStencilView() {
   HRESULT hr = S_FALSE;
 
-  DXGI_SWAP_CHAIN_DESC1 desc = {};
-  hr = swapchain_->GetDesc1(&desc);
-  if (FAILED(hr)) return hr;
-
   D3D11_TEXTURE2D_DESC depth_stencil_desc;
-  depth_stencil_desc.Width = desc.Width;
-  depth_stencil_desc.Height = desc.Height;
+  depth_stencil_desc.Width = win_size_.cx;
+  depth_stencil_desc.Height = win_size_.cy;
   depth_stencil_desc.MipLevels = 1;
   depth_stencil_desc.ArraySize = 1;
   depth_stencil_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -130,9 +122,7 @@ HRESULT Dx11Wrapper::CreateDepthStencilView() {
   hr = device_->CreateDepthStencilView(depth_stencil_buffer_.Get(), &depth_stencil_view_desc,
                                        depth_stencil_view_.GetAddressOf());
 
-  if (FAILED(hr)) {
-    return false;
-  }
+  if (FAILED(hr)) return hr;
   return hr;
 }
 
@@ -184,14 +174,10 @@ void Dx11Wrapper::CreateDepthStencilState() {
 }
 
 void Dx11Wrapper::CreateViewport() {
-  DXGI_SWAP_CHAIN_DESC1 desc = {};
-  HRESULT hr = swapchain_->GetDesc1(&desc);
-  if (FAILED(hr)) return;
-
   viewport_.TopLeftX = 0.0f;
   viewport_.TopLeftY = 0.0f;
-  viewport_.Width = static_cast<FLOAT>(desc.Width);
-  viewport_.Height = static_cast<FLOAT>(desc.Height);
+  viewport_.Width = static_cast<FLOAT>(win_size_.cx);
+  viewport_.Height = static_cast<FLOAT>(win_size_.cy);
   viewport_.MinDepth = 0.0f;
   viewport_.MaxDepth = 1.0f;
   device_context_->RSSetViewports(1, &viewport_); // ビューポートの設定
