@@ -21,10 +21,9 @@ struct TextureSize {
  * @brief Texture Ç™ä«óùÇ∑ÇÈÇ‡ÇÃ
  */
 export struct Texture {
-  std::wstring filename;
+  wchar_t filename;
   ComPtr<ID3D11ShaderResourceView> texture;
-  unsigned int width;
-  unsigned int height;
+  TextureSize size;
 };
 
 export class TextureManager {
@@ -37,7 +36,7 @@ private:
 public:
   TextureManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 
-  int Load(const std::string& filename);
+  FixedPoolIndexType Load(const wchar_t& filename);
   void Release(FixedPoolIndexType idx);
 
   void Set(FixedPoolIndexType idx);

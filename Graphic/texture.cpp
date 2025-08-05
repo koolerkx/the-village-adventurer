@@ -1,6 +1,7 @@
 module;
 #include <cassert>
 #include <WinString.h>
+#include "utils/WICTextureLoader11.h"
 
 module graphic.texture;
 
@@ -14,7 +15,36 @@ TextureManager::TextureManager(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
   device_context_ = pContext;
 }
 
-int TextureManager::Load(const std::string& filename) {}
+FixedPoolIndexType TextureManager::Load(const wchar_t& filename) {
+  ID3D11Resource* texture = nullptr;
+  ID3D11ShaderResourceView* texture_resource_view = nullptr;
+
+  if (FAILED(DirectX::CreateWICTextureFromFile(device_.Get(), &filename, &texture, &texture_resource_view))) {
+    MessageBoxW(nullptr, L"フォントテクスチャの読み込みに失敗しました", &filename, MB_OK | MB_ICONERROR);
+    assert(false);
+  }
+
+  D3D11_TEXTURE2D_DESC texture2d_desc;
+  static_cast<ID3D11Texture2D*>(texture)->GetDesc(&texture2d_desc);
+  const UINT texture_width = texture2d_desc.Width;
+  const UINT texture_height = texture2d_desc.Height;
+
+  auto result = texture_pool_.insert({
+    .filename = filename,
+    .texture = texture_resource_view,
+    .size{
+      .width = texture_width,
+      .height = texture_height
+    }
+  });
+
+  if (!result.has_value()) {
+    MessageBoxW(nullptr, L"テクスチャの挿入に失敗しました", &filename, MB_OK | MB_ICONERROR);
+    assert(false);
+  }
+
+  return result.value();
+}
 
 void TextureManager::Release(FixedPoolIndexType idx) {
   texture_pool_.remove(idx, [](Texture texture) -> void { texture.texture.Reset(); });
@@ -27,8 +57,5 @@ void TextureManager::Set(FixedPoolIndexType idx) {
 
 TextureSize TextureManager::GetSize(FixedPoolIndexType idx) {
   Texture* texture = texture_pool_.get(idx);
-  return {
-    .height = texture->height,
-    .width = texture->width
-  };
+  return texture->size;
 }
