@@ -29,7 +29,21 @@ Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
   device_->CreateBuffer(&bd, NULL, vertex_buffer_.GetAddressOf());
 }
 
-void Renderer::Draw() {
+DirectX::XMMATRIX Renderer::MakeTransformMatrix(const Transform& transform) {
+  using namespace DirectX;
+  return XMMatrixTransformation2D(
+    XMVectorSet(0, 0, 0, 0),                                                                       // 拡大縮小ピボットポイント
+    0.0f,                                                                                          // 拡大縮小軸
+    XMVectorSet(transform.size.x * transform.scale.x, transform.size.y * transform.scale.y, 0, 0), // 拡大縮小
+    XMVectorSet(transform.rotation_pivot.x, transform.rotation_pivot.y, 0, 0),                     // 回転ピボットポイント
+    transform.rotation_radian,                                                                     // 回転角度
+    XMVectorSet(transform.position.x + transform.size.x * transform.scale.x / 2,
+                transform.position.y + transform.scale.y / 2, 0,
+                0) // 平行移動
+  );
+}
+
+void Renderer::Draw(const Transform& transform) {
   // シェーダーを描画パイプラインに設定
   shader_manager_->Begin();
 
@@ -54,23 +68,11 @@ void Renderer::Draw() {
   UINT offset = 0;
   device_context_->IASetVertexBuffers(0, 1, vertex_buffer_.GetAddressOf(), &stride, &offset);
 
-  float display_w = 100.0f;
-  float display_h = 100.0f;
-  float display_x = 100.0f;
-  float display_y = 100.0f;
-
   // 頂点シェーダーに変換行列を設定
   shader_manager_->SetProjectionMatrix(
     DirectX::XMMatrixOrthographicOffCenterLH(0.0f, 1280.0f, 720.0f, 0.0f, 0.0f, 1.0f));
 
-  DirectX::XMMATRIX mat = DirectX::XMMatrixTransformation2D(
-    DirectX::XMVectorSet(0, 0, 0, 0),                                                // 拡大縮小ピボットポイント
-    0.0f,                                                                            // 拡大縮小軸
-    DirectX::XMVectorSet(display_w, display_h, 0, 0),                                // 拡大縮小
-    DirectX::XMVectorSet(0, 0, 0, 0),                                                // 回転ピボットポイント
-    0,                                                                               // 回転角度
-    DirectX::XMVectorSet(display_x + display_w / 2, display_y + display_h / 2, 0, 0) // 平行移動
-  );
+  DirectX::XMMATRIX mat = MakeTransformMatrix(transform);
 
   shader_manager_->SetWorldMatrix(mat);
 

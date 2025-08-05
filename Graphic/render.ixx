@@ -1,7 +1,7 @@
 module;
 #include <d3d11.h>
-#include <DirectXMath.h>
 #include <wrl/client.h>
+#include <DirectXMath.h>
 
 export module graphic.render;
 
@@ -10,12 +10,21 @@ using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 import std;
 import graphic.shader;
+import graphic.utils.math;
 
 // 頂点構造体
 export struct Vertex {
-  DirectX::XMFLOAT3 position; // 頂点座標
-  DirectX::XMFLOAT4 color;    // 色
-  DirectX::XMFLOAT2 uv;       // テクスチャー
+  POSITION position; // 頂点座標
+  COLOR color;       // 色
+  UV uv;             // テクスチャー
+};
+
+export struct Transform {
+  POSITION position;
+  SCALE scale = {1.0f, 1.0f};
+  SCALE size;
+  float rotation_radian = 0.0f;
+  POSITION rotation_pivot = {0.0f, 0.0f, 0.0f};
 };
 
 export class Renderer {
@@ -28,9 +37,11 @@ private:
 
   int vertex_num_ = 0;
 
+  static DirectX::XMMATRIX MakeTransformMatrix(const Transform& transform);
+
 public:
   Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
            const std::shared_ptr<ShaderManager>& shader_manager, int vertex_num = 4);
 
-  void Draw();
+  void Draw(const Transform& transform);
 };

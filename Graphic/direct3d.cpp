@@ -15,6 +15,7 @@ using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 import std;
 import graphic.application;
+import graphic.utils.math;
 
 HRESULT Dx11Wrapper::CreateSwapChain(HWND hwnd) {
   DXGI_SWAP_CHAIN_DESC1 swapchain_desc{};
@@ -215,7 +216,12 @@ Dx11Wrapper::Dx11Wrapper(HWND hwnd) {
 Dx11Wrapper::~Dx11Wrapper() {}
 
 void Dx11Wrapper::Update() {
-  renderer_->Draw();
+  Transform transform = {
+    .position = POSITION(100.0f, 100.0f, 0.0f),
+    .size = {100.0f, 100.0f},
+  };
+
+  renderer_->Draw(transform);
 }
 
 void Dx11Wrapper::BeginDraw() {
