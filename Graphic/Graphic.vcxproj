@@ -19,6 +19,8 @@
         <ClCompile Include="render.ixx"/>
         <ClCompile Include="shader.cpp"/>
         <ClCompile Include="shader.ixx"/>
+        <ClCompile Include="texture.cpp" />
+        <ClCompile Include="texture.ixx" />
         <ClCompile Include="utils\fixed_pool.cpp" />
         <ClCompile Include="utils\fixed_pool.ixx" />
         <ClCompile Include="utils\math.ixx" />
