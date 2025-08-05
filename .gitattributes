@@ -1,0 +1,5 @@
+*.cpp   text working-tree-encoding=cp932 diff=sjis
+*.h     text working-tree-encoding=cp932 diff=sjis
+*.hlsl  text working-tree-encoding=cp932 diff=sjis
+*.md    text working-tree-encoding=cp932 diff=sjis
+
