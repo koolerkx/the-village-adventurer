@@ -24,6 +24,10 @@
         <ClCompile Include="utils\fixed_pool.cpp" />
         <ClCompile Include="utils\fixed_pool.ixx" />
         <ClCompile Include="utils\math.ixx" />
+        <ClCompile Include="utils\WICTextureLoader11.cpp"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ClInclude Include="utils\WICTextureLoader11.h"/>
     </ItemGroup>
     <ItemGroup>
         <FxCompile Include="shaders\shader_pixel_2d.hlsl">
