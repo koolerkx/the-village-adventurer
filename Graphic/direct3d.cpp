@@ -219,6 +219,7 @@ Dx11Wrapper::Dx11Wrapper(HWND hwnd) {
   }
   CreateBlendState();
   CreateDepthStencilState();
+  CreateViewport();
 
   shader_manager_ = std::make_shared<ShaderManager>(device_.Get(), device_context_.Get());
   renderer_ = std::make_shared<Renderer>(device_.Get(), device_context_.Get(),
