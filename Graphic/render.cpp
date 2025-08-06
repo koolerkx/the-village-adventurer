@@ -43,7 +43,7 @@ DirectX::XMMATRIX Renderer::MakeTransformMatrix(const Transform& transform) {
   );
 }
 
-void Renderer::Draw(const Transform& transform) {
+void Renderer::Draw(const Transform& transform, const COLOR& color) {
   // シェーダーを描画パイプラインに設定
   shader_manager_->Begin();
 
@@ -59,6 +59,11 @@ void Renderer::Draw(const Transform& transform) {
   v[1].position = {+0.5f, -0.5f, 0.0f}; // RT
   v[2].position = {-0.5f, +0.5f, 0.0f}; // LB
   v[3].position = {+0.5f, +0.5f, 0.0f}; // RB
+
+  v[0].color = color;
+  v[1].color = color;
+  v[2].color = color;
+  v[3].color = color;
 
   // 頂点バッファのロックを解除
   device_context_->Unmap(vertex_buffer_.Get(), 0);

@@ -221,7 +221,7 @@ void Dx11Wrapper::Update() {
     .size = {100.0f, 100.0f},
   };
 
-  renderer_->Draw(transform);
+  renderer_->Draw(transform, {0.0f, 1.0f, 1.0f, 1.0f});
 }
 
 void Dx11Wrapper::BeginDraw() {

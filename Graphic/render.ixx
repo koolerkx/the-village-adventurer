@@ -43,5 +43,5 @@ public:
   Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
            const std::shared_ptr<ShaderManager>& shader_manager, int vertex_num = 4);
 
-  void Draw(const Transform& transform);
+  void Draw(const Transform& transform, const COLOR& color);
 };

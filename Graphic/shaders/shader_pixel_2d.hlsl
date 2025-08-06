@@ -15,8 +15,6 @@ Texture2D tex;     // テクスチャ
 SamplerState samp; // テクスチャさんプラ
 
 float4 main(PS_INPUT ps_in) : SV_TARGET {
-  const float4 color = {0, 0, 0, 1};
-  return color;
-  // return ps_in.color;
+  return ps_in.color;
   // return tex.Sample(samp, ps_in.uv) * ps_in.color;
 }
