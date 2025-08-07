@@ -16,6 +16,15 @@ template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 import std;
+export import graphic.render;
+export import graphic.shader;
+export import graphic.texture;
+
+export struct ResourceManager {
+  std::unique_ptr<Renderer> renderer = nullptr;
+  std::unique_ptr<ShaderManager> shader_manager = nullptr;
+  std::unique_ptr<TextureManager> texture_manager = nullptr;
+};
 
 export class Dx11Wrapper {
   SIZE win_size_;
@@ -37,7 +46,6 @@ export class Dx11Wrapper {
   ComPtr<ID3D11DepthStencilView> depth_stencil_view_ = nullptr;
   D3D11_TEXTURE2D_DESC back_buffer_desc_{};
 
-
   D3D11_VIEWPORT viewport_{};
 
   HRESULT CreateSwapChain(HWND hwnd);
@@ -48,13 +56,18 @@ export class Dx11Wrapper {
   void CreateDepthStencilState();
   void CreateViewport();
 
+  std::unique_ptr<ResourceManager> resource_manager_ = nullptr;
+
 public:
   Dx11Wrapper(HWND hwnd);
   ~Dx11Wrapper();
 
-  void Update();
   void BeginDraw();
   void EndDraw() const;
+
+  void Dispatch(
+    std::move_only_function<void(ResourceManager*)> func = [](ResourceManager*) {}
+  );
 
   // Getters
   ComPtr<ID3D11Device> GetDevice();
@@ -63,4 +76,6 @@ public:
 
   static void SetBlendMultiply(ID3D11DeviceContext* ctx, ID3D11BlendState* state,
                                float r = 0, float g = 0, float b = 0, float a = 0);
+
+  SIZE GetWindowSize() const { return win_size_; }
 };

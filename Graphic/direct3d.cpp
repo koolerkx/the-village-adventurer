@@ -15,6 +15,7 @@ using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 import std;
 import graphic.application;
+import graphic.utils.math;
 
 HRESULT Dx11Wrapper::CreateSwapChain(HWND hwnd) {
   DXGI_SWAP_CHAIN_DESC1 swapchain_desc{};
@@ -81,10 +82,6 @@ HRESULT Dx11Wrapper::InitializeDXGIDevice() {
 
 HRESULT Dx11Wrapper::CreateFinalRenderTargets() {
   HRESULT hr = S_FALSE;
-  DXGI_SWAP_CHAIN_DESC1 desc = {};
-  hr = swapchain_->GetDesc1(&desc);
-  if (FAILED(hr)) return hr;
-
 
   ComPtr<ID3D11Texture2D> back_buffer_pointer = nullptr;
 
@@ -103,13 +100,9 @@ HRESULT Dx11Wrapper::CreateFinalRenderTargets() {
 HRESULT Dx11Wrapper::CreateDepthStencilView() {
   HRESULT hr = S_FALSE;
 
-  DXGI_SWAP_CHAIN_DESC1 desc = {};
-  hr = swapchain_->GetDesc1(&desc);
-  if (FAILED(hr)) return hr;
-
   D3D11_TEXTURE2D_DESC depth_stencil_desc;
-  depth_stencil_desc.Width = desc.Width;
-  depth_stencil_desc.Height = desc.Height;
+  depth_stencil_desc.Width = win_size_.cx;
+  depth_stencil_desc.Height = win_size_.cy;
   depth_stencil_desc.MipLevels = 1;
   depth_stencil_desc.ArraySize = 1;
   depth_stencil_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -130,9 +123,7 @@ HRESULT Dx11Wrapper::CreateDepthStencilView() {
   hr = device_->CreateDepthStencilView(depth_stencil_buffer_.Get(), &depth_stencil_view_desc,
                                        depth_stencil_view_.GetAddressOf());
 
-  if (FAILED(hr)) {
-    return false;
-  }
+  if (FAILED(hr)) return hr;
   return hr;
 }
 
@@ -184,14 +175,10 @@ void Dx11Wrapper::CreateDepthStencilState() {
 }
 
 void Dx11Wrapper::CreateViewport() {
-  DXGI_SWAP_CHAIN_DESC1 desc = {};
-  HRESULT hr = swapchain_->GetDesc1(&desc);
-  if (FAILED(hr)) return;
-
   viewport_.TopLeftX = 0.0f;
   viewport_.TopLeftY = 0.0f;
-  viewport_.Width = static_cast<FLOAT>(desc.Width);
-  viewport_.Height = static_cast<FLOAT>(desc.Height);
+  viewport_.Width = static_cast<FLOAT>(win_size_.cx);
+  viewport_.Height = static_cast<FLOAT>(win_size_.cy);
   viewport_.MinDepth = 0.0f;
   viewport_.MaxDepth = 1.0f;
   device_context_->RSSetViewports(1, &viewport_); // ビューポートの設定
@@ -219,11 +206,21 @@ Dx11Wrapper::Dx11Wrapper(HWND hwnd) {
   }
   CreateBlendState();
   CreateDepthStencilState();
+  CreateViewport();
+
+  std::unique_ptr<ShaderManager> shader_manager = std::make_unique<ShaderManager>(device_.Get(), device_context_.Get());
+  std::unique_ptr<TextureManager> texture_manager = std::make_unique<TextureManager>(
+    device_.Get(), device_context_.Get());
+  std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(device_.Get(), device_context_.Get(),
+                                                                  shader_manager.get(), texture_manager.get(), 12);
+
+  resource_manager_ = std::make_unique<ResourceManager>();
+  resource_manager_->shader_manager = std::move(shader_manager);
+  resource_manager_->texture_manager = std::move(texture_manager);
+  resource_manager_->renderer = std::move(renderer);
 }
 
 Dx11Wrapper::~Dx11Wrapper() {}
-
-void Dx11Wrapper::Update() {}
 
 void Dx11Wrapper::BeginDraw() {
   float clear_color[4] = {0.2f, 0.4f, 0.8f, 1.0f};
@@ -240,6 +237,9 @@ void Dx11Wrapper::EndDraw() const {
   (void)swapchain_->Present(1, 0);
 }
 
+void Dx11Wrapper::Dispatch(std::move_only_function<void(ResourceManager*)> func) {
+  func(resource_manager_.get());
+}
 
 ComPtr<ID3D11Device> Dx11Wrapper::GetDevice() {
   return device_;
