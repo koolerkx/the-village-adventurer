@@ -103,6 +103,16 @@ void Application::Run() const {
   ShowWindow(hwnd_, SW_SHOW);
   UpdateWindow(hwnd_);
 
+  std::function<void(ResourceManager*)> on_update_function = [](ResourceManager* resource_manager) -> void {
+    // TODO: DEBUG, TO BE REMOVE
+    Transform transform = {
+      .position = POSITION(100.0f, 100.0f, 0.0f),
+      .size = {100.0f, 100.0f},
+    };
+
+    resource_manager->renderer->Draw(transform, {0.0f, 1.0f, 1.0f, 1.0f});
+  };
+
   MSG msg = {};
   do {
     if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -111,10 +121,7 @@ void Application::Run() const {
     }
     else {
       direct3d_->BeginDraw();
-
-      // TODO: On Update
-      direct3d_->Update();
-
+      direct3d_->Dispatch(on_update_function);
       direct3d_->EndDraw();
     }
   }

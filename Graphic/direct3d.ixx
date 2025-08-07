@@ -16,8 +16,15 @@ template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 import std;
-import graphic.render;
-import graphic.shader;
+export import graphic.render;
+export import graphic.shader;
+export import graphic.texture;
+
+export struct ResourceManager {
+  std::unique_ptr<Renderer> renderer = nullptr;
+  std::unique_ptr<ShaderManager> shader_manager = nullptr;
+  std::unique_ptr<TextureManager> texture_manager = nullptr;
+};
 
 export class Dx11Wrapper {
   SIZE win_size_;
@@ -49,17 +56,18 @@ export class Dx11Wrapper {
   void CreateDepthStencilState();
   void CreateViewport();
 
-  // Graphic Pipeline
-  std::shared_ptr<ShaderManager> shader_manager_ = nullptr;
-  std::shared_ptr<Renderer> renderer_ = nullptr;
-  
+  std::unique_ptr<ResourceManager> resource_manager_ = nullptr;
+
 public:
   Dx11Wrapper(HWND hwnd);
   ~Dx11Wrapper();
 
-  void Update();
   void BeginDraw();
   void EndDraw() const;
+
+  void Dispatch(
+    std::move_only_function<void(ResourceManager*)> func = [](ResourceManager*) {}
+  );
 
   // Getters
   ComPtr<ID3D11Device> GetDevice();

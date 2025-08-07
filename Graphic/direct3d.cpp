@@ -208,21 +208,19 @@ Dx11Wrapper::Dx11Wrapper(HWND hwnd) {
   CreateDepthStencilState();
   CreateViewport();
 
-  shader_manager_ = std::make_shared<ShaderManager>(device_.Get(), device_context_.Get());
-  renderer_ = std::make_shared<Renderer>(device_.Get(), device_context_.Get(),
-                                         shader_manager_, 12);
+  std::unique_ptr<ShaderManager> shader_manager = std::make_unique<ShaderManager>(device_.Get(), device_context_.Get());
+  std::unique_ptr<TextureManager> texture_manager = std::make_unique<TextureManager>(
+    device_.Get(), device_context_.Get());
+  std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(device_.Get(), device_context_.Get(),
+                                                                  shader_manager.get(), texture_manager.get(), 12);
+
+  resource_manager_ = std::make_unique<ResourceManager>();
+  resource_manager_->shader_manager = std::move(shader_manager);
+  resource_manager_->texture_manager = std::move(texture_manager);
+  resource_manager_->renderer = std::move(renderer);
 }
 
 Dx11Wrapper::~Dx11Wrapper() {}
-
-void Dx11Wrapper::Update() {
-  Transform transform = {
-    .position = POSITION(100.0f, 100.0f, 0.0f),
-    .size = {100.0f, 100.0f},
-  };
-
-  renderer_->Draw(transform, {0.0f, 1.0f, 1.0f, 1.0f});
-}
 
 void Dx11Wrapper::BeginDraw() {
   float clear_color[4] = {0.2f, 0.4f, 0.8f, 1.0f};
@@ -237,6 +235,10 @@ void Dx11Wrapper::BeginDraw() {
 
 void Dx11Wrapper::EndDraw() const {
   (void)swapchain_->Present(1, 0);
+}
+
+void Dx11Wrapper::Dispatch(std::move_only_function<void(ResourceManager*)> func) {
+  func(resource_manager_.get());
 }
 
 ComPtr<ID3D11Device> Dx11Wrapper::GetDevice() {
