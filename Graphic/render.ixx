@@ -29,7 +29,7 @@ export struct Transform {
 };
 
 export struct UV {
-  POSITION position;
+  UVPOSITION position;
   SCALE size;
 };
 

@@ -5,6 +5,7 @@
       <w>hwnd</w>
       <w>kooler</w>
       <w>texcoord</w>
+      <w>uvposition</w>
       <w>wcex</w>
     </words>
   </dictionary>

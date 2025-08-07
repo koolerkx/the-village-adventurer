@@ -8,6 +8,7 @@ module graphic.application;
 
 import std;
 import graphic.direct3D;
+import graphic.utils.math;
 
 // Load from config
 static constexpr char WINDOW_CLASS[] = "GameWindow"; // メインウインドウクラス名
@@ -103,14 +104,36 @@ void Application::Run() const {
   ShowWindow(hwnd_, SW_SHOW);
   UpdateWindow(hwnd_);
 
-  std::function<void(ResourceManager*)> on_update_function = [](ResourceManager* resource_manager) -> void {
-    // TODO: DEBUG, TO BE REMOVE
-    Transform transform = {
+  FixedPoolIndexType texture_id_1 = -1;
+  FixedPoolIndexType texture_id_2 = -1;
+
+  // Load Texture
+  direct3d_->Dispatch([&texture_id_1, &texture_id_2](ResourceManager* resource_manager) -> void {
+    texture_id_1 = resource_manager->texture_manager->Load(L"assets/block_test.png");
+    texture_id_2 = resource_manager->texture_manager->Load(L"assets/block_white.png");
+  });
+
+  std::function<void(ResourceManager*)> on_update_function = [texture_id_1, texture_id_2
+    ](ResourceManager* resource_manager) -> void {
+    Transform transform1 = {
       .position = POSITION(100.0f, 100.0f, 0.0f),
       .size = {100.0f, 100.0f},
+      .rotation_radian = 45 * std::numbers::pi / 180,
     };
+    UV uv1 = {{0, 0}, {8, 8}};
+    COLOR color1 = {1.0f, 1.0f, 1.0f, 1.0f};
 
-    resource_manager->renderer->Draw(transform, {0.0f, 1.0f, 1.0f, 1.0f});
+    resource_manager->renderer->DrawSprite(texture_id_1, transform1, uv1, color1);
+
+    Transform transform2 = {
+      .position = POSITION(400.0f, 100.0f, 0.0f),
+      .size = {100.0f, 100.0f},
+      .rotation_radian = 0 * std::numbers::pi / 180,
+    };
+    UV uv2 = {{0, 0}, {8, 8}};
+    COLOR color2 = {1.0f, 1.0f, 1.0f, 1.0f};
+
+    resource_manager->renderer->DrawSprite(texture_id_2, transform2, uv2, color2);
   };
 
   MSG msg = {};
