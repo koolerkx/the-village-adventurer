@@ -15,14 +15,14 @@ TextureManager::TextureManager(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
   device_context_ = pContext;
 }
 
-FixedPoolIndexType TextureManager::Load(const wchar_t& filename) {
+FixedPoolIndexType TextureManager::Load(std::wstring filename) {
   ComPtr<ID3D11Resource> texture = nullptr;
   ComPtr<ID3D11ShaderResourceView> texture_resource_view = nullptr;
 
   if (FAILED(
-    DirectX::CreateWICTextureFromFile(device_.Get(), &filename, texture.GetAddressOf(), texture_resource_view.
+    DirectX::CreateWICTextureFromFile(device_.Get(), filename.c_str(), texture.GetAddressOf(), texture_resource_view.
       GetAddressOf()))) {
-    MessageBoxW(nullptr, L"フォントテクスチャの読み込みに失敗しました", &filename, MB_OK | MB_ICONERROR);
+    MessageBoxW(nullptr, L"フォントテクスチャの読み込みに失敗しました", filename.c_str(), MB_OK | MB_ICONERROR);
     assert(false);
   }
 
@@ -41,7 +41,7 @@ FixedPoolIndexType TextureManager::Load(const wchar_t& filename) {
   });
 
   if (!result.has_value()) {
-    MessageBoxW(nullptr, L"テクスチャの挿入に失敗しました", &filename, MB_OK | MB_ICONERROR);
+    MessageBoxW(nullptr, L"テクスチャの挿入に失敗しました", filename.c_str(), MB_OK | MB_ICONERROR);
     assert(false);
   }
 
