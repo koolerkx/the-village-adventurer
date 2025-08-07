@@ -22,6 +22,7 @@ export struct TextureSize {
  */
 export struct Texture {
   std::wstring filename;
+  std::optional<std::string> key;
   ComPtr<ID3D11ShaderResourceView> texture;
   TextureSize size;
 };
@@ -32,14 +33,22 @@ private:
   ComPtr<ID3D11DeviceContext> device_context_ = nullptr;
 
   FixedPool<Texture> texture_pool_;
+  std::unordered_map<std::wstring, FixedPoolIndexType> texture_filename_;
+  std::unordered_map<std::string, FixedPoolIndexType> texture_key_;
 
 public:
   TextureManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 
-  FixedPoolIndexType Load(std::wstring filename);
+  FixedPoolIndexType Load(std::wstring filename, std::optional<std::string> key = std::nullopt);
   void Release(FixedPoolIndexType idx);
 
-  void Set(FixedPoolIndexType idx);
+  void SetShaderById(FixedPoolIndexType idx);
+  void SetShaderByKey(std::string key);
+  inline void SetShader(FixedPoolIndexType idx) { SetShaderById(idx); }
 
-  TextureSize GetSize(FixedPoolIndexType idx);
+  TextureSize GetSizeById(FixedPoolIndexType idx);
+  TextureSize GetSizeByKey(std::string key);
+  inline void GetSize(FixedPoolIndexType idx) { GetSizeById(idx); }
+
+  FixedPoolIndexType GetIdByKey(std::string key);
 };

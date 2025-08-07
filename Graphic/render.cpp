@@ -96,7 +96,7 @@ void Renderer::Draw(const Transform& transform, const COLOR& color) {
 void Renderer::DrawSprite(const FixedPoolIndexType texture_id,
                           const Transform& transform, const UV& uv,
                           const COLOR& color) {
-  texture_manager_->Set(texture_id);
+  texture_manager_->SetShaderById(texture_id);
   shader_manager_->Begin();
 
   // 頂点バッファをロックする
@@ -118,7 +118,7 @@ void Renderer::DrawSprite(const FixedPoolIndexType texture_id,
   v[3].color = color;
 
   // UVマップ
-  TextureSize size = texture_manager_->GetSize(texture_id);
+  TextureSize size = texture_manager_->GetSizeById(texture_id);
 
   float u0 = uv.position.x / static_cast<float>(size.width);
   float v0 = uv.position.y / static_cast<float>(size.height);

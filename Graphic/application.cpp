@@ -104,26 +104,26 @@ void Application::Run() const {
   ShowWindow(hwnd_, SW_SHOW);
   UpdateWindow(hwnd_);
 
-  FixedPoolIndexType texture_id_1 = -1;
-  FixedPoolIndexType texture_id_2 = -1;
+  FixedPoolIndexType texture_id_2;
 
   // Load Texture
-  direct3d_->Dispatch([&texture_id_1, &texture_id_2](ResourceManager* resource_manager) -> void {
-    texture_id_1 = resource_manager->texture_manager->Load(L"assets/block_test.png");
+  direct3d_->Dispatch([&texture_id_2](ResourceManager* resource_manager) -> void {
+    resource_manager->texture_manager->Load(L"assets/block_test.png", "test");
     texture_id_2 = resource_manager->texture_manager->Load(L"assets/block_white.png");
   });
 
-  std::function<void(ResourceManager*)> on_update_function = [texture_id_1, texture_id_2
+  std::function<void(ResourceManager*)> on_update_function = [texture_id_2
     ](ResourceManager* resource_manager) -> void {
     Transform transform1 = {
       .position = POSITION(100.0f, 100.0f, 0.0f),
       .size = {100.0f, 100.0f},
-      .rotation_radian = 45 * std::numbers::pi / 180,
+      .rotation_radian = 45.0f * static_cast<float>(std::numbers::pi) / 180.0f,
     };
     UV uv1 = {{0, 0}, {8, 8}};
     COLOR color1 = {1.0f, 1.0f, 1.0f, 1.0f};
 
-    resource_manager->renderer->DrawSprite(texture_id_1, transform1, uv1, color1);
+    FixedPoolIndexType texture_id = resource_manager->texture_manager->GetIdByKey("test");
+    resource_manager->renderer->DrawSprite(texture_id, transform1, uv1, color1);
 
     Transform transform2 = {
       .position = POSITION(400.0f, 100.0f, 0.0f),
