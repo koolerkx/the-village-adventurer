@@ -22,12 +22,48 @@ private:
   };
 
 public:
-  FixedPool();
+  FixedPool() {
+    free_list_.reserve(Max);
+    for (int i = static_cast<int>(Max) - 1; i >= 0; --i) {
+      free_list_.push_back(static_cast<Index>(i));
+    }
+  }
 
-  std::expected<Index, InsertError> insert(const T& value);
-  void remove(Index idx, const std::move_only_function<void(T&)>& func = [](T&) {});
-  T* get(Index idx);
-  const T* get(Index idx) const;
-  bool is_alive(Index idx) const;
-  void update(Index idx, const std::move_only_function<void(T&)>& func);
+  std::expected<Index, InsertError> insert(const T& value) {
+    if (free_list_.empty()) return std::unexpected(InsertError::POOL_FULL);
+
+    Index idx = free_list_.back();
+    free_list_.pop_back();
+
+    data_[idx] = value;
+    alive_[idx] = true;
+    return idx;
+  }
+
+  void remove(Index idx, std::move_only_function<void(T&)> func = [](T&) {}) {
+    if (idx >= Max || !alive_[idx]) return;
+
+    func(data_[idx]);
+
+    alive_[idx] = false;
+    free_list_.push_back(idx);
+  }
+
+  T* get(Index idx) {
+    return idx < Max && alive_[idx] ? &data_[idx] : nullptr;
+  }
+
+  const T* get(Index idx) const {
+    return idx < Max && alive_[idx] ? &data_[idx] : nullptr;
+  }
+
+  bool is_alive(Index idx) const {
+    return idx < Max && alive_[idx];
+  }
+
+  void update(Index idx, const std::move_only_function<void(T&)>& func) {
+    if (idx >= Max || !alive_[idx]) return;
+
+    func(data_[idx]);
+  }
 };
