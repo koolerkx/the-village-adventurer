@@ -31,5 +31,8 @@ jobs:
     - name: Restore NuGet packages
       run: nuget restore ${{ env.SOLUTION_FILE_PATH }}
 
+    - name: Create directory
+      run: mkdir -p assets/shaders
+
     - name: Build (${{ matrix.configuration }}, ${{ matrix.platform }})
       run: msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
