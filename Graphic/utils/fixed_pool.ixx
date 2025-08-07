@@ -6,9 +6,11 @@ import std;
 
 export using FixedPoolIndexType = unsigned __int8;
 
+constexpr std::size_t FALLBACK_MAX = 65535;
+
 export template <typename T,
                  typename IT = FixedPoolIndexType,
-                 std::size_t Max = std::numeric_limits<IT>::max()>
+                 std::size_t Max = (std::numeric_limits<IT>::max() < FALLBACK_MAX ? std::numeric_limits<IT>::max() : FALLBACK_MAX)>
 class FixedPool {
   using Index = IT;
 
