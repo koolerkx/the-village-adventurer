@@ -11,8 +11,6 @@
         </ProjectConfiguration>
     </ItemGroup>
     <ItemGroup>
-        <ClCompile Include="application.cpp"/>
-        <ClCompile Include="application.ixx"/>
         <ClCompile Include="direct3d.cpp"/>
         <ClCompile Include="direct3d.ixx"/>
         <ClCompile Include="render.cpp"/>

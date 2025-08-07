@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36310.24
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Game\Game.vcxproj", "{0C754A9F-E68B-4E1B-AD00-89691F8502A5}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "App", "App\App.vcxproj", "{0C754A9F-E68B-4E1B-AD00-89691F8502A5}"
 	ProjectSection(ProjectDependencies) = postProject
 		{8473A483-591C-4EFB-87CE-FE7774916D73} = {8473A483-591C-4EFB-87CE-FE7774916D73}
 	EndProjectSection

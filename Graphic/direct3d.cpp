@@ -14,7 +14,6 @@ template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 import std;
-import graphic.application;
 import graphic.utils.math;
 
 HRESULT Dx11Wrapper::CreateSwapChain(HWND hwnd) {
@@ -185,9 +184,15 @@ void Dx11Wrapper::CreateViewport() {
 }
 
 Dx11Wrapper::Dx11Wrapper(HWND hwnd) {
-  Application& app = Application::Instance();
-  win_size_ = app.GetWindowSize();
+  RECT rect;
+  if(GetWindowRect(hwnd, &rect)) {
+    int width = rect.right - rect.left;
+    int height = rect.bottom - rect.top;
 
+    win_size_.cx = width;
+    win_size_.cy = height;
+  }
+  
   if (FAILED(InitializeDXGIDevice())) {
     assert(0);
     return;

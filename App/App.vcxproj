@@ -100,6 +100,8 @@
     </ItemDefinitionGroup>
     <ItemGroup>
         <ClCompile Include="main.cpp"/>
+        <ClCompile Include="application.ixx"/>
+        <ClCompile Include="application.cpp"/>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Graphic\Graphic.vcxproj"/>

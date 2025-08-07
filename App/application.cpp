@@ -4,7 +4,7 @@ module;
 #include <Windows.h>
 #include <objbase.h>
 
-module graphic.application;
+module application;
 
 import std;
 import graphic.direct3D;
