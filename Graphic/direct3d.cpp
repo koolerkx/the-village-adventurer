@@ -185,14 +185,14 @@ void Dx11Wrapper::CreateViewport() {
 
 Dx11Wrapper::Dx11Wrapper(HWND hwnd) {
   RECT rect;
-  if(GetWindowRect(hwnd, &rect)) {
+  if (GetWindowRect(hwnd, &rect)) {
     int width = rect.right - rect.left;
     int height = rect.bottom - rect.top;
 
     win_size_.cx = width;
     win_size_.cy = height;
   }
-  
+
   if (FAILED(InitializeDXGIDevice())) {
     assert(0);
     return;
@@ -262,4 +262,8 @@ void Dx11Wrapper::SetBlendMultiply(ID3D11DeviceContext* ctx, ID3D11BlendState* s
                                    float r, float g, float b, float a) {
   float factor[4] = {r, g, b, a};
   ctx->OMSetBlendState(state, factor, 0xffffffff);
+}
+
+ResourceManager* Dx11Wrapper::GetResourceManager() const {
+  return resource_manager_.get();
 }

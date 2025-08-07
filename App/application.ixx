@@ -6,6 +6,7 @@ export module application;
 
 import std;
 import graphic.direct3D;
+import game.scene_manager;
 
 export class Application {
 private:
@@ -21,6 +22,8 @@ private:
   Application();
   Application(const Application&) = delete;
   void operator=(const Application&) = delete;
+
+  std::unique_ptr<SceneManager> scene_manager_ = nullptr;
 
 public:
   static Application& Instance();
