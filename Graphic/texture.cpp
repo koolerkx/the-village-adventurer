@@ -16,16 +16,18 @@ TextureManager::TextureManager(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 }
 
 FixedPoolIndexType TextureManager::Load(const wchar_t& filename) {
-  ID3D11Resource* texture = nullptr;
-  ID3D11ShaderResourceView* texture_resource_view = nullptr;
+  ComPtr<ID3D11Resource> texture = nullptr;
+  ComPtr<ID3D11ShaderResourceView> texture_resource_view = nullptr;
 
-  if (FAILED(DirectX::CreateWICTextureFromFile(device_.Get(), &filename, &texture, &texture_resource_view))) {
+  if (FAILED(
+    DirectX::CreateWICTextureFromFile(device_.Get(), &filename, texture.GetAddressOf(), texture_resource_view.
+      GetAddressOf()))) {
     MessageBoxW(nullptr, L"フォントテクスチャの読み込みに失敗しました", &filename, MB_OK | MB_ICONERROR);
     assert(false);
   }
 
   D3D11_TEXTURE2D_DESC texture2d_desc;
-  static_cast<ID3D11Texture2D*>(texture)->GetDesc(&texture2d_desc);
+  static_cast<ID3D11Texture2D*>(texture.Get())->GetDesc(&texture2d_desc);
   const UINT texture_width = texture2d_desc.Width;
   const UINT texture_height = texture2d_desc.Height;
 

@@ -8,10 +8,10 @@ template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 import std;
-import graphic.utils.fixed_pool;
+export import graphic.utils.fixed_pool;
 import graphic.utils.math;
 
-struct TextureSize {
+export struct TextureSize {
   unsigned int width;
   unsigned int height;
 };
