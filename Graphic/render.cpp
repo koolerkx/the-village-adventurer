@@ -152,3 +152,49 @@ void Renderer::DrawSprite(const FixedPoolIndexType texture_id,
   // ポリゴン描画命令発行
   device_context_->Draw(vertex_num_, 0);
 }
+
+void Renderer::DrawLineForDebugUse(const POSITION& start, const POSITION& end, const COLOR& color) {
+  const std::wstring texture_filename = L"assets/block_white.png";
+  const FixedPoolIndexType texture_id = texture_manager_->Load(texture_filename);
+  
+  texture_manager_->SetShaderById(texture_id);
+
+  shader_manager_->Begin();
+
+  // 頂点バッファをロックする
+  D3D11_MAPPED_SUBRESOURCE msr;
+  device_context_->Map(vertex_buffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+
+  // 頂点バッファへの仮想ポインタを取得
+  Vertex* v = static_cast<Vertex*>(msr.pData);
+
+  // 画面の左上から右下に向かう線分を描画する
+  v[0].position = {start.x, start.y, 0.0f}; // LT
+  v[1].position = {end.x, end.y, 0.0f}; // RT
+
+  v[0].color = color;
+  v[1].color = color;
+
+  v[0].uv = {0, 0};
+  v[1].uv = {1, 1};
+  
+  // 頂点バッファのロックを解除
+  device_context_->Unmap(vertex_buffer_.Get(), 0);
+
+  // 頂点バッファを描画パイプラインに設定
+  UINT stride = sizeof(Vertex);
+  UINT offset = 0;
+  device_context_->IASetVertexBuffers(0, 1, vertex_buffer_.GetAddressOf(), &stride, &offset);
+
+  // 頂点シェーダーに変換行列を設定
+  shader_manager_->SetProjectionMatrix(
+    DirectX::XMMatrixOrthographicOffCenterLH(0.0f, 1280.0f, 720.0f, 0.0f, 0.0f, 1.0f));
+
+  shader_manager_->SetWorldMatrix(DirectX::XMMatrixIdentity());
+
+  // プリミティブトポロジ設定
+  device_context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+
+  // ポリゴン描画命令発行
+  device_context_->Draw(vertex_num_, 0);
+}

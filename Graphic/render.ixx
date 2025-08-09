@@ -11,6 +11,7 @@ using ComPtr = Microsoft::WRL::ComPtr<T>;
 import std;
 import graphic.shader;
 import graphic.utils.math;
+import graphic.utils.color;
 import graphic.texture;
 
 // í∏ì_ç\ë¢ëÃ

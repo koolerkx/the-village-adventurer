@@ -1,4 +1,5 @@
 module;
+#include <Windows.h>
 
 export module graphic.debug;
 
@@ -15,6 +16,9 @@ export struct DebugSetting {
 };
 
 export struct UiGuidelineProps {
+  int grid_size = 16;
+  COLOR grid_color = color::AliceBlue;
+  
   int column_count = 8;
   int column_margin = 24;
   int column_gutter = 24;
@@ -26,18 +30,17 @@ export struct UiGuidelineProps {
 
 export struct DebugContext {
   const ResourceManager* render_resource_manager = nullptr;
+  SIZE window_size = {0, 0};
 };
 
 export class DebugManager {
 private:
-  DebugSetting debug_setting_;
-  UiGuidelineProps guideline_props_;
+  static constexpr DebugSetting debug_setting_;
+  static constexpr UiGuidelineProps guideline_props_;
   std::unique_ptr<DebugContext> context_;
 
-  
-
 public:
-  DebugManager(std::unique_ptr<DebugContext> context, DebugSetting setting, UiGuidelineProps guideline);
+  DebugManager(std::unique_ptr<DebugContext> context);
 
   void OnUpdate(float delta_time);
   void OnRender();

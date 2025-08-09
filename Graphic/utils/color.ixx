@@ -204,4 +204,8 @@ export namespace color {
   constexpr COLOR SlateGray = toRGB("#708090", 1.0f);
   constexpr COLOR DarkSlateGray = toRGB("#2F4F4F", 1.0f);
   constexpr COLOR Black = toRGB("#000000", 1.0f);
+
+  DirectX::XMFLOAT4 setOpacity(COLOR color, float opacity) {
+    return DirectX::XMFLOAT4(color.x, color.y, color.z, opacity);
+  }
 }

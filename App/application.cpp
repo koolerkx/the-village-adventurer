@@ -115,10 +115,13 @@ void Application::Run() const {
     else {
       // todo: add delta time
       scene_manager_->OnUpdate(0.0f);
+      debug_manager_->OnUpdate(0.0f);
 
       direct3d_->BeginDraw();
       scene_manager_->OnRender();
       // direct3d_->Dispatch(on_update_function);
+
+      debug_manager_->OnRender();
       direct3d_->EndDraw();
     }
   }
@@ -128,7 +131,7 @@ void Application::Run() const {
 bool Application::Init() {
   (void)CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
-  SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+  // SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
   CreateGameWindow(hwnd_, window_class_);
 
@@ -144,6 +147,11 @@ bool Application::Init() {
                      std::move(initial_context)
     )
   );
+
+  std::unique_ptr<DebugContext> debug_context = std::make_unique<DebugContext>();
+  debug_context->render_resource_manager = direct3d_->GetResourceManager();
+  debug_context->window_size = GetWindowSize();
+  debug_manager_.reset(new DebugManager(std::move(debug_context)));
 
   return true;
 }

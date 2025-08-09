@@ -17,7 +17,7 @@ TextureManager::TextureManager(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 
 FixedPoolIndexType TextureManager::Load(std::wstring filename, std::optional<std::string> key) {
   if (texture_filename_.contains(filename)) {
-    texture_filename_[filename];
+    return texture_filename_[filename];
   }
   if (key.has_value() && texture_key_.contains(key.value())) {
     return texture_key_[key.value()];
