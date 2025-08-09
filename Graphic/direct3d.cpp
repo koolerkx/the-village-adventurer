@@ -229,7 +229,7 @@ Dx11Wrapper::Dx11Wrapper(HWND hwnd) {
 Dx11Wrapper::~Dx11Wrapper() {}
 
 void Dx11Wrapper::BeginDraw() {
-  float clear_color[4] = {0.2f, 0.4f, 0.8f, 1.0f};
+  float clear_color[4] = {background_clear_color.x, background_clear_color.y, background_clear_color.z, background_clear_color.w};
   device_context_->ClearRenderTargetView(render_target_views_.Get(), clear_color);
   device_context_->ClearDepthStencilView(depth_stencil_view_.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 

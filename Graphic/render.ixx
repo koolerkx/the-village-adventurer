@@ -40,6 +40,12 @@ export struct Line {
   COLOR color;
 };
 
+export struct Rect {
+  POSITION left_top;
+  POSITION right_bottom;
+  COLOR color;
+};
+
 export class Renderer {
 private:
   ComPtr<ID3D11Device> device_ = nullptr;
@@ -50,11 +56,18 @@ private:
   ComPtr<ID3D11Buffer> vertex_buffer_ = nullptr;      // 頂点バッファ
   ComPtr<ID3D11Buffer> line_vertex_buffer_ = nullptr; // ライン頂点バッファ
 
+  size_t rects_buffer_can_store_ = 0; // max = 2^32 = ~4.29E9
+  ComPtr<ID3D11Buffer> rect_vertex_buffer_ = nullptr; // レクト頂点バッファ
+  ComPtr<ID3D11Buffer> rect_index_buffer_;
+  DXGI_FORMAT rect_index_format_ = DXGI_FORMAT_R32_UINT;
+
   int vertex_num_ = 0;
 
   static DirectX::XMMATRIX MakeTransformMatrix(const Transform& transform);
 
   DirectX::XMMATRIX mat_ortho_;
+
+  void CreateRectBuffer(size_t max_rect_num);
 
 public:
   Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
@@ -70,4 +83,5 @@ public:
 
   void DrawLineForDebugUse(const POSITION& start, const POSITION& end, const COLOR& color);
   void DrawLinesForDebugUse(const std::span<Line> lines);
+  void DrawRectsForDebugUse(const std::span<Rect> rects);
 };

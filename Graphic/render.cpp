@@ -42,9 +42,36 @@ Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
 
   device_->CreateBuffer(&line_buff_desc, NULL, line_vertex_buffer_.GetAddressOf());
 
+  CreateRectBuffer(1024);
+  
   // FIXME: load window size from config file
   mat_ortho_ =
     DirectX::XMMatrixOrthographicOffCenterLH(0.0f, 1280, 720, 0.0f, 0.0f, 1.0f);
+}
+
+void Renderer::CreateRectBuffer(size_t max_rect_num) {
+  if (max_rect_num < rects_buffer_can_store_) return;
+
+  // Vertex Buffer
+  D3D11_BUFFER_DESC rect_buff_desc = {};
+  rect_buff_desc.Usage = D3D11_USAGE_DYNAMIC;
+  rect_buff_desc.ByteWidth = sizeof(Vertex) * max_rect_num * 4;
+  rect_buff_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+  rect_buff_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+  device_->CreateBuffer(&rect_buff_desc, NULL, rect_vertex_buffer_.GetAddressOf());
+
+  // Index Buffer
+  const size_t max_indices = max_rect_num * 4 + (max_rect_num - 1); // insert cut value between each rect
+  D3D11_BUFFER_DESC bd{};
+  bd.Usage = D3D11_USAGE_DYNAMIC;
+  bd.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * max_indices);
+  bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+  bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+  rect_index_buffer_.Reset();
+  device_->CreateBuffer(&bd, nullptr, rect_index_buffer_.GetAddressOf());
+  rect_index_format_ = DXGI_FORMAT_R32_UINT; // cut value: 0xFFFFFFFF
 }
 
 DirectX::XMMATRIX Renderer::MakeTransformMatrix(const Transform& transform) {
@@ -250,4 +277,81 @@ void Renderer::DrawLinesForDebugUse(const std::span<Line> lines) {
   device_context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
   device_context_->Draw(static_cast<UINT>(lines.size() * 2), 0);
+}
+
+void Renderer::DrawRectsForDebugUse(const std::span<Rect> rects) {
+  if (rects.empty()) return;
+
+  const std::wstring texture_filename = L"assets/block_white.png";
+  const FixedPoolIndexType texture_id = texture_manager_->Load(texture_filename);
+
+  texture_manager_->SetShaderById(texture_id);
+
+  shader_manager_->Begin();
+
+  shader_manager_->SetProjectionMatrix(mat_ortho_);
+  shader_manager_->SetWorldMatrix(DirectX::XMMatrixIdentity());
+
+  // Vertex Buffer
+  {
+    D3D11_MAPPED_SUBRESOURCE msr{};
+    device_context_->Map(rect_vertex_buffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+    Vertex* v = static_cast<Vertex*>(msr.pData);
+
+    for (size_t i = 0; i < rects.size(); i++) {
+      const auto& [left_top, right_bottom, color] = rects[i];
+      const UINT base = static_cast<UINT>(i * 4);
+
+      v[base + 0].position = {left_top.x, left_top.y, 0.0f};         // LT
+      v[base + 1].position = {right_bottom.x, left_top.y, 0.0f};     // RT
+      v[base + 2].position = {left_top.x, right_bottom.y, 0.0f};     // LB
+      v[base + 3].position = {right_bottom.x, right_bottom.y, 0.0f}; // RB
+
+      v[base + 0].color = color;
+      v[base + 1].color = color;
+      v[base + 2].color = color;
+      v[base + 3].color = color;
+
+      v[base + 0].uv = {0, 0};
+      v[base + 1].uv = {1, 0};
+      v[base + 2].uv = {0, 1};
+      v[base + 3].uv = {1, 1};
+    }
+
+    device_context_->Unmap(rect_vertex_buffer_.Get(), 0);
+  }
+
+  // Index Buffer
+  const uint32_t CUT = 0xFFFFFFFFu; // DXGI_FORMAT_R32_UINT primitive-restart
+  const size_t index_count = rects.size() * 4 + (rects.size() - 1);
+
+  {
+    D3D11_MAPPED_SUBRESOURCE msr{};
+    device_context_->Map(rect_index_buffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+    auto* idx = static_cast<uint32_t*>(msr.pData);
+
+    size_t w = 0;
+    for (uint32_t i = 0; i < static_cast<uint32_t>(rects.size()); ++i) {
+      const uint32_t b = i * 4;
+      idx[w++] = b + 0; // LT
+      idx[w++] = b + 1; // RT
+      idx[w++] = b + 2; // LB
+      idx[w++] = b + 3; // RB
+
+      if (i + 1 < rects.size()) {
+        idx[w++] = CUT;
+      }
+    }
+    device_context_->Unmap(rect_index_buffer_.Get(), 0);
+  }
+
+
+  UINT stride = sizeof(Vertex), offset = 0;
+  ID3D11Buffer* vb = rect_vertex_buffer_.Get();
+  device_context_->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
+  device_context_->IASetIndexBuffer(rect_index_buffer_.Get(), rect_index_format_, 0);
+
+  device_context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+  device_context_->DrawIndexed(static_cast<UINT>(index_count), 0, 0);
 }

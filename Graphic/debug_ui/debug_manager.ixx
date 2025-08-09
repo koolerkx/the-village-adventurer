@@ -17,15 +17,17 @@ export struct DebugSetting {
 
 export struct UiGuidelineProps {
   int grid_size = 16;
-  COLOR grid_color = color::setOpacity(color::Red, 0.1f);
+  COLOR grid_color = color::setOpacity(color::red, 0.1f);
 
   int column_count = 8;
   int column_margin = 24;
   int column_gutter = 24;
+  COLOR column_color = color::setOpacity(color::red, 0.1f);
 
   int row_count = 4;
   int row_margin = 0;
-  int row_gutter = 20;
+  int row_gutter = 16;
+  COLOR row_color = color::setOpacity(color::red, 0.1f);
 };
 
 export struct DebugContext {
@@ -40,6 +42,7 @@ private:
   std::unique_ptr<DebugContext> context_;
 
   std::vector<Line> grid_lines_;
+  std::vector<Rect> rects_;
 
 public:
   DebugManager(std::unique_ptr<DebugContext> context);

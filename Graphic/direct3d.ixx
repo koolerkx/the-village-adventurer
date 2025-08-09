@@ -21,6 +21,8 @@ export import graphic.shader;
 export import graphic.texture;
 export import graphic.utils.color;
 
+constexpr COLOR background_clear_color = color::grey900;
+
 export struct ResourceManager {
   std::unique_ptr<Renderer> renderer = nullptr;
   std::unique_ptr<ShaderManager> shader_manager = nullptr;
