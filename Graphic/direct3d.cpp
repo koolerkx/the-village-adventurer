@@ -217,7 +217,8 @@ Dx11Wrapper::Dx11Wrapper(HWND hwnd) {
   std::unique_ptr<TextureManager> texture_manager = std::make_unique<TextureManager>(
     device_.Get(), device_context_.Get());
   std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(device_.Get(), device_context_.Get(),
-                                                                  shader_manager.get(), texture_manager.get(), 12);
+                                                                  shader_manager.get(), texture_manager.get(),
+                                                                  win_size_, 12);
 
   resource_manager_ = std::make_unique<ResourceManager>();
   resource_manager_->shader_manager = std::move(shader_manager);

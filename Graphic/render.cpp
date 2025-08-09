@@ -11,6 +11,7 @@ import graphic.texture;
 Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
                    ShaderManager* shader_manager,
                    TextureManager* texture_manager,
+                   SIZE, // FIXME, load window size from file
                    int vertex_num) {
   if (!pDevice || !pContext) {
     OutputDebugString("ShaderManager::ShaderManager : 与えられたデバイスかコンテキストが不正です");
@@ -32,6 +33,18 @@ Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
   bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
   device_->CreateBuffer(&bd, NULL, vertex_buffer_.GetAddressOf());
+
+  D3D11_BUFFER_DESC line_buff_desc = {};
+  line_buff_desc.Usage = D3D11_USAGE_DYNAMIC;
+  line_buff_desc.ByteWidth = sizeof(Vertex) * 6000; // todo: extract
+  line_buff_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+  line_buff_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+  device_->CreateBuffer(&line_buff_desc, NULL, line_vertex_buffer_.GetAddressOf());
+
+  // FIXME: load window size from config file
+  mat_ortho_ =
+    DirectX::XMMatrixOrthographicOffCenterLH(0.0f, 1280, 720, 0.0f, 0.0f, 1.0f);
 }
 
 DirectX::XMMATRIX Renderer::MakeTransformMatrix(const Transform& transform) {
@@ -156,7 +169,7 @@ void Renderer::DrawSprite(const FixedPoolIndexType texture_id,
 void Renderer::DrawLineForDebugUse(const POSITION& start, const POSITION& end, const COLOR& color) {
   const std::wstring texture_filename = L"assets/block_white.png";
   const FixedPoolIndexType texture_id = texture_manager_->Load(texture_filename);
-  
+
   texture_manager_->SetShaderById(texture_id);
 
   shader_manager_->Begin();
@@ -170,14 +183,14 @@ void Renderer::DrawLineForDebugUse(const POSITION& start, const POSITION& end, c
 
   // 画面の左上から右下に向かう線分を描画する
   v[0].position = {start.x, start.y, 0.0f}; // LT
-  v[1].position = {end.x, end.y, 0.0f}; // RT
+  v[1].position = {end.x, end.y, 0.0f};     // RT
 
   v[0].color = color;
   v[1].color = color;
 
   v[0].uv = {0, 0};
   v[1].uv = {1, 1};
-  
+
   // 頂点バッファのロックを解除
   device_context_->Unmap(vertex_buffer_.Get(), 0);
 
@@ -187,8 +200,7 @@ void Renderer::DrawLineForDebugUse(const POSITION& start, const POSITION& end, c
   device_context_->IASetVertexBuffers(0, 1, vertex_buffer_.GetAddressOf(), &stride, &offset);
 
   // 頂点シェーダーに変換行列を設定
-  shader_manager_->SetProjectionMatrix(
-    DirectX::XMMatrixOrthographicOffCenterLH(0.0f, 1280.0f, 720.0f, 0.0f, 0.0f, 1.0f));
+  shader_manager_->SetProjectionMatrix(mat_ortho_);
 
   shader_manager_->SetWorldMatrix(DirectX::XMMatrixIdentity());
 
@@ -197,4 +209,45 @@ void Renderer::DrawLineForDebugUse(const POSITION& start, const POSITION& end, c
 
   // ポリゴン描画命令発行
   device_context_->Draw(vertex_num_, 0);
+}
+
+void Renderer::DrawLinesForDebugUse(const std::span<Line> lines) {
+  if (lines.empty()) return;
+
+  const std::wstring texture_filename = L"assets/block_white.png";
+  const FixedPoolIndexType texture_id = texture_manager_->Load(texture_filename);
+
+  texture_manager_->SetShaderById(texture_id);
+
+  shader_manager_->Begin();
+
+  shader_manager_->SetProjectionMatrix(mat_ortho_);
+  shader_manager_->SetWorldMatrix(DirectX::XMMatrixIdentity());
+
+  D3D11_MAPPED_SUBRESOURCE msr{};
+  device_context_->Map(line_vertex_buffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+  Vertex* v = static_cast<Vertex*>(msr.pData);
+
+  for (size_t i = 0; i < lines.size(); i++) {
+    const auto& [start, end, color] = lines[i];
+    const UINT base = static_cast<UINT>(i * 2);
+
+    v[base + 0].position = {start.x, start.y, 0.0f};
+    v[base + 1].position = {end.x, end.y, 0.0f};
+
+    v[base + 0].color = color;
+    v[base + 1].color = color;
+
+    v[base + 0].uv = {0.0f, 0.0f};
+    v[base + 1].uv = {1.0f, 1.0f};
+  }
+
+  device_context_->Unmap(line_vertex_buffer_.Get(), 0);
+
+  UINT stride = sizeof(Vertex), offset = 0;
+  ID3D11Buffer* vb = line_vertex_buffer_.Get();
+  device_context_->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
+  device_context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+
+  device_context_->Draw(static_cast<UINT>(lines.size() * 2), 0);
 }

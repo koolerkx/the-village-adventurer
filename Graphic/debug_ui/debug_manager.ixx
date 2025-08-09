@@ -17,8 +17,8 @@ export struct DebugSetting {
 
 export struct UiGuidelineProps {
   int grid_size = 16;
-  COLOR grid_color = color::AliceBlue;
-  
+  COLOR grid_color = color::setOpacity(color::Red, 0.1f);
+
   int column_count = 8;
   int column_margin = 24;
   int column_gutter = 24;
@@ -35,9 +35,11 @@ export struct DebugContext {
 
 export class DebugManager {
 private:
-  static constexpr DebugSetting debug_setting_;
-  static constexpr UiGuidelineProps guideline_props_;
+  DebugSetting debug_setting_;
+  UiGuidelineProps props_;
   std::unique_ptr<DebugContext> context_;
+
+  std::vector<Line> grid_lines_;
 
 public:
   DebugManager(std::unique_ptr<DebugContext> context);
