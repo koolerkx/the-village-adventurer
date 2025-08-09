@@ -19,6 +19,7 @@ import std;
 export import graphic.render;
 export import graphic.shader;
 export import graphic.texture;
+export import graphic.utils.color;
 
 export struct ResourceManager {
   std::unique_ptr<Renderer> renderer = nullptr;

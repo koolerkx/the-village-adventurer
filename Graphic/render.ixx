@@ -56,4 +56,6 @@ public:
   void DrawSprite(const FixedPoolIndexType texture_id,
                   const Transform& transform, const UV& uv,
                   const COLOR& color);
+
+  void DrawLineForDebugUse(const POSITION& start, const POSITION& end, const COLOR& color);
 };

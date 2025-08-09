@@ -21,6 +21,7 @@
         <ClCompile Include="shader.ixx"/>
         <ClCompile Include="texture.cpp"/>
         <ClCompile Include="texture.ixx"/>
+        <ClCompile Include="utils\color.ixx" />
         <ClCompile Include="utils\fixed_pool.ixx"/>
         <ClCompile Include="utils\math.ixx"/>
         <ClCompile Include="utils\WICTextureLoader11.cpp"/>
