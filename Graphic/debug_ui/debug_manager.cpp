@@ -64,7 +64,13 @@ DebugManager::DebugManager(std::unique_ptr<DebugContext> context) {
   }
 }
 
-void DebugManager::OnUpdate(const float delta_time) {}
+void DebugManager::OnUpdate(const float delta_time) {
+  static float fps_smooth = 0.0f;
+  const float alpha = 0.1f; // 平滑係數，0.0 ~ 1.0
+  float current_fps = (delta_time > 0.0f) ? (1.0f / delta_time) : 0.0f;
+  fps_smooth = fps_smooth * (1.0f - alpha) + current_fps * alpha;
+  std::println("FPS: {:.2f}", fps_smooth);
+}
 
 void DebugManager::OnRender() {
   if (debug_setting_.is_show_ui_gridline) {

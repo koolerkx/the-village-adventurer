@@ -7,6 +7,7 @@ module;
 module application;
 
 import std;
+import app.timer;
 import graphic.direct3D;
 import graphic.utils.math;
 import game.scene;
@@ -102,32 +103,6 @@ SIZE Application::GetWindowSize() {
   return ret;
 }
 
-void Application::Run() const {
-  ShowWindow(hwnd_, SW_SHOW);
-  UpdateWindow(hwnd_);
-
-  MSG msg = {};
-  do {
-    if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-      TranslateMessage(&msg);
-      DispatchMessage(&msg);
-    }
-    else {
-      // todo: add delta time
-      scene_manager_->OnUpdate(0.0f);
-      debug_manager_->OnUpdate(0.0f);
-
-      direct3d_->BeginDraw();
-      scene_manager_->OnRender();
-      // direct3d_->Dispatch(on_update_function);
-
-      debug_manager_->OnRender();
-      direct3d_->EndDraw();
-    }
-  }
-  while (msg.message != WM_QUIT);
-}
-
 bool Application::Init() {
   (void)CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
@@ -153,7 +128,29 @@ bool Application::Init() {
   debug_context->window_size = GetWindowSize();
   debug_manager_.reset(new DebugManager(std::move(debug_context)));
 
+  timer_updater_.reset(new TimerUpdater(60.0f));
+
   return true;
+}
+
+void Application::Run() {
+  ShowWindow(hwnd_, SW_SHOW);
+  UpdateWindow(hwnd_);
+
+  auto updateFn = [this](float dt) { OnUpdate(dt); };
+  auto fixedFn = [this](float fdt) { OnFixedUpdate(fdt); };
+
+  MSG msg = {};
+  do {
+    if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
+    }
+    else {
+      timer_updater_->tick(updateFn, fixedFn);
+    }
+  }
+  while (msg.message != WM_QUIT);
 }
 
 void Application::Terminate() const {
@@ -168,3 +165,18 @@ Application& Application::Instance() {
 Application::Application() {}
 
 Application::~Application() {}
+
+void Application::OnUpdate(float delta_time) {
+  scene_manager_->OnUpdate(delta_time);
+  debug_manager_->OnUpdate(delta_time);
+
+  direct3d_->BeginDraw();
+  scene_manager_->OnRender();
+  // direct3d_->Dispatch(on_update_function);
+
+  debug_manager_->OnRender();
+  direct3d_->EndDraw();
+}
+
+void Application::OnFixedUpdate(float delta_time) {
+}

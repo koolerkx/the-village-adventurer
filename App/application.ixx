@@ -5,6 +5,7 @@ module;
 export module application;
 
 import std;
+import app.timer;
 import graphic.direct3D;
 import graphic.debug;
 import game.scene_manager;
@@ -27,11 +28,16 @@ private:
   std::unique_ptr<SceneManager> scene_manager_ = nullptr;
   std::unique_ptr<DebugManager> debug_manager_ = nullptr;
 
+  std::unique_ptr<TimerUpdater> timer_updater_ = nullptr;
+
+  void OnUpdate(float delta_time);
+  void OnFixedUpdate(float delta_time);
+
 public:
   static Application& Instance();
 
   bool Init();      /// 初期化
-  void Run() const; /// ループ起動
+  void Run(); /// ループ起動
 
   /// 後処理
   void Terminate() const;

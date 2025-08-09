@@ -102,6 +102,8 @@
         <ClCompile Include="main.cpp"/>
         <ClCompile Include="application.ixx"/>
         <ClCompile Include="application.cpp"/>
+        <ClCompile Include="timer_updater.cpp" />
+        <ClCompile Include="timer_updater.ixx" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Graphic\Graphic.vcxproj"/>
