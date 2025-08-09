@@ -3,9 +3,9 @@
 #include <Windows.h>
 #include <objbase.h>
 
-import graphic.application;
+import application;
 
-int APIENTRY WinMain(_In_ HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
+int APIENTRY WinMain(_In_ HINSTANCE, HINSTANCE, LPSTR, int) {
   CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
   Application& app = Application::Instance();

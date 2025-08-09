@@ -10,35 +10,11 @@
             <Platform>x64</Platform>
         </ProjectConfiguration>
     </ItemGroup>
-    <ItemGroup>
-        <ClCompile Include="direct3d.cpp"/>
-        <ClCompile Include="direct3d.ixx"/>
-        <ClCompile Include="render.cpp"/>
-        <ClCompile Include="render.ixx"/>
-        <ClCompile Include="shader.cpp"/>
-        <ClCompile Include="shader.ixx"/>
-        <ClCompile Include="texture.cpp"/>
-        <ClCompile Include="texture.ixx"/>
-        <ClCompile Include="utils\fixed_pool.ixx"/>
-        <ClCompile Include="utils\math.ixx"/>
-        <ClCompile Include="utils\WICTextureLoader11.cpp"/>
-    </ItemGroup>
-    <ItemGroup>
-        <ClInclude Include="utils\WICTextureLoader11.h"/>
-    </ItemGroup>
-    <ItemGroup>
-        <FxCompile Include="shaders\shader_pixel_2d.hlsl">
-            <ShaderType>Pixel</ShaderType>
-        </FxCompile>
-        <FxCompile Include="shaders\shader_vertex_2d.hlsl">
-            <ShaderType>Vertex</ShaderType>
-        </FxCompile>
-    </ItemGroup>
     <PropertyGroup Label="Globals">
         <VCProjectVersion>15.0</VCProjectVersion>
-        <ProjectGuid>{8473A483-591C-4EFB-87CE-FE7774916D73}</ProjectGuid>
+        <ProjectGuid>{0C754A9F-E68B-4E1B-AD00-89691F8502A5}</ProjectGuid>
         <Keyword>Win32Proj</Keyword>
-        <RootNamespace>Graphic</RootNamespace>
+        <RootNamespace>Game</RootNamespace>
         <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     </PropertyGroup>
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
@@ -46,13 +22,13 @@
         <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-        <ConfigurationType>StaticLibrary</ConfigurationType>
+        <ConfigurationType>Application</ConfigurationType>
         <UseDebugLibraries>true</UseDebugLibraries>
         <PlatformToolset>v143</PlatformToolset>
         <CharacterSet>MultiByte</CharacterSet>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-        <ConfigurationType>StaticLibrary</ConfigurationType>
+        <ConfigurationType>Application</ConfigurationType>
         <UseDebugLibraries>false</UseDebugLibraries>
         <PlatformToolset>v143</PlatformToolset>
         <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -69,32 +45,36 @@
     <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
         <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
     </ImportGroup>
+    <PropertyGroup Label="UserMacros"/>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
         <LinkIncremental>true</LinkIncremental>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
         <LinkIncremental>false</LinkIncremental>
     </PropertyGroup>
+    <ItemDefinitionGroup>
+        <ClCompile>
+            <AdditionalIncludeDirectories>..\Graphic;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+        </ClCompile>
+    </ItemDefinitionGroup>
     <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
         <ClCompile>
             <PrecompiledHeader>NotUsing</PrecompiledHeader>
             <WarningLevel>Level4</WarningLevel>
             <Optimization>Disabled</Optimization>
             <SDLCheck>true</SDLCheck>
-            <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
             <ConformanceMode>true</ConformanceMode>
             <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-            <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
             <LanguageStandard>stdcpp23</LanguageStandard>
             <MultiProcessorCompilation>true</MultiProcessorCompilation>
+            <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+            <ModuleReferencePaths>..\Graphic\x64\Debug;%(ModuleReferencePaths)</ModuleReferencePaths>
         </ClCompile>
         <Link>
             <SubSystem>Windows</SubSystem>
             <GenerateDebugInformation>true</GenerateDebugInformation>
         </Link>
-        <PostBuildEvent>
-            <Command>xcopy /D /Y "$(TargetDir)*.cso" "$(SolutionDir)assets/shaders"</Command>
-        </PostBuildEvent>
     </ItemDefinitionGroup>
     <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
         <ClCompile>
@@ -104,12 +84,12 @@
             <FunctionLevelLinking>true</FunctionLevelLinking>
             <IntrinsicFunctions>true</IntrinsicFunctions>
             <SDLCheck>true</SDLCheck>
-            <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
             <ConformanceMode>true</ConformanceMode>
             <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
             <LanguageStandard>stdcpp23</LanguageStandard>
-            <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
             <MultiProcessorCompilation>true</MultiProcessorCompilation>
+            <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
         </ClCompile>
         <Link>
             <SubSystem>Windows</SubSystem>
@@ -117,11 +97,20 @@
             <OptimizeReferences>true</OptimizeReferences>
             <GenerateDebugInformation>true</GenerateDebugInformation>
         </Link>
-        <PostBuildEvent>
-            <Command>xcopy /D /Y "$(TargetDir)*.cso" "$(SolutionDir)assets/shaders"</Command>
-        </PostBuildEvent>
     </ItemDefinitionGroup>
+    <ItemGroup>
+        <ClCompile Include="main.cpp"/>
+        <ClCompile Include="application.ixx"/>
+        <ClCompile Include="application.cpp"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Graphic\Graphic.vcxproj"/>
+        <ProjectReference Include="..\Game\Game.vcxproj"/>
+    </ItemGroup>
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
     <ImportGroup Label="ExtensionTargets">
     </ImportGroup>
+    <PropertyGroup>
+        <LocalDebuggerWorkingDirectory>$(SolutionDir)</LocalDebuggerWorkingDirectory>
+    </PropertyGroup>
 </Project>

@@ -78,4 +78,5 @@ public:
                                float r = 0, float g = 0, float b = 0, float a = 0);
 
   SIZE GetWindowSize() const { return win_size_; }
+  ResourceManager* GetResourceManager() const;
 };
