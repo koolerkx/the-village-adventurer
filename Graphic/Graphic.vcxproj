@@ -11,6 +11,8 @@
         </ProjectConfiguration>
     </ItemGroup>
     <ItemGroup>
+        <ClCompile Include="debug_ui\debug_manager.cpp" />
+        <ClCompile Include="debug_ui\debug_manager.ixx" />
         <ClCompile Include="direct3d.cpp"/>
         <ClCompile Include="direct3d.ixx"/>
         <ClCompile Include="render.cpp"/>
