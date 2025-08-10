@@ -38,6 +38,9 @@
         <FxCompile Include="shaders\shader_vertex_2d.hlsl">
             <ShaderType>Vertex</ShaderType>
         </FxCompile>
+        <FxCompile Include="shaders\instanced_shader_vertex_2d.hlsl">
+            <ShaderType>Vertex</ShaderType>
+        </FxCompile>
     </ItemGroup>
     <PropertyGroup Label="Globals">
         <VCProjectVersion>15.0</VCProjectVersion>

@@ -13,6 +13,7 @@ import graphic.shader;
 import graphic.utils.math;
 import graphic.utils.color;
 import graphic.texture;
+import graphic.utils.font;
 
 // 頂点構造体
 export struct Vertex {
@@ -22,9 +23,9 @@ export struct Vertex {
 };
 
 export struct Transform {
-  POSITION position;
+  POSITION position = {0.0f, 0.0f, 0.0f};
   SCALE scale = {1.0f, 1.0f};
-  SCALE size;
+  SCALE size = {100.0f, 100.0f};
   float rotation_radian = 0.0f;
   POSITION rotation_pivot = {0.0f, 0.0f, 0.0f};
 };
@@ -46,6 +47,34 @@ export struct Rect {
   COLOR color;
 };
 
+export struct RenderItem {
+  FixedPoolIndexType texture_id;
+  Transform transform;
+  UV uv;
+  COLOR color;
+};
+
+export struct RenderInstanceItem {
+  Transform transform;
+  UV uv;
+  COLOR color;
+};
+
+export struct TextSpriteProps {
+  Transform transform;
+  std::wstring font_key;
+  float pixel_size = 12.0f;
+};
+
+struct InstanceData {
+  DirectX::XMFLOAT2 pos;    // (x, y)
+  DirectX::XMFLOAT2 size;   // (w, h)
+  DirectX::XMFLOAT4 uv; // (u0, v0, u1, v1)
+  float radian; // 
+  DirectX::XMFLOAT2 rotation_pivot;    // (x, y)
+  DirectX::XMFLOAT4 color;  // (r,g,b,a)
+};
+
 export class Renderer {
 private:
   ComPtr<ID3D11Device> device_ = nullptr;
@@ -56,10 +85,17 @@ private:
   ComPtr<ID3D11Buffer> vertex_buffer_ = nullptr;      // 頂点バッファ
   ComPtr<ID3D11Buffer> line_vertex_buffer_ = nullptr; // ライン頂点バッファ
 
-  size_t rects_buffer_can_store_ = 0; // max = 2^32 = ~4.29E9
+  size_t rects_buffer_can_store_ = 0;                 // max = 2^32 = ~4.29E9
   ComPtr<ID3D11Buffer> rect_vertex_buffer_ = nullptr; // レクト頂点バッファ
   ComPtr<ID3D11Buffer> rect_index_buffer_;
   DXGI_FORMAT rect_index_format_ = DXGI_FORMAT_R32_UINT;
+
+  // instance draw
+  size_t instance_buffer_can_store_ = 0;                  // max = 2^32 = ~4.29E9
+  ComPtr<ID3D11Buffer> instance_vertex_buffer_ = nullptr; // レクト頂点バッファ
+  ComPtr<ID3D11Buffer> instance_index_buffer_;
+  ComPtr<ID3D11Buffer> instance_quad_buffer_;
+  DXGI_FORMAT instance_index_format_ = DXGI_FORMAT_R16_UINT;
 
   int vertex_num_ = 0;
 
@@ -68,6 +104,7 @@ private:
   DirectX::XMMATRIX mat_ortho_;
 
   void CreateRectBuffer(size_t max_rect_num);
+  void CreateInstanceBuffer(size_t max_instance_num);
 
 public:
   Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
@@ -84,4 +121,8 @@ public:
   void DrawLineForDebugUse(const POSITION& start, const POSITION& end, const COLOR& color);
   void DrawLinesForDebugUse(const std::span<Line> lines);
   void DrawRectsForDebugUse(const std::span<Rect> rects);
+
+  void DrawFont(const std::wstring& text, const TextSpriteProps& props);
+
+  void DrawSpritesInstanced(std::span<RenderInstanceItem> render_items, FixedPoolIndexType texture_id);
 };
