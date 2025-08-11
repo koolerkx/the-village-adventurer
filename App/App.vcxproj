@@ -102,8 +102,8 @@
         <ClCompile Include="main.cpp"/>
         <ClCompile Include="application.ixx"/>
         <ClCompile Include="application.cpp"/>
-        <ClCompile Include="timer_updater.cpp" />
-        <ClCompile Include="timer_updater.ixx" />
+        <ClCompile Include="timer_updater.cpp"/>
+        <ClCompile Include="timer_updater.ixx"/>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Graphic\Graphic.vcxproj"/>
@@ -114,5 +114,10 @@
     </ImportGroup>
     <PropertyGroup>
         <LocalDebuggerWorkingDirectory>$(SolutionDir)</LocalDebuggerWorkingDirectory>
+    </PropertyGroup>
+    <!-- Warning MSB8028 -->
+    <PropertyGroup>
+        <IntermediateDirectory>$(Platform)\$(Configuration)\$(ProjectName)\Intermediate\</IntermediateDirectory>
+        <OutputDirectory>$(Platform)\$(Configuration)\$(ProjectName)\Output\</OutputDirectory>
     </PropertyGroup>
 </Project>

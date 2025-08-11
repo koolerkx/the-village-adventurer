@@ -25,7 +25,7 @@
         <ClCompile Include="utils\fixed_pool.ixx"/>
         <ClCompile Include="utils\font.cpp"/>
         <ClCompile Include="utils\font.ixx"/>
-        <ClCompile Include="utils\types.ixx" />
+        <ClCompile Include="utils\types.ixx"/>
         <ClCompile Include="utils\WICTextureLoader11.cpp"/>
     </ItemGroup>
     <ItemGroup>
@@ -132,4 +132,9 @@
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
     <ImportGroup Label="ExtensionTargets">
     </ImportGroup>
+    <!-- Warning MSB8028 -->
+    <PropertyGroup>
+        <IntermediateDirectory>$(Platform)\$(Configuration)\$(ProjectName)\Intermediate\</IntermediateDirectory>
+        <OutputDirectory>$(Platform)\$(Configuration)\$(ProjectName)\Output\</OutputDirectory>
+    </PropertyGroup>
 </Project>
