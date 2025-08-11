@@ -86,7 +86,7 @@ void ShaderManager::CreateVertexShader(const std::string& filename, std::span<D3
     assert(false);
   }
 
-  UINT num_elements = layout.size(); // 配列の要素数を取得
+  UINT num_elements = static_cast<UINT>(layout.size()); // 配列の要素数を取得
 
   // 頂点レイアウトの作成
   hr = device_->CreateInputLayout(layout.data(), num_elements, vsbinary_pointer, filesize, ppInputLayout);

@@ -1,5 +1,5 @@
-module; // (optional) global module fragment for legacy includes
-import <cassert>;
+module;
+#include <cassert>
 
 module app.timer;
 

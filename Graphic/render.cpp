@@ -7,6 +7,8 @@ module;
 module graphic.render;
 
 import graphic.texture;
+import graphic.utils.font;
+import graphic.utils.color;
 
 Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
                    ShaderManager* shader_manager,
@@ -56,7 +58,7 @@ void Renderer::CreateRectBuffer(const size_t max_rect_num) {
   // Vertex Buffer
   D3D11_BUFFER_DESC rect_buff_desc = {};
   rect_buff_desc.Usage = D3D11_USAGE_DYNAMIC;
-  rect_buff_desc.ByteWidth = sizeof(Vertex) * max_rect_num * 4;
+  rect_buff_desc.ByteWidth = static_cast<UINT>(sizeof(Vertex) * max_rect_num * 4);
   rect_buff_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
   rect_buff_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
@@ -105,7 +107,7 @@ void Renderer::CreateInstanceBuffer(const size_t max_instance_num) {
   instDesc.Usage = D3D11_USAGE_DYNAMIC;
   instDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
   instDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-  instDesc.ByteWidth = max_instance_num * sizeof(InstanceData);
+  instDesc.ByteWidth = static_cast<UINT>(max_instance_num * sizeof(InstanceData));
   device_->CreateBuffer(&instDesc, nullptr, instance_vertex_buffer_.GetAddressOf());
 }
 
@@ -380,7 +382,6 @@ void Renderer::DrawRectsForDebugUse(const std::span<Rect> rects) {
     device_context_->Unmap(rect_index_buffer_.Get(), 0);
   }
 
-
   UINT stride = sizeof(Vertex), offset = 0;
   ID3D11Buffer* vb = rect_vertex_buffer_.Get();
   device_context_->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
@@ -390,7 +391,42 @@ void Renderer::DrawRectsForDebugUse(const std::span<Rect> rects) {
 
   device_context_->DrawIndexed(static_cast<UINT>(index_count), 0, 0);
 }
-void Renderer::DrawSpritesInstanced(std::span<RenderInstanceItem> render_items, FixedPoolIndexType texture_id) {
+
+void Renderer::DrawBox(Rect rect) {
+  POSITION left_top = rect.left_top;
+  POSITION right_top = {rect.right_bottom.x, rect.left_top.y, 0};
+  POSITION left_bottom = {rect.left_top.x, rect.right_bottom.y, 0};
+  POSITION right_bottom = rect.right_bottom;
+
+  std::array<Line, 4> lines = {
+    Line{left_top, right_top, rect.color},
+    Line{right_top, right_bottom, rect.color},
+    Line{left_bottom, right_bottom, rect.color},
+    Line{left_top, left_bottom, rect.color},
+  };
+
+  DrawLinesForDebugUse(lines);
+}
+
+void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props) {
+  Font* font = Font::GetFont(font_key);
+
+  std::vector<RenderInstanceItem> items = font->MakeStringRenderInstanceItems(str, transform, props);
+  std::span<RenderInstanceItem> items_span = std::span(items.data(), items.size());
+  DrawSpritesInstanced(items_span, font->GetTextureId());
+
+  StringSpriteSize size = font->GetStringSize(str, transform, props);
+  std::array<Rect, 1> ary({
+    Rect{
+      transform.position,
+      {transform.position.x + size.width, transform.position.y + size.height, 0.0f},
+      color::setOpacity(color::grey600, 0.2f)
+    }
+  });
+  DrawRectsForDebugUse(ary);
+}
+
+void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_items, FixedPoolIndexType texture_id) {
   if (render_items.empty()) return;
 
   texture_manager_->SetShaderById(texture_id);
@@ -409,27 +445,28 @@ void Renderer::DrawSpritesInstanced(std::span<RenderInstanceItem> render_items, 
 
     { // pos, size
       const auto& [x, y, _] = it.transform.position;
+      const auto& [scale_x, scale_y] = it.transform.scale;
       const auto& [w, h] = it.transform.size;
       instances[i].pos = {x, y};
-      instances[i].size = {w, h};
+      instances[i].size = {w * scale_x, h * scale_y};
     }
     { // uvRect（u0,v0,u1,v1）
-      const auto& [x, y] = it.uv.position;
-      const auto& [w, h] = it.uv.size;
+      const auto& [uv_x, uv_y] = it.uv.position;
+      const auto& [uv_w, uv_h] = it.uv.size;
       const auto& [size_x, size_y] = texture_manager_->GetSizeById(texture_id);
 
-      const float u0 = x / static_cast<float>(size_x);
-      const float v0 = y / static_cast<float>(size_y);
-      const float u1 = (x + w) / static_cast<float>(size_x);
-      const float v1 = (y + h) / static_cast<float>(size_y);
+      const float u0 = uv_x / static_cast<float>(size_x);
+      const float v0 = uv_y / static_cast<float>(size_y);
+      const float u1 = (uv_x + uv_w) / static_cast<float>(size_x);
+      const float v1 = (uv_y + uv_h) / static_cast<float>(size_y);
 
       instances[i].uv = {u0, v0, u1, v1};
       instances[i].uv = {u0, v0, u1, v1};
 
       {
-        auto& [x, y, _] = it.transform.rotation_pivot;
+        auto& [rotation_x, rotation_y, _] = it.transform.rotation_pivot;
         auto& rad = it.transform.rotation_radian;
-        instances[i].rotation_pivot = {x, y};
+        instances[i].rotation_pivot = {rotation_x, rotation_y};
         instances[i].radian = rad;
       }
     }

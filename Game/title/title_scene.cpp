@@ -4,7 +4,7 @@ module;
 module game.title_scene;
 
 import std;
-import graphic.utils.math;
+import graphic.utils.types;
 
 void TitleScene::OnEnter(GameContext* ctx) {
   OutputDebugString("TitleScene> OnEnter\n");
@@ -25,7 +25,7 @@ void TitleScene::OnRender(GameContext* ctx) {
   UV uv1 = {{0, 0}, {8, 8}};
   COLOR color1 = {1.0f, 1.0f, 1.0f, 1.0f};
 
-  ctx->render_resource_manager->renderer->DrawSprite(texture_id, transform1, uv1, color1);
+  // ctx->render_resource_manager->renderer->DrawSprite(texture_id, transform1, uv1, color1);
 
 
   OutputDebugString("TitleScene> OnRender\n");

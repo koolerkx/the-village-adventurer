@@ -5,8 +5,9 @@ export module graphic.utils.font;
 import std;
 import graphic.texture;
 import graphic.utils.fixed_pool;
+import graphic.utils.types;
 
-export struct CharSpriteMetadata {
+struct CharSpriteMetadata {
   unsigned int id = 32u; // unicode id
   unsigned short x = 0u; // u
   unsigned short y = 0u; // v
@@ -17,9 +18,6 @@ export struct CharSpriteMetadata {
   short xAdvance = 0; // for proportional font
 };
 
-export struct TextSize {
-  float width, height;
-};
 
 export enum class DefinedFont: unsigned short {
   FUSION_PIXEL_FONT_DEBUG,
@@ -43,8 +41,13 @@ private:
 
 public:
   Font(FixedPoolIndexType texture_id, std::wstring fontMetadataFilename);
-  std::vector<CharSpriteMetadata> MakeStringMetadata(const std::wstring& str);
-  TextSize GetStringSize(const std::wstring& str, float scale = 1.0f);
+  std::vector<RenderInstanceItem> MakeStringRenderInstanceItems(const std::wstring& str, Transform transform,
+                                                                StringSpriteProps props);
+  StringSpriteSize GetStringSize(
+    const std::wstring& str,
+    const Transform& transform,
+    const StringSpriteProps& props
+  );
 
   FixedPoolIndexType GetTextureId() const { return font_texture_id_; }
 

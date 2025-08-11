@@ -9,8 +9,8 @@ template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 import std;
+import graphic.utils.types;
 import graphic.shader;
-import graphic.utils.math;
 import graphic.utils.color;
 import graphic.texture;
 import graphic.utils.font;
@@ -22,57 +22,13 @@ export struct Vertex {
   TEXCOORD uv;       // テクスチャー
 };
 
-export struct Transform {
-  POSITION position = {0.0f, 0.0f, 0.0f};
-  SCALE scale = {1.0f, 1.0f};
-  SCALE size = {100.0f, 100.0f};
-  float rotation_radian = 0.0f;
-  POSITION rotation_pivot = {0.0f, 0.0f, 0.0f};
-};
-
-export struct UV {
-  UVPOSITION position;
-  SCALE size;
-};
-
-export struct Line {
-  POSITION start;
-  POSITION end;
-  COLOR color;
-};
-
-export struct Rect {
-  POSITION left_top;
-  POSITION right_bottom;
-  COLOR color;
-};
-
-export struct RenderItem {
-  FixedPoolIndexType texture_id;
-  Transform transform;
-  UV uv;
-  COLOR color;
-};
-
-export struct RenderInstanceItem {
-  Transform transform;
-  UV uv;
-  COLOR color;
-};
-
-export struct TextSpriteProps {
-  Transform transform;
-  std::wstring font_key;
-  float pixel_size = 12.0f;
-};
-
 struct InstanceData {
-  DirectX::XMFLOAT2 pos;    // (x, y)
-  DirectX::XMFLOAT2 size;   // (w, h)
-  DirectX::XMFLOAT4 uv; // (u0, v0, u1, v1)
-  float radian; // 
-  DirectX::XMFLOAT2 rotation_pivot;    // (x, y)
-  DirectX::XMFLOAT4 color;  // (r,g,b,a)
+  DirectX::XMFLOAT2 pos;            // (x, y)
+  DirectX::XMFLOAT2 size;           // (w, h)
+  DirectX::XMFLOAT4 uv;             // (u0, v0, u1, v1)
+  float radian;                     // float(rad)
+  DirectX::XMFLOAT2 rotation_pivot; // (x, y)
+  DirectX::XMFLOAT4 color;          // (r,g,b,a)
 };
 
 export class Renderer {
@@ -122,7 +78,9 @@ public:
   void DrawLinesForDebugUse(const std::span<Line> lines);
   void DrawRectsForDebugUse(const std::span<Rect> rects);
 
-  void DrawFont(const std::wstring& text, const TextSpriteProps& props);
+  void DrawBox(Rect rect);
+
+  void DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props);
 
   void DrawSpritesInstanced(std::span<RenderInstanceItem> render_items, FixedPoolIndexType texture_id);
 };

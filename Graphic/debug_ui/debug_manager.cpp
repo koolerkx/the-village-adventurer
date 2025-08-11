@@ -3,6 +3,7 @@ module;
 module graphic.debug;
 
 import std;
+import graphic.utils.font;
 
 DebugManager::DebugManager(std::unique_ptr<DebugContext> context) {
   context_ = std::move(context);
@@ -33,7 +34,7 @@ DebugManager::DebugManager(std::unique_ptr<DebugContext> context) {
 
     auto columns = std::views::iota(0, props_.column_count) |
       std::views::transform([&](int i) {
-        float start_x = props_.column_margin + i * (column_width + props_.column_gutter);
+        float start_x = static_cast<float>(props_.column_margin + i * (column_width + props_.column_gutter));
         float end_x = start_x + column_width;
 
         return Rect{
@@ -50,7 +51,7 @@ DebugManager::DebugManager(std::unique_ptr<DebugContext> context) {
 
     auto rows = std::views::iota(0, props_.row_count) |
       std::views::transform([&](int i) {
-        float start_y = props_.row_margin + i * (row_height + props_.row_gutter);
+        float start_y = static_cast<float>(props_.row_margin + i * (row_height + props_.row_gutter));
         float end_y = start_y + row_height;
 
         return Rect{
@@ -62,20 +63,46 @@ DebugManager::DebugManager(std::unique_ptr<DebugContext> context) {
 
     rects_.insert(rects_.end(), rows.begin(), rows.end());
   }
+
+  auto [font_spritemap_filename, font_metadata_filename] = defined_font_map[DefinedFont::FUSION_PIXEL_FONT_DEBUG];
+  font_key_ = Font::MakeFontGetKey(font_spritemap_filename, font_metadata_filename,
+                                   context_->render_resource_manager->texture_manager.get());
+  font_texture_id_ = Font::GetFont(font_key_)->GetTextureId();
+  props_.debug_text_props.font_key = font_key_;
 }
 
 void DebugManager::OnUpdate(const float delta_time) {
-  static float fps_smooth = 0.0f;
-  const float alpha = 0.1f; // 平滑係數，0.0 ~ 1.0
+  const float alpha = 0.1f; // smooth index 0.0 ~ 1.0
   float current_fps = (delta_time > 0.0f) ? (1.0f / delta_time) : 0.0f;
-  fps_smooth = fps_smooth * (1.0f - alpha) + current_fps * alpha;
-  std::println("FPS: {:.2f}", fps_smooth);
+  fps_smooth_ = fps_smooth_ * (1.0f - alpha) + current_fps * alpha;
+
+  delta_time_ = delta_time;
+}
+
+void DebugManager::OnFixedUpdate(float delta_time) {
+  const float alpha = 0.1f; // smooth index 0.0 ~ 1.0
+  float current_fps = (delta_time > 0.0f) ? (1.0f / delta_time) : 0.0f;
+  fixed_fps_smooth_ = fixed_fps_smooth_ * (1.0f - alpha) + current_fps * alpha;
 }
 
 void DebugManager::OnRender() {
   if (debug_setting_.is_show_ui_gridline) {
     context_->render_resource_manager->renderer->DrawLinesForDebugUse(grid_lines_);
   }
+  if (debug_setting_.is_show_ui_column || debug_setting_.is_show_ui_row) {
+    context_->render_resource_manager->renderer->DrawRectsForDebugUse(rects_);
+  }
 
-  context_->render_resource_manager->renderer->DrawRectsForDebugUse(rects_);
+  if (debug_setting_.is_show_fps) {
+    std::wstringstream wss;
+    wss << L"Fixed FPS: " << std::format(L"{:.0f}", fixed_fps_smooth_) << "\n";
+    wss << L"FPS: " << std::format(L"{:.0f}", fps_smooth_) << "\n";
+    wss << L"DT: " << std::format(L"{:.0f}", delta_time_);
+
+    context_->render_resource_manager->renderer->DrawFont(wss.str(),
+                                                          font_key_,
+                                                          props_.debug_text_props.transform,
+                                                          props_.debug_text_props.font_props
+    );
+  }
 }

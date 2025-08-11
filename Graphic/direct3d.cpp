@@ -14,7 +14,7 @@ template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 import std;
-import graphic.utils.math;
+import graphic.utils.types;
 
 HRESULT Dx11Wrapper::CreateSwapChain(HWND hwnd) {
   DXGI_SWAP_CHAIN_DESC1 swapchain_desc{};

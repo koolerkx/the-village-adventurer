@@ -9,7 +9,7 @@ using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 import std;
 export import graphic.utils.fixed_pool;
-import graphic.utils.math;
+import graphic.utils.types;
 
 export struct TextureSize {
   unsigned int width;

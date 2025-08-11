@@ -9,7 +9,7 @@ module application;
 import std;
 import app.timer;
 import graphic.direct3D;
-import graphic.utils.math;
+import graphic.utils.types;
 import game.scene;
 import game.title_scene;
 
@@ -179,4 +179,5 @@ void Application::OnUpdate(float delta_time) {
 }
 
 void Application::OnFixedUpdate(float delta_time) {
+  debug_manager_->OnFixedUpdate(delta_time);
 }

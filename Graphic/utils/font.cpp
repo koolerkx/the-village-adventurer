@@ -79,82 +79,133 @@ Font::Font(FixedPoolIndexType texture_id, std::wstring fontMetadataFilename)
   }
 }
 
-std::vector<CharSpriteMetadata> Font::MakeStringMetadata(const std::wstring& str) {
-  std::vector<CharSpriteMetadata> result;
+// transform scale handled, caller should reset scale to 1
+std::vector<RenderInstanceItem> Font::MakeStringRenderInstanceItems(
+  const std::wstring& str, Transform transform, StringSpriteProps props
+) {
+  std::vector<RenderInstanceItem> items;
+  items.reserve(str.size());
+
+  float cursor_x = 0.0f;
+  float cursor_y = 0.0f;
+
+  const float sx = (props.pixel_size / line_height_) * transform.scale.x;
+  const float sy = (props.pixel_size / line_height_) * transform.scale.y;
+
+  const float line_height = props.line_height > 0 ? props.line_height : static_cast<float>(line_height_);
+  const float line_advance = (static_cast<float>(line_height) + props.line_spacing) * sy;
+
   for (wchar_t wc : str) {
     if (wc == L'\r') {
       continue; // ignore \r
     }
     if (wc == L'\n') {
       // insert empty object for new line `\n` (id=10)
-      result.push_back({10, 0, 0, 0, 0, 0, 0, 0});
+      cursor_x = 0.0f;
+      cursor_y += line_advance;
       continue;
     }
 
     unsigned int code = static_cast<unsigned int>(wc);
-    auto it = charMap.find(code);
-    if (it != charMap.end()) {
-      result.push_back(it->second);
+    const CharSpriteMetadata* meta = nullptr;
+
+    if (auto it = charMap.find(code); it != charMap.end()) {
+      meta = &it->second;
+    }
+    else if (auto q = charMap.find(63u); q != charMap.end()) { // '?'
+      meta = &q->second;
+    }
+    else if (auto sp = charMap.find(32u); sp != charMap.end()) { // space
+      meta = &sp->second;
     }
     else {
-      // missing char using `?` (id=63)
-      auto q_it = charMap.find(63);
-      if (q_it != charMap.end()) {
-        result.push_back(q_it->second);
-      }
-      else {
-        // fallback to space (id=32)
-        result.push_back({0, 0, 0, 0, 0, 0, 0, 0});
-        std::cerr << "Missing '?' in font for code: " << code << std::endl;
-      }
+      continue;
     }
+
+    const float gx = transform.position.x + cursor_x + static_cast<float>(meta->xOffset) * sx;
+    const float gy = transform.position.y + cursor_y + static_cast<float>(meta->yOffset) * sy;
+    const float gz = transform.position.z;
+
+    Transform gt = transform;
+    gt.position = {gx, gy, gz};
+    gt.size = {static_cast<float>(meta->width * sx), static_cast<float>(meta->height * sy)};
+
+    const float u0 = meta->x;
+    const float v0 = meta->y;
+    const float u1 = meta->width;
+    const float v1 = meta->height;
+
+    UV uv{};
+    uv.position = {u0, v0};
+    uv.size = {u1, v1};
+
+    RenderInstanceItem item{};
+    item.transform = gt;
+    item.transform.scale.x = 1; // scale handled
+    item.transform.scale.y = 1; // scale handled
+    item.uv = uv;
+    item.color = props.color;
+
+    items.push_back(item);
+
+    cursor_x += (static_cast<float>(meta->xAdvance) + props.letter_spacing) * sx;
   }
-  return result;
+  return items;
 }
 
-TextSize Font::GetStringSize(const std::wstring& str, float scale) {
+StringSpriteSize Font::GetStringSize(
+  const std::wstring& str,
+  const Transform& transform,
+  const StringSpriteProps& props
+) {
   if (str.empty()) return {0.0f, 0.0f};
+
+  const float sx = (props.pixel_size / line_height_) * transform.scale.x;
+  const float sy = (props.pixel_size / line_height_) * transform.scale.y;
+
+  const float line_height = props.line_height > 0 ? props.line_height : static_cast<float>(line_height_);
+  const float line_advance = (static_cast<float>(line_height) + props.line_spacing) * sy;
 
   float min_x = 0.0f, min_y = 0.0f;
   float max_x = 0.0f, max_y = 0.0f;
-  bool has_char = false;
+  bool has_bbox = false;
 
   float cursor_x = 0.0f;
   float cursor_y = 0.0f;
-  const float scaled_line_height = static_cast<float>(line_height_) * scale;
+
+  auto get_meta = [&](unsigned int code) -> const CharSpriteMetadata* {
+    if (auto it = charMap.find(code); it != charMap.end()) return &it->second;
+    if (auto q = charMap.find(63u); q != charMap.end()) return &q->second;    // '?'
+    if (auto sp = charMap.find(32u); sp != charMap.end()) return &sp->second; // ' '
+    return nullptr;
+  };
 
   for (wchar_t wc : str) {
     if (wc == L'\r') continue;
 
     if (wc == L'\n') {
       cursor_x = 0.0f;
-      cursor_y += scaled_line_height; // 下一行
+      cursor_y += line_advance;
       continue;
     }
 
     const unsigned int code = static_cast<unsigned int>(wc);
-    auto it = charMap.find(code);
-    if (it == charMap.end()) {
-      auto sp = charMap.find(32u); // space
-      if (sp != charMap.end()) {
-        cursor_x += static_cast<float>(sp->second.xAdvance) * scale;
-      }
+    const CharSpriteMetadata* meta = get_meta(code);
+    if (!meta) {
       continue;
     }
 
-    const auto& meta = it->second;
+    const float left = cursor_x + static_cast<float>(meta->xOffset) * sx;
+    const float top = cursor_y + static_cast<float>(meta->yOffset) * sy;
+    const float right = left + static_cast<float>(meta->width) * sx;
+    const float bottom = top + static_cast<float>(meta->height) * sy;
 
-    const float left = cursor_x + static_cast<float>(meta.xOffset) * scale;
-    const float top = cursor_y + static_cast<float>(meta.yOffset) * scale;
-    const float right = left + static_cast<float>(meta.width) * scale;
-    const float bottom = top + static_cast<float>(meta.height) * scale;
-
-    if (!has_char) {
+    if (!has_bbox) {
       min_x = left;
       max_x = right;
       min_y = top;
       max_y = bottom;
-      has_char = true;
+      has_bbox = true;
     }
     else {
       if (left < min_x) min_x = left;
@@ -163,12 +214,20 @@ TextSize Font::GetStringSize(const std::wstring& str, float scale) {
       if (bottom > max_y) max_y = bottom;
     }
 
-    cursor_x += static_cast<float>(meta.xAdvance) * scale;
+    cursor_x += (static_cast<float>(meta->xAdvance) + props.letter_spacing) * sx;
   }
 
-  if (!has_char) return {0.0f, 0.0f};
+  const float baseline_bottom = cursor_y + static_cast<float>(line_height_) * sy;
 
-  return {max_x - min_x, max_y - min_y};
+  if (!has_bbox) {
+    return {0.0f, baseline_bottom};
+  }
+
+  const float bbox_w = max_x - min_x;
+  const float bbox_h = max_y - min_y;
+
+  const float height = std::max(bbox_h, baseline_bottom - min_y);
+  return {bbox_w, height};
 }
 
 std::wstring Font::MakeFontGetKey(const std::wstring& font_filename, std::wstring fontMetadataFilename,

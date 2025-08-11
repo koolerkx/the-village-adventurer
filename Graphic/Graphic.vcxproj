@@ -11,8 +11,8 @@
         </ProjectConfiguration>
     </ItemGroup>
     <ItemGroup>
-        <ClCompile Include="debug_ui\debug_manager.cpp" />
-        <ClCompile Include="debug_ui\debug_manager.ixx" />
+        <ClCompile Include="debug_ui\debug_manager.cpp"/>
+        <ClCompile Include="debug_ui\debug_manager.ixx"/>
         <ClCompile Include="direct3d.cpp"/>
         <ClCompile Include="direct3d.ixx"/>
         <ClCompile Include="render.cpp"/>
@@ -21,11 +21,11 @@
         <ClCompile Include="shader.ixx"/>
         <ClCompile Include="texture.cpp"/>
         <ClCompile Include="texture.ixx"/>
-        <ClCompile Include="utils\color.ixx" />
+        <ClCompile Include="utils\color.ixx"/>
         <ClCompile Include="utils\fixed_pool.ixx"/>
-        <ClCompile Include="utils\font.cpp" />
-        <ClCompile Include="utils\font.ixx" />
-        <ClCompile Include="utils\math.ixx"/>
+        <ClCompile Include="utils\font.cpp"/>
+        <ClCompile Include="utils\font.ixx"/>
+        <ClCompile Include="utils\types.ixx" />
         <ClCompile Include="utils\WICTextureLoader11.cpp"/>
     </ItemGroup>
     <ItemGroup>
