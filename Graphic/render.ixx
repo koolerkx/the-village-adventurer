@@ -74,13 +74,17 @@ public:
                   const Transform& transform, const UV& uv,
                   const COLOR& color);
 
-  void DrawLineForDebugUse(const POSITION& start, const POSITION& end, const COLOR& color);
-  void DrawLinesForDebugUse(const std::span<Line> lines);
-  void DrawRectsForDebugUse(const std::span<Rect> rects);
+  void DrawLine(const POSITION& start, const POSITION& end, const COLOR& color);
+  // Indexed Draw
+  void DrawLines(const std::span<Line> lines);
+  void DrawRects(const std::span<Rect> rects);
 
+  // Indexed Draw
   void DrawBox(Rect rect);
 
+  // Instanced Indexed Draw
   void DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props);
 
+  // Instanced Indexed Draw
   void DrawSpritesInstanced(std::span<RenderInstanceItem> render_items, FixedPoolIndexType texture_id);
 };

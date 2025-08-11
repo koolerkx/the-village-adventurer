@@ -88,10 +88,10 @@ void DebugManager::OnFixedUpdate(float delta_time) {
 
 void DebugManager::OnRender() {
   if (debug_setting_.is_show_ui_gridline) {
-    context_->render_resource_manager->renderer->DrawLinesForDebugUse(grid_lines_);
+    context_->render_resource_manager->renderer->DrawLines(grid_lines_);
   }
   if (debug_setting_.is_show_ui_column || debug_setting_.is_show_ui_row) {
-    context_->render_resource_manager->renderer->DrawRectsForDebugUse(rects_);
+    context_->render_resource_manager->renderer->DrawRects(rects_);
   }
 
   if (debug_setting_.is_show_fps) {

@@ -230,7 +230,7 @@ void Renderer::DrawSprite(const FixedPoolIndexType texture_id,
   device_context_->Draw(vertex_num_, 0);
 }
 
-void Renderer::DrawLineForDebugUse(const POSITION& start, const POSITION& end, const COLOR& color) {
+void Renderer::DrawLine(const POSITION& start, const POSITION& end, const COLOR& color) {
   const std::wstring texture_filename = L"assets/block_white.png";
   const FixedPoolIndexType texture_id = texture_manager_->Load(texture_filename);
 
@@ -275,7 +275,7 @@ void Renderer::DrawLineForDebugUse(const POSITION& start, const POSITION& end, c
   device_context_->Draw(vertex_num_, 0);
 }
 
-void Renderer::DrawLinesForDebugUse(const std::span<Line> lines) {
+void Renderer::DrawLines(const std::span<Line> lines) {
   if (lines.empty()) return;
 
   const std::wstring texture_filename = L"assets/block_white.png";
@@ -316,7 +316,7 @@ void Renderer::DrawLinesForDebugUse(const std::span<Line> lines) {
   device_context_->Draw(static_cast<UINT>(lines.size() * 2), 0);
 }
 
-void Renderer::DrawRectsForDebugUse(const std::span<Rect> rects) {
+void Renderer::DrawRects(const std::span<Rect> rects) {
   if (rects.empty()) return;
 
   const std::wstring texture_filename = L"assets/block_white.png";
@@ -405,7 +405,7 @@ void Renderer::DrawBox(Rect rect) {
     Line{left_top, left_bottom, rect.color},
   };
 
-  DrawLinesForDebugUse(lines);
+  DrawLines(lines);
 }
 
 void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props) {
@@ -423,7 +423,7 @@ void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transfor
       color::setOpacity(color::grey600, 0.2f)
     }
   });
-  DrawRectsForDebugUse(ary);
+  DrawRects(ary);
 }
 
 void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_items, FixedPoolIndexType texture_id) {
