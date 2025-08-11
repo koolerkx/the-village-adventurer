@@ -10,6 +10,11 @@ import std;
 template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
+export enum class VertexShaderType {
+  Instance,
+  Default
+};
+
 export class ShaderManager {
 private:
   ComPtr<ID3D11Device> device_ = nullptr;
@@ -21,9 +26,15 @@ private:
   ComPtr<ID3D11Buffer> vs_constant_buffer_0_ = nullptr; // Projection
   ComPtr<ID3D11Buffer> vs_constant_buffer_1_ = nullptr; // World
 
+  // instace draw shder
+  ComPtr<ID3D11VertexShader> instance_vertex_shader_ = nullptr;
+  ComPtr<ID3D11InputLayout> instance_input_layout_ = nullptr;
+
   ComPtr<ID3D11SamplerState> sampler_state_ = nullptr;
 
-  void CreateVertexShader(const std::string& filename);
+  void CreateVertexShader(const std::string& filename,
+                          std::span<D3D11_INPUT_ELEMENT_DESC> layout,
+                          ID3D11VertexShader** ppVertexShader, ID3D11InputLayout** ppInputLayout);
   void CreateConstantBuffer();
 
   // Pixel Shader
@@ -36,7 +47,7 @@ private:
 public:
   ShaderManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 
-  void Begin();
+  void Begin(VertexShaderType type = VertexShaderType::Default);
 
   void SetProjectionMatrix(const DirectX::XMMATRIX& matrix) const;
   void SetWorldMatrix(const DirectX::XMMATRIX& matrix) const;

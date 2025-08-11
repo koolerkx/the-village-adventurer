@@ -11,6 +11,8 @@
         </ProjectConfiguration>
     </ItemGroup>
     <ItemGroup>
+        <ClCompile Include="debug_ui\debug_manager.cpp"/>
+        <ClCompile Include="debug_ui\debug_manager.ixx"/>
         <ClCompile Include="direct3d.cpp"/>
         <ClCompile Include="direct3d.ixx"/>
         <ClCompile Include="render.cpp"/>
@@ -19,8 +21,11 @@
         <ClCompile Include="shader.ixx"/>
         <ClCompile Include="texture.cpp"/>
         <ClCompile Include="texture.ixx"/>
+        <ClCompile Include="utils\color.ixx"/>
         <ClCompile Include="utils\fixed_pool.ixx"/>
-        <ClCompile Include="utils\math.ixx"/>
+        <ClCompile Include="utils\font.cpp"/>
+        <ClCompile Include="utils\font.ixx"/>
+        <ClCompile Include="utils\types.ixx"/>
         <ClCompile Include="utils\WICTextureLoader11.cpp"/>
     </ItemGroup>
     <ItemGroup>
@@ -31,6 +36,9 @@
             <ShaderType>Pixel</ShaderType>
         </FxCompile>
         <FxCompile Include="shaders\shader_vertex_2d.hlsl">
+            <ShaderType>Vertex</ShaderType>
+        </FxCompile>
+        <FxCompile Include="shaders\instanced_shader_vertex_2d.hlsl">
             <ShaderType>Vertex</ShaderType>
         </FxCompile>
     </ItemGroup>
@@ -124,4 +132,9 @@
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
     <ImportGroup Label="ExtensionTargets">
     </ImportGroup>
+    <!-- Warning MSB8028 -->
+    <PropertyGroup>
+        <IntermediateDirectory>$(Platform)\$(Configuration)\$(ProjectName)\Intermediate\</IntermediateDirectory>
+        <OutputDirectory>$(Platform)\$(Configuration)\$(ProjectName)\Output\</OutputDirectory>
+    </PropertyGroup>
 </Project>

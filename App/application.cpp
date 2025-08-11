@@ -7,8 +7,9 @@ module;
 module application;
 
 import std;
+import app.timer;
 import graphic.direct3D;
-import graphic.utils.math;
+import graphic.utils.types;
 import game.scene;
 import game.title_scene;
 
@@ -102,33 +103,10 @@ SIZE Application::GetWindowSize() {
   return ret;
 }
 
-void Application::Run() const {
-  ShowWindow(hwnd_, SW_SHOW);
-  UpdateWindow(hwnd_);
-
-  MSG msg = {};
-  do {
-    if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-      TranslateMessage(&msg);
-      DispatchMessage(&msg);
-    }
-    else {
-      // todo: add delta time
-      scene_manager_->OnUpdate(0.0f);
-
-      direct3d_->BeginDraw();
-      scene_manager_->OnRender();
-      // direct3d_->Dispatch(on_update_function);
-      direct3d_->EndDraw();
-    }
-  }
-  while (msg.message != WM_QUIT);
-}
-
 bool Application::Init() {
   (void)CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
-  SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+  // SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
   CreateGameWindow(hwnd_, window_class_);
 
@@ -145,7 +123,36 @@ bool Application::Init() {
     )
   );
 
+#if defined(DEBUG) || defined(_DEBUG)
+  std::unique_ptr<DebugContext> debug_context = std::make_unique<DebugContext>();
+  debug_context->render_resource_manager = direct3d_->GetResourceManager();
+  debug_context->window_size = GetWindowSize();
+  debug_manager_.reset(new DebugManager(std::move(debug_context)));
+#endif
+  
+  timer_updater_.reset(new TimerUpdater(60.0f));
+
   return true;
+}
+
+void Application::Run() {
+  ShowWindow(hwnd_, SW_SHOW);
+  UpdateWindow(hwnd_);
+
+  auto updateFn = [this](float dt) { OnUpdate(dt); };
+  auto fixedFn = [this](float fdt) { OnFixedUpdate(fdt); };
+
+  MSG msg = {};
+  do {
+    if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
+    }
+    else {
+      timer_updater_->tick(updateFn, fixedFn);
+    }
+  }
+  while (msg.message != WM_QUIT);
 }
 
 void Application::Terminate() const {
@@ -160,3 +167,26 @@ Application& Application::Instance() {
 Application::Application() {}
 
 Application::~Application() {}
+
+void Application::OnUpdate(float delta_time) {
+  scene_manager_->OnUpdate(delta_time);
+
+#if defined(DEBUG) || defined(_DEBUG)
+  debug_manager_->OnUpdate(delta_time);
+#endif
+  
+  direct3d_->BeginDraw();
+  scene_manager_->OnRender();
+  // direct3d_->Dispatch(on_update_function);
+
+#if defined(DEBUG) || defined(_DEBUG)
+  debug_manager_->OnRender();
+#endif
+  direct3d_->EndDraw();
+}
+
+void Application::OnFixedUpdate(float delta_time) {
+#if defined(DEBUG) || defined(_DEBUG)
+  debug_manager_->OnFixedUpdate(delta_time);
+#endif
+}

@@ -3,5 +3,7 @@
   <component name="Encoding" addBOMForNewFiles="with BOM under Windows, with no BOM otherwise">
     <file url="file://$PROJECT_DIR$/App/GameWindow/GameWindow.cpp" charset="Shift_JIS" />
     <file url="file://$PROJECT_DIR$/App/GameWindow/GameWindow.ixx" charset="Shift_JIS" />
+    <file url="file://$PROJECT_DIR$/Graphic/debug_ui/debug_manager.cpp" charset="Shift_JIS" />
+    <file url="file://$PROJECT_DIR$/Graphic/debug_ui/debug_manager.ixx" charset="Shift_JIS" />
   </component>
 </project>

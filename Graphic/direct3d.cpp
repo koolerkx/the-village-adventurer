@@ -14,7 +14,7 @@ template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 import std;
-import graphic.utils.math;
+import graphic.utils.types;
 
 HRESULT Dx11Wrapper::CreateSwapChain(HWND hwnd) {
   DXGI_SWAP_CHAIN_DESC1 swapchain_desc{};
@@ -217,7 +217,8 @@ Dx11Wrapper::Dx11Wrapper(HWND hwnd) {
   std::unique_ptr<TextureManager> texture_manager = std::make_unique<TextureManager>(
     device_.Get(), device_context_.Get());
   std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(device_.Get(), device_context_.Get(),
-                                                                  shader_manager.get(), texture_manager.get(), 12);
+                                                                  shader_manager.get(), texture_manager.get(),
+                                                                  win_size_, 12);
 
   resource_manager_ = std::make_unique<ResourceManager>();
   resource_manager_->shader_manager = std::move(shader_manager);
@@ -228,7 +229,7 @@ Dx11Wrapper::Dx11Wrapper(HWND hwnd) {
 Dx11Wrapper::~Dx11Wrapper() {}
 
 void Dx11Wrapper::BeginDraw() {
-  float clear_color[4] = {0.2f, 0.4f, 0.8f, 1.0f};
+  float clear_color[4] = {background_clear_color.x, background_clear_color.y, background_clear_color.z, background_clear_color.w};
   device_context_->ClearRenderTargetView(render_target_views_.Get(), clear_color);
   device_context_->ClearDepthStencilView(depth_stencil_view_.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 

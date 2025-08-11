@@ -16,5 +16,6 @@ SamplerState samp; // テクスチャさんプラ
 
 float4 main(PS_INPUT ps_in) : SV_TARGET {
   // return ps_in.color;
+  // return float4(1,0,1,1);
   return tex.Sample(samp, ps_in.uv) * ps_in.color;
 }
