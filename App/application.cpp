@@ -123,11 +123,13 @@ bool Application::Init() {
     )
   );
 
+#if defined(DEBUG) || defined(_DEBUG)
   std::unique_ptr<DebugContext> debug_context = std::make_unique<DebugContext>();
   debug_context->render_resource_manager = direct3d_->GetResourceManager();
   debug_context->window_size = GetWindowSize();
   debug_manager_.reset(new DebugManager(std::move(debug_context)));
-
+#endif
+  
   timer_updater_.reset(new TimerUpdater(60.0f));
 
   return true;
@@ -168,16 +170,23 @@ Application::~Application() {}
 
 void Application::OnUpdate(float delta_time) {
   scene_manager_->OnUpdate(delta_time);
-  debug_manager_->OnUpdate(delta_time);
 
+#if defined(DEBUG) || defined(_DEBUG)
+  debug_manager_->OnUpdate(delta_time);
+#endif
+  
   direct3d_->BeginDraw();
   scene_manager_->OnRender();
   // direct3d_->Dispatch(on_update_function);
 
+#if defined(DEBUG) || defined(_DEBUG)
   debug_manager_->OnRender();
+#endif
   direct3d_->EndDraw();
 }
 
 void Application::OnFixedUpdate(float delta_time) {
+#if defined(DEBUG) || defined(_DEBUG)
   debug_manager_->OnFixedUpdate(delta_time);
+#endif
 }

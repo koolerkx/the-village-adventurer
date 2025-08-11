@@ -1,8 +1,11 @@
 module;
+#if defined(DEBUG) || defined(_DEBUG)
 #include <Windows.h>
+#endif
 
 export module graphic.debug;
 
+#if defined(DEBUG) || defined(_DEBUG)
 import std;
 import graphic.direct3D;
 import graphic.utils.font;
@@ -80,3 +83,4 @@ public:
   void OnFixedUpdate(float delta_time);
   void OnRender();
 };
+#endif

@@ -2,6 +2,7 @@ module;
 
 module graphic.debug;
 
+#if defined(DEBUG) || defined(_DEBUG)
 import std;
 import graphic.utils.font;
 
@@ -106,3 +107,4 @@ void DebugManager::OnRender() {
     );
   }
 }
+#endif
