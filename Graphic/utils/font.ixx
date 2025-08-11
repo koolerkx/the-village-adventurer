@@ -24,11 +24,13 @@ export enum class DefinedFont: unsigned short {
 };
 
 export std::map<DefinedFont, std::pair<std::wstring, std::wstring>> defined_font_map({
+#if defined(DEBUG) || defined(_DEBUG)
   {
     DefinedFont::FUSION_PIXEL_FONT_DEBUG,
-    std::pair<std::wstring, std::wstring>(L"assets\\fusion-pixel-font-12px-monospaced-debug_0.png",
-                                          L"assets\\fusion-pixel-font-12px-monospaced-debug.fnt")
+    std::pair<std::wstring, std::wstring>(L"assets\\fonts\\fusion-pixel-font-12px-monospaced-debug_0.png",
+                                          L"assets\\fonts\\\\fusion-pixel-font-12px-monospaced-debug.fnt")
   }
+#endif
 });
 
 export class Font {
