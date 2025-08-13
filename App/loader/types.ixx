@@ -27,6 +27,7 @@ export struct GraphicConfig {
 
 export struct MapConfig {
   std::string default_map;
+  std::string map_metadata;
   std::vector<std::string> files;
   std::vector<std::string> animate_files;
 };

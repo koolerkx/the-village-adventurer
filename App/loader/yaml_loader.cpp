@@ -46,6 +46,8 @@ void YAMLConfigLoader::loadConfig(const std::string& config_path) {
     if (auto map_node = config["config"]["map"]) {
       config_.map.default_map =
         map_node["default_map"].as<std::string>(config_.map.default_map);
+      config_.map.map_metadata =
+        map_node["map_metadata"].as<std::string>(config_.map.map_metadata);
 
       if (auto files_node = map_node["map"]["files"]) {
         config_.map.files = files_node.as<std::vector<std::string>>();

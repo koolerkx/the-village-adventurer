@@ -12,13 +12,15 @@
     </ItemGroup>
     <ItemGroup>
         <ClCompile Include="game_context.ixx"/>
-        <ClCompile Include="map\tile_repository.cpp" />
-        <ClCompile Include="map\tile_repository.ixx" />
         <ClCompile Include="scene.ixx" />
         <ClCompile Include="scene_manager.cpp" />
         <ClCompile Include="scene_manager.ixx" />
         <ClCompile Include="title\title_scene.cpp" />
         <ClCompile Include="title\title_scene.ixx" />
+        <ClCompile Include="map\tile_repository.cpp" />
+        <ClCompile Include="map\tile_repository.ixx" />
+        <ClCompile Include="map\tinyxml\tinyxml2.cpp" />
+        <ClCompile Include="map\tinyxml\tinyxml2.h" />
     </ItemGroup>
     <PropertyGroup Label="Globals">
         <VCProjectVersion>15.0</VCProjectVersion>

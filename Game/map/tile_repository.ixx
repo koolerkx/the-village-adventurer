@@ -4,8 +4,8 @@ export module game.map.tile_repository;
 import std;
 
 struct UV {
-  unsigned int v;
   unsigned int u;
+  unsigned int v;
   unsigned short w = 16;
   unsigned short h = 16;
 };
@@ -30,13 +30,18 @@ struct CollisionData {
 };
 
 export class TileRepository {
+private:
   unsigned short texture_width_{}, texture_height_{}; // texture size
   unsigned short tile_width_{}, tile_height_{};
   unsigned short columns_count_{};
   unsigned int tileCount{};
 
+
   std::map<unsigned int, TileAnimatedData> tile_animated_data_;
   std::map<unsigned int, std::vector<CollisionData>> tile_collision_data_;
+
+public:
+  TileRepository(std::string_view metadata_filepath);
 
   inline UV GetUvById(unsigned int tileId) const {
     return UV{
@@ -48,10 +53,16 @@ export class TileRepository {
   }
 
   inline std::optional<TileAnimatedData> GetTileAnimatedData(unsigned int tileId) const {
-    return tile_animated_data_.contains(tileId) ? tile_animated_data_.at(tileId) : std::nullopt;
+    if (auto it = tile_animated_data_.find(tileId); it != tile_animated_data_.end()) {
+      return it->second;
+    }
+    return std::nullopt;
   }
 
   inline std::optional<std::vector<CollisionData>> GetTileCollisionData(unsigned int tileId) const {
-    return tile_collision_data_.contains(tileId) ? tile_collision_data_.at(tileId) : std::nullopt;
+    if (auto it = tile_collision_data_.find(tileId); it != tile_collision_data_.end()) {
+      return it->second;
+    }
+    return std::nullopt;
   }
 };

@@ -6,9 +6,15 @@ import std;
 
 SceneManager::SceneManager(
   std::unique_ptr<IScene> initial_scene,
-  std::unique_ptr<GameContext> game_context
+  std::unique_ptr<GameContext> game_context,
+  std::unique_ptr<GameConfig> game_config
 ) {
   game_context_ = std::move(game_context);
+  game_config_ = std::move(game_config);
+
+  // Load Map
+  tile_repository_ = std::make_unique<TileRepository>(game_config_->map_tile_filepath);
+  
   ChangeScene(std::move(initial_scene));
 }
 
