@@ -10,6 +10,7 @@ config:
       pixel_shader: "assets/shaders/shader_pixel_2d.cso"
   map:
     default_map: "forest1"
+    map_metadata: "map/map_assets.tsx"
     map:
       files:
         - "map/forest1.tmx"

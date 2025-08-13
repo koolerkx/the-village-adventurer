@@ -11,6 +11,7 @@
 *.sln.docstates
 
 *.cso
+map/roguelike-topdown-game.tiled-session
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
