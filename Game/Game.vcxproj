@@ -12,11 +12,13 @@
     </ItemGroup>
     <ItemGroup>
         <ClCompile Include="game_context.ixx"/>
-        <ClCompile Include="scene.ixx"/>
-        <ClCompile Include="scene_manager.cpp"/>
-        <ClCompile Include="scene_manager.ixx"/>
-        <ClCompile Include="title\title_scene.cpp"/>
-        <ClCompile Include="title\title_scene.ixx"/>
+        <ClCompile Include="map\tile_repository.cpp" />
+        <ClCompile Include="map\tile_repository.ixx" />
+        <ClCompile Include="scene.ixx" />
+        <ClCompile Include="scene_manager.cpp" />
+        <ClCompile Include="scene_manager.ixx" />
+        <ClCompile Include="title\title_scene.cpp" />
+        <ClCompile Include="title\title_scene.ixx" />
     </ItemGroup>
     <PropertyGroup Label="Globals">
         <VCProjectVersion>15.0</VCProjectVersion>
@@ -25,7 +27,7 @@
         <RootNamespace>Graphic</RootNamespace>
         <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     </PropertyGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
     <PropertyGroup>
         <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     </PropertyGroup>
@@ -42,16 +44,16 @@
         <WholeProgramOptimization>true</WholeProgramOptimization>
         <CharacterSet>MultiByte</CharacterSet>
     </PropertyGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
     <ImportGroup Label="ExtensionSettings">
     </ImportGroup>
     <ImportGroup Label="Shared">
     </ImportGroup>
     <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     </ImportGroup>
     <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     </ImportGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
         <LinkIncremental>true</LinkIncremental>
@@ -99,11 +101,11 @@
             <GenerateDebugInformation>true</GenerateDebugInformation>
         </Link>
     </ItemDefinitionGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
     <ImportGroup Label="ExtensionTargets">
     </ImportGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Graphic\Graphic.vcxproj"/>
+        <ProjectReference Include="..\Graphic\Graphic.vcxproj" />
     </ItemGroup>
     <!-- Warning MSB8028 -->
     <PropertyGroup>
