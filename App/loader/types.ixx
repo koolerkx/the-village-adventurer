@@ -22,6 +22,7 @@ export struct GraphicConfig {
   int window_size_width{1280};
   int window_size_height{720};
   ShaderFiles shader_files{};
+  bool handle_dps{false};
 };
 
 export struct MapConfig {

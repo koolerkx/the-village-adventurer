@@ -29,6 +29,8 @@ void YAMLConfigLoader::loadConfig(const std::string& config_path) {
         graphic_node["window_size_width"].as<int>(config_.graphic.window_size_width);
       config_.graphic.window_size_height =
         graphic_node["window_size_height"].as<int>(config_.graphic.window_size_height);
+      config_.graphic.handle_dps =
+        graphic_node["handle_dps"].as<bool>(config_.graphic.handle_dps);
 
       if (auto shader_node = graphic_node["shader_files"]) {
         config_.graphic.shader_files.vertex_shader =

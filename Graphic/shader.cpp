@@ -7,8 +7,9 @@ module;
 module graphic.shader;
 
 import std;
+import graphic.utils.config;
 
-ShaderManager::ShaderManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext) {
+ShaderManager::ShaderManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, Dx11WrapperConfig config) {
   if (!pDevice || !pContext) {
     OutputDebugString("ShaderManager::ShaderManager : 与えられたデバイスかコンテキストが不正です");
     assert(false);
@@ -37,7 +38,7 @@ ShaderManager::ShaderManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
     {"TEXCOORD", 6, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1},
     // color
   };
-  CreateVertexShader("assets\\shaders\\instanced_shader_vertex_2d.cso", instance_layout,
+  CreateVertexShader(config.instanced_vertex_shader, instance_layout,
                      instance_vertex_shader_.GetAddressOf(), instance_input_layout_.ReleaseAndGetAddressOf());
 
   // 頂点レイアウトの定義
@@ -46,13 +47,11 @@ ShaderManager::ShaderManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
     {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
     {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
   };
-  // TODO: extract the path
-  CreateVertexShader("assets\\shaders\\shader_vertex_2d.cso", layout,
+  CreateVertexShader(config.vertex_shader, layout,
                      vertex_shader_.GetAddressOf(), input_layout_.ReleaseAndGetAddressOf());
   CreateConstantBuffer();
 
-  // TODO: extract the path
-  CreatePixelShader("assets\\shaders\\shader_pixel_2d.cso", pixel_shader_.GetAddressOf());
+  CreatePixelShader(config.pixel_shader, pixel_shader_.GetAddressOf());
   CreateSamplerState();
 }
 

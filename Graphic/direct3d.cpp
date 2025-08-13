@@ -25,8 +25,8 @@ HRESULT Dx11Wrapper::CreateSwapChain(HWND hwnd) {
   swapchain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // 何に使う、ここは絵を各場所で使う
   swapchain_desc.SampleDesc.Count = 1;
   swapchain_desc.SampleDesc.Quality = 0;
-  // swap_chain_desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD; // 0: 垂直同期なし
-  swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+  swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD; // 0: 垂直同期なし
+  // swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
   // swapchain_desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 
   HRESULT hr = dxgi_factory_->CreateSwapChainForHwnd(
@@ -183,16 +183,11 @@ void Dx11Wrapper::CreateViewport() {
   device_context_->RSSetViewports(1, &viewport_); // ビューポートの設定
 }
 
-Dx11Wrapper::Dx11Wrapper(HWND hwnd) {
-  RECT rect;
-  if (GetWindowRect(hwnd, &rect)) {
-    int width = rect.right - rect.left;
-    int height = rect.bottom - rect.top;
-
-    win_size_.cx = width;
-    win_size_.cy = height;
-  }
-
+Dx11Wrapper::Dx11Wrapper(HWND hwnd, const Dx11WrapperConfig& config) {
+  config_ = config;
+  win_size_.cx = config.window_size_width;
+  win_size_.cy = config.window_size_height;
+  
   if (FAILED(InitializeDXGIDevice())) {
     assert(0);
     return;
@@ -213,7 +208,7 @@ Dx11Wrapper::Dx11Wrapper(HWND hwnd) {
   CreateDepthStencilState();
   CreateViewport();
 
-  std::unique_ptr<ShaderManager> shader_manager = std::make_unique<ShaderManager>(device_.Get(), device_context_.Get());
+  std::unique_ptr<ShaderManager> shader_manager = std::make_unique<ShaderManager>(device_.Get(), device_context_.Get(), config_);
   std::unique_ptr<TextureManager> texture_manager = std::make_unique<TextureManager>(
     device_.Get(), device_context_.Get());
   std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(device_.Get(), device_context_.Get(),
@@ -240,7 +235,8 @@ void Dx11Wrapper::BeginDraw() {
 }
 
 void Dx11Wrapper::EndDraw() const {
-  (void)swapchain_->Present(1, 0);
+  // (void)swapchain_->Present(1, 0);
+  (void)swapchain_->Present(0, 0);
 }
 
 void Dx11Wrapper::Dispatch(std::move_only_function<void(ResourceManager*)> func) {

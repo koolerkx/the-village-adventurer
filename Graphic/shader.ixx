@@ -6,6 +6,7 @@ module;
 export module graphic.shader;
 
 import std;
+import graphic.utils.config;
 
 template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -45,7 +46,7 @@ private:
   void CreateSamplerState();
 
 public:
-  ShaderManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+  ShaderManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, Dx11WrapperConfig config);
 
   void Begin(VertexShaderType type = VertexShaderType::Default);
 

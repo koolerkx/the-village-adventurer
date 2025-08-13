@@ -20,8 +20,8 @@ constexpr const char* config_filepath = "./config.yaml";
 // Load from config
 static constexpr char WINDOW_CLASS[] = "GameWindow"; // メインウインドウクラス名
 static constexpr char TITLE[] = "Game";              // 	タイトルバーのテクスト
-constexpr unsigned int WINDOW_WIDTH = 1280;
-constexpr unsigned int WINDOW_HEIGHT = 720;
+// constexpr unsigned int WINDOW_WIDTH = 1280;
+// constexpr unsigned int WINDOW_HEIGHT = 720;
 
 LRESULT CALLBACK WindowProcedure(const HWND hWnd, const UINT message, const WPARAM wParam, const LPARAM lParam) {
   switch (message) {
@@ -46,8 +46,9 @@ LRESULT CALLBACK WindowProcedure(const HWND hWnd, const UINT message, const WPAR
   return 0;
 }
 
-void Application::CreateGameWindow(HWND& hwnd, WNDCLASSEX& windowClass) {
+void Application::CreateGameWindow(HWND& hwnd, WNDCLASSEX& windowClass, const GraphicConfig& graphic_config) {
   HINSTANCE hinst = GetModuleHandle(nullptr);
+  win_size_ = {graphic_config.window_size_width, graphic_config.window_size_height};
 
   // ウインドウクラスの登録
   windowClass.cbSize = sizeof(WNDCLASSEX);
@@ -65,7 +66,7 @@ void Application::CreateGameWindow(HWND& hwnd, WNDCLASSEX& windowClass) {
   // メインウィンドウの作成
 
   RECT window_rect{
-    0, 0, WINDOW_WIDTH, WINDOW_HEIGHT
+    0, 0, win_size_.cx, win_size_.cy
   };
 
   DWORD style = WS_OVERLAPPEDWINDOW & ~(WS_MAXIMIZEBOX | WS_THICKFRAME);
@@ -101,25 +102,30 @@ void Application::CreateGameWindow(HWND& hwnd, WNDCLASSEX& windowClass) {
 }
 
 SIZE Application::GetWindowSize() {
-  SIZE ret;
-  ret.cx = WINDOW_WIDTH;
-  ret.cy = WINDOW_HEIGHT;
-  return ret;
+  return win_size_;
 }
 
 bool Application::Init() {
   (void)CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-  
+
   // load config
   YAMLConfigLoader config_loader{config_filepath};
-  const Config& config = config_loader.getConfig();
+  const Config config = config_loader.getConfig();
 
+  if (config.graphic.handle_dps) {
+    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+  }
 
-  SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+  CreateGameWindow(hwnd_, window_class_, config.graphic);
 
-  CreateGameWindow(hwnd_, window_class_);
-
-  direct3d_.reset(new Dx11Wrapper(hwnd_));
+  direct3d_.reset(new Dx11Wrapper(hwnd_, {
+                                    .horizontal_sync{config.graphic.horizontal_sync},
+                                    .window_size_width{config.graphic.window_size_width},
+                                    .window_size_height{config.graphic.window_size_height},
+                                    .vertex_shader = config.graphic.shader_files.vertex_shader,
+                                    .instanced_vertex_shader = config.graphic.shader_files.instanced_vertex_shader,
+                                    .pixel_shader = config.graphic.shader_files.pixel_shader
+                                  }));
 
   std::unique_ptr<GameContext> initial_context = std::make_unique<GameContext>();
   initial_context->render_resource_manager = direct3d_->GetResourceManager();
@@ -138,7 +144,7 @@ bool Application::Init() {
   debug_context->window_size = GetWindowSize();
   debug_manager_.reset(new DebugManager(std::move(debug_context)));
 #endif
-  
+
   timer_updater_.reset(new TimerUpdater(60.0f));
 
   return true;
@@ -183,7 +189,7 @@ void Application::OnUpdate(float delta_time) {
 #if defined(DEBUG) || defined(_DEBUG)
   debug_manager_->OnUpdate(delta_time);
 #endif
-  
+
   direct3d_->BeginDraw();
   scene_manager_->OnRender();
   // direct3d_->Dispatch(on_update_function);
