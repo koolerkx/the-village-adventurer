@@ -30,8 +30,6 @@ private:
   Application(const Application&) = delete;
   void operator=(const Application&) = delete;
 
-  std::unique_ptr<SceneManager> scene_manager_ = nullptr;
-
 #if defined(DEBUG) || defined(_DEBUG)
   std::unique_ptr<DebugManager> debug_manager_ = nullptr;
 #endif

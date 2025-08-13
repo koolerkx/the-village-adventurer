@@ -1,19 +1,23 @@
 module;
-#include <WinString.h>
 
 module game.title_scene;
 
 import std;
 import graphic.utils.types;
+import game.scene_manager;
+import game.scene_game;
 
 void TitleScene::OnEnter(GameContext* ctx) {
-  OutputDebugString("TitleScene> OnEnter\n");
+  std::cout << "TitleScene> OnEnter" << std::endl;
 
   texture_id = ctx->render_resource_manager->texture_manager->Load(L"assets/block_test.png", "test");
+
+  SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<GameScene>());
+  
 }
 
 void TitleScene::OnUpdate(GameContext*, float delta_time) {
-  OutputDebugString("TitleScene> OnUpdate\n");
+  // std::cout << "TitleScene> OnUpdate" << std::endl;
 }
 
 void TitleScene::OnRender(GameContext* ctx) {
@@ -28,9 +32,9 @@ void TitleScene::OnRender(GameContext* ctx) {
   // ctx->render_resource_manager->renderer->DrawSprite(texture_id, transform1, uv1, color1);
 
 
-  OutputDebugString("TitleScene> OnRender\n");
+  // std::cout << "TitleScene> OnRender\n";
 }
 
 void TitleScene::OnExit(GameContext*) {
-  OutputDebugString("TitleScene> OnExit\n");
+  std::cout << "TitleScene> OnExit" << std::endl;
 }
