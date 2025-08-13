@@ -23,8 +23,8 @@ void YAMLConfigLoader::loadConfig(const std::string& config_path) {
     YAML::Node config = YAML::LoadFile(config_path);
 
     if (auto graphic_node = config["config"]["graphic"]) {
-      config_.graphic.horizontal_sync =
-        graphic_node["horizontal_sync"].as<bool>(config_.graphic.horizontal_sync);
+      config_.graphic.vsync =
+        graphic_node["vsync"].as<bool>(config_.graphic.vsync);
       config_.graphic.window_size_width =
         graphic_node["window_size_width"].as<int>(config_.graphic.window_size_width);
       config_.graphic.window_size_height =

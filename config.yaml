@@ -1,6 +1,6 @@
 config:
   graphic:
-    horizontal_sync: true
+    vsync: true
     window_size_width: 1280
     window_size_height: 720
     handle_dps: false

@@ -18,7 +18,7 @@ export struct ShaderFiles {
 };
 
 export struct GraphicConfig {
-  bool horizontal_sync{true};
+  bool vsync{true};
   int window_size_width{1280};
   int window_size_height{720};
   ShaderFiles shader_files{};
