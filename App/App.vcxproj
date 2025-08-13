@@ -55,6 +55,7 @@
     <ItemDefinitionGroup>
         <ClCompile>
             <AdditionalIncludeDirectories>..\Graphic;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <AdditionalIncludeDirectories>.\loader\yaml-cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
         </ClCompile>
     </ItemDefinitionGroup>
     <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
