@@ -1,0 +1,154 @@
+module;
+#include <cassert>
+#include "../map/tinyxml/tinyxml2.h"
+
+module game.map;
+import game.map.tile_repository;
+
+TileMap::TileMap() {}
+
+void TileMap::OnUpdate(GameContext* ctx, float delta_time) {
+  // TODO: Update Animation -> loop layer -> loop animation state
+}
+
+void TileMap::OnRender(GameContext* ctx) {
+  // TODO: Render with map offset
+}
+
+void TileMap::Load(std::string_view filepath, TileRepository* tr) {
+  tinyxml2::XMLDocument doc;
+  if (doc.LoadFile(filepath.data()) != tinyxml2::XML_SUCCESS) {
+    std::cerr << "Failed to load XML file: " + std::string(filepath) << std::endl;
+    assert(false);
+  }
+
+  auto* mapElement = doc.FirstChildElement("map");
+  if (!mapElement) {
+    std::cerr << "Necessary element not found: map" << std::endl;
+    assert(false);
+  }
+
+  if (tinyxml2::XMLError result = mapElement->QueryUnsignedAttribute("tilewidth", &tile_width_);
+    result != tinyxml2::XML_SUCCESS) {
+    std::cerr << "Failed to read 'tilecount' attribute: "
+      << (mapElement->Attribute("tilecount") ? mapElement->Attribute("tilecount") : "missing")
+      << std::endl;
+    assert(false);
+  }
+
+  if (tinyxml2::XMLError result = mapElement->QueryUnsignedAttribute("tileheight", &tile_height_);
+    result != tinyxml2::XML_SUCCESS) {
+    std::cerr << "Failed to read 'tileheight' attribute: "
+      << (mapElement->Attribute("tileheight") ? mapElement->Attribute("tileheight") : "missing")
+      << std::endl;
+    assert(false);
+  }
+
+  if (tinyxml2::XMLError result = mapElement->QueryUnsignedAttribute("width", &map_width_);
+    result != tinyxml2::XML_SUCCESS) {
+    std::cerr << "Failed to read 'width' attribute: "
+      << (mapElement->Attribute("width") ? mapElement->Attribute("width") : "missing")
+      << std::endl;
+    assert(false);
+  }
+
+  if (tinyxml2::XMLError result = mapElement->QueryUnsignedAttribute("height", &map_height_);
+    result != tinyxml2::XML_SUCCESS) {
+    std::cerr << "Failed to read 'height' attribute: "
+      << (mapElement->Attribute("height") ? mapElement->Attribute("height") : "missing")
+      << std::endl;
+    assert(false);
+  }
+
+  // Layer
+  for (auto* layerElement = mapElement->FirstChildElement("layer"); layerElement; layerElement = layerElement->
+       NextSiblingElement("layer")) {
+    MapLayer layer;
+
+    auto* dataElement = layerElement->FirstChildElement("data");
+    if (!dataElement || !dataElement->GetText()) {
+      continue;
+    }
+
+    std::string csvData = dataElement->GetText();
+    std::vector<unsigned int> tile_ids;
+    std::stringstream ss(csvData);
+    std::string item;
+
+    // Read csv cell by cell
+    // remove space if any
+    // convert unsigned int
+    while (std::getline(ss, item, ',')) {
+      item.erase(std::remove_if(item.begin(), item.end(), ::isspace), item.end());
+      if (!item.empty()) {
+        try {
+          unsigned int tile_id = std::stoul(item);
+          tile_ids.push_back(tile_id);
+        }
+        catch (const std::exception& e) {
+          std::cerr << "Invalid tile id: " + item << std::endl;
+          assert(false);
+        }
+      }
+    }
+
+    // validation check
+    if (tile_ids.size() != map_width_ * map_height_) {
+      std::cerr << "Layer tile data not match map size" << std::endl;
+      assert(false);
+    }
+
+    for (unsigned int i = 0; i < tile_ids.size(); ++i) {
+      if (tile_ids[i] == 0) {
+        layer.tiles.x.push_back(-1);
+        layer.tiles.y.push_back(-1);
+        layer.tiles.u.push_back(-1);
+        layer.tiles.v.push_back(-1);
+        layer.tiles.tile_id.push_back(0);
+        continue;
+      }
+
+      unsigned int x = (i % map_width_) * tile_width_;
+      unsigned int y = (i / map_width_) * tile_height_;
+
+      TileUV uv = tr->GetUvById(tile_ids[i]);
+
+      layer.tiles.x.push_back(x);
+      layer.tiles.y.push_back(y);
+      layer.tiles.u.push_back(uv.u);
+      layer.tiles.v.push_back(uv.v);
+      layer.tiles.tile_id.push_back(tile_ids[i]);
+
+      // animation data and make tile anim state
+      if (std::optional<TileAnimationData> tile_animation_data = tr->GetTileAnimatedData(tile_ids[i]);
+        tile_animation_data.has_value()) {
+        TileAnimationData data = tile_animation_data.value();
+
+        layer.tile_animation_states_[layer.tiles.tile_id.size() - 1] = {
+          .is_loop = data.is_loop,
+          .play_on_start = data.play_on_start,
+          .frames = data.frames,
+          .frame_durations = data.frame_durations
+        };
+      }
+
+      // handle collision
+    }
+    layers_.push_back(layer);
+  }
+
+  // TODO: Handle layer
+  for (auto* objectGroup = mapElement->FirstChildElement("objectgroup"); objectGroup; objectGroup = objectGroup->
+       NextSiblingElement("objectgroup")) {
+    for (auto* object = objectGroup->FirstChildElement("object"); object; object = object->
+         NextSiblingElement("object")) {
+      // unsigned int id = object->UnsignedAttribute("id", 0);
+      // std::string name = object->Attribute("name", "");
+      // std::string type = object->Attribute("type", "");
+      // float x = object->FloatAttribute("x", 0.0f);
+      // float y = object->FloatAttribute("y", 0.0f);
+      // float width = object->FloatAttribute("width", 0.0f);
+      // float height = object->FloatAttribute("height", 0.0f);
+    }
+  }
+}

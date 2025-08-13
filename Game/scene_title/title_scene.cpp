@@ -12,8 +12,7 @@ void TitleScene::OnEnter(GameContext* ctx) {
 
   texture_id = ctx->render_resource_manager->texture_manager->Load(L"assets/block_test.png", "test");
 
-  SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<GameScene>());
-  
+  SceneManager::GetInstance().ChangeScene(std::make_unique<GameScene>());
 }
 
 void TitleScene::OnUpdate(GameContext*, float delta_time) {

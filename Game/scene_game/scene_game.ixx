@@ -2,11 +2,13 @@ module;
 
 export module game.scene_game;
 
+import std;
 import game.scene;
+import game.map;
 
 export class GameScene : public IScene {
 private:
-  FixedPoolIndexType texture_id;
+  std::unique_ptr<TileMap> map_ {nullptr};
   
 public:
   void OnEnter(GameContext* ctx) override;

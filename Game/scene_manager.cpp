@@ -10,10 +10,13 @@ SceneManager& SceneManager::Init(std::unique_ptr<IScene> initial_scene,
   game_context_ = std::move(game_context);
   game_config_ = std::move(game_config);
 
-  // Load Map
-  tile_repository_ = std::make_unique<TileRepository>(game_config_->map_tile_filepath);
 
-  SceneManager sm = GetInstance();
+  // Scene Manager Setup
+  SceneManager& sm = GetInstance();
+  // Load Map
+  sm.SetTileRepository(std::make_unique<TileRepository>(game_config_->map_tile_filepath));
+
+  // Enter initial Scene
   sm.ChangeScene(std::move(initial_scene));
 
   return sm;
@@ -35,7 +38,6 @@ void SceneManager::ChangeSceneDelayed(std::unique_ptr<IScene> new_scene) {
 }
 
 void SceneManager::ProcessPendingSceneChange() {
-  
   if (is_scene_change_pending_) {
     if (current_scene_) {
       current_scene_->OnExit(game_context_.get());

@@ -76,7 +76,7 @@ TileRepository::TileRepository(std::string_view metadata_filepath) {
     // Animation data
     auto* animation = tile->FirstChildElement("animation");
     if (animation) {
-      TileAnimatedData animData;
+      TileAnimationData animData;
       auto* properties = tile->FirstChildElement("properties");
       if (properties) {
         for (auto* prop = properties->FirstChildElement("property"); prop; prop = prop->

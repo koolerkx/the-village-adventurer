@@ -12,8 +12,8 @@
     </ItemGroup>
     <ItemGroup>
         <ClCompile Include="game_context.ixx"/>
-        <ClCompile Include="map\map.cpp"/>
-        <ClCompile Include="map\map.ixx"/>
+        <ClCompile Include="map\TileMap.cpp" />
+        <ClCompile Include="map\TileMap.ixx" />
         <ClCompile Include="scene_game\scene_game.cpp"/>
         <ClCompile Include="scene_game\scene_game.ixx"/>
         <ClCompile Include="scene_title\title_scene.cpp"/>
