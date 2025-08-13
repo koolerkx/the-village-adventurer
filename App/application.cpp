@@ -8,10 +8,14 @@ module application;
 
 import std;
 import app.timer;
+import app.loader.yaml;
 import graphic.direct3D;
 import graphic.utils.types;
 import game.scene;
 import game.title_scene;
+
+// config
+constexpr const char* config_filepath = "./config.yaml";
 
 // Load from config
 static constexpr char WINDOW_CLASS[] = "GameWindow"; // メインウインドウクラス名
@@ -105,8 +109,13 @@ SIZE Application::GetWindowSize() {
 
 bool Application::Init() {
   (void)CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+  
+  // load config
+  YAMLConfigLoader config_loader{config_filepath};
+  const Config& config = config_loader.getConfig();
 
-  // SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
+  SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
   CreateGameWindow(hwnd_, window_class_);
 
