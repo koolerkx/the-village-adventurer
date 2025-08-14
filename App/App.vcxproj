@@ -14,7 +14,7 @@
         <VCProjectVersion>15.0</VCProjectVersion>
         <ProjectGuid>{0C754A9F-E68B-4E1B-AD00-89691F8502A5}</ProjectGuid>
         <Keyword>Win32Proj</Keyword>
-        <RootNamespace>Game</RootNamespace>
+        <RootNamespace>App</RootNamespace>
         <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     </PropertyGroup>
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
@@ -55,6 +55,8 @@
     <ItemDefinitionGroup>
         <ClCompile>
             <AdditionalIncludeDirectories>..\Graphic;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <AdditionalIncludeDirectories>..\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <AdditionalIncludeDirectories>.\loader\yaml-cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
         </ClCompile>
     </ItemDefinitionGroup>
     <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -99,11 +101,14 @@
         </Link>
     </ItemDefinitionGroup>
     <ItemGroup>
+        <ClCompile Include="loader\types.ixx" />
         <ClCompile Include="main.cpp"/>
         <ClCompile Include="application.ixx"/>
         <ClCompile Include="application.cpp"/>
         <ClCompile Include="timer_updater.cpp"/>
         <ClCompile Include="timer_updater.ixx"/>
+        <ClCompile Include="loader/yaml_loader.cpp"/>
+        <ClCompile Include="loader/yaml_loader.ixx"/>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Graphic\Graphic.vcxproj"/>

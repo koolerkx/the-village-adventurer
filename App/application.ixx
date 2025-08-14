@@ -6,6 +6,7 @@ export module application;
 
 import std;
 import app.timer;
+import app.loader.types;
 import graphic.direct3D;
 import game.scene_manager;
 
@@ -19,9 +20,10 @@ private:
   WNDCLASSEX window_class_;
   HWND hwnd_ = nullptr;
   std::shared_ptr<Dx11Wrapper> direct3d_;
+  SIZE win_size_;
 
   // ゲーム用ウィンドウの生成
-  static void CreateGameWindow(HWND& hwnd, WNDCLASSEX& windowClass);
+  void CreateGameWindow(HWND& hwnd, WNDCLASSEX& windowClass, const GraphicConfig& graphic_config);
 
   // シングルトン、コピー・代入禁止
   Application();
@@ -47,6 +49,6 @@ public:
 
   /// 後処理
   void Terminate() const;
-  static SIZE GetWindowSize();
+  SIZE GetWindowSize();
   ~Application();
 };

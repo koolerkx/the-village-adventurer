@@ -55,6 +55,8 @@ private:
 
   int vertex_num_ = 0;
 
+  SIZE window_size_;
+
   static DirectX::XMMATRIX MakeTransformMatrix(const Transform& transform);
 
   DirectX::XMMATRIX mat_ortho_;

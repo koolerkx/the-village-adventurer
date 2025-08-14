@@ -20,6 +20,7 @@ export import graphic.render;
 export import graphic.shader;
 export import graphic.texture;
 export import graphic.utils.color;
+export import graphic.utils.config;
 
 constexpr COLOR background_clear_color = color::grey900;
 
@@ -31,6 +32,7 @@ export struct ResourceManager {
 
 export class Dx11Wrapper {
   SIZE win_size_;
+  Dx11WrapperConfig config_;
 
   // DXGI
   ComPtr<IDXGIFactory7> dxgi_factory_ = nullptr;
@@ -62,7 +64,7 @@ export class Dx11Wrapper {
   std::unique_ptr<ResourceManager> resource_manager_ = nullptr;
 
 public:
-  Dx11Wrapper(HWND hwnd);
+  Dx11Wrapper(HWND hwnd, const Dx11WrapperConfig& config);
   ~Dx11Wrapper();
 
   void BeginDraw();

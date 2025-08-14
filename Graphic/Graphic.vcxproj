@@ -26,6 +26,7 @@
         <ClCompile Include="utils\font.cpp"/>
         <ClCompile Include="utils\font.ixx"/>
         <ClCompile Include="utils\types.ixx"/>
+        <ClCompile Include="utils\config.ixx"/>
         <ClCompile Include="utils\WICTextureLoader11.cpp"/>
     </ItemGroup>
     <ItemGroup>

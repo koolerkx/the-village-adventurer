@@ -10,10 +10,12 @@ import graphic.texture;
 import graphic.utils.font;
 import graphic.utils.color;
 
+constexpr int LINE_VERTEX_NUM = 6000;
+
 Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
                    ShaderManager* shader_manager,
                    TextureManager* texture_manager,
-                   SIZE, // FIXME, load window size from file
+                   SIZE window_size,
                    int vertex_num) {
   if (!pDevice || !pContext) {
     OutputDebugString("ShaderManager::ShaderManager : 与えられたデバイスかコンテキストが不正です");
@@ -38,7 +40,7 @@ Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
 
   D3D11_BUFFER_DESC line_buff_desc = {};
   line_buff_desc.Usage = D3D11_USAGE_DYNAMIC;
-  line_buff_desc.ByteWidth = sizeof(Vertex) * 6000; // todo: extract
+  line_buff_desc.ByteWidth = sizeof(Vertex) * LINE_VERTEX_NUM;
   line_buff_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
   line_buff_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
@@ -47,9 +49,10 @@ Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
   CreateRectBuffer(1024);
   CreateInstanceBuffer(1024);
 
-  // FIXME: load window size from config file
+  window_size_ = window_size;
+
   mat_ortho_ =
-    DirectX::XMMatrixOrthographicOffCenterLH(0.0f, 1280, 720, 0.0f, 0.0f, 1.0f);
+    DirectX::XMMatrixOrthographicOffCenterLH(0.0f, window_size_.cx, window_size_.cy, 0.0f, 0.0f, 1.0f);
 }
 
 void Renderer::CreateRectBuffer(const size_t max_rect_num) {
@@ -94,7 +97,7 @@ void Renderer::CreateInstanceBuffer(const size_t max_instance_num) {
   D3D11_SUBRESOURCE_DATA vbData{unitQuad};
   device_->CreateBuffer(&vbDesc, &vbData, instance_quad_buffer_.GetAddressOf());
 
-  const uint16_t idx[6] = {0, 1, 2, 2, 1, 3};
+  constexpr uint16_t idx[6] = {0, 1, 2, 2, 1, 3};
   D3D11_BUFFER_DESC ibDesc{};
   ibDesc.Usage = D3D11_USAGE_IMMUTABLE;
   ibDesc.ByteWidth = sizeof(idx);
@@ -156,8 +159,7 @@ void Renderer::Draw(const Transform& transform, const COLOR& color) {
   device_context_->IASetVertexBuffers(0, 1, vertex_buffer_.GetAddressOf(), &stride, &offset);
 
   // 頂点シェーダーに変換行列を設定
-  shader_manager_->SetProjectionMatrix(
-    DirectX::XMMatrixOrthographicOffCenterLH(0.0f, 1280.0f, 720.0f, 0.0f, 0.0f, 1.0f));
+  shader_manager_->SetProjectionMatrix(mat_ortho_);
 
   DirectX::XMMATRIX mat = MakeTransformMatrix(transform);
 
@@ -216,8 +218,7 @@ void Renderer::DrawSprite(const FixedPoolIndexType texture_id,
   device_context_->IASetVertexBuffers(0, 1, vertex_buffer_.GetAddressOf(), &stride, &offset);
 
   // 頂点シェーダーに変換行列を設定
-  shader_manager_->SetProjectionMatrix(
-    DirectX::XMMatrixOrthographicOffCenterLH(0.0f, 1280.0f, 720.0f, 0.0f, 0.0f, 1.0f));
+  shader_manager_->SetProjectionMatrix(mat_ortho_);
 
   DirectX::XMMATRIX mat = MakeTransformMatrix(transform);
 
