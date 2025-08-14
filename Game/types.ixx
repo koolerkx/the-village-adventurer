@@ -27,8 +27,12 @@ export struct TileAnimationData {
 export struct TileAnimationState {
   bool is_loop = false;
   bool play_on_start = false;
+  bool is_playing = false;
   std::vector<TileUV> frames;
   std::vector<float> frame_durations;
+
+  size_t current_frame = 0;
+  float current_frame_time = 0.f;
 };
 
 export struct CollisionData {

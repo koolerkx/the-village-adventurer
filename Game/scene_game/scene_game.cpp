@@ -22,10 +22,12 @@ void GameScene::OnEnter(GameContext* ctx) {
   FixedPoolIndexType id = ctx->render_resource_manager->texture_manager->Load(w_texture_path);
   map_->Load(default_map_path, id, tr);
   Transform t = map_->GetTransform();
+
+  // TODO: remove debug data
   t.position.x = 0.0f;
-  t.position.y = 0.0f;
-  t.scale.x = 1.0f;
-  t.scale.y = 1.0f;
+  t.position.y = -384.0f;
+  t.scale.x = 3.0f;
+  t.scale.y = 3.0f;
   t.position_anchor.x = 0.0f;
   t.position_anchor.y = 0.0f;
   map_->SetTransform(t);

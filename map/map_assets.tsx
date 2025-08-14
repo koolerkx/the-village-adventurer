@@ -124,6 +124,17 @@
    <frame tileid="128" duration="250"/>
   </animation>
  </tile>
+ <tile id="4145">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
+  <animation>
+   <frame tileid="4146" duration="500"/>
+   <frame tileid="4145" duration="500"/>
+   <frame tileid="4147" duration="500"/>
+  </animation>
+ </tile>
  <tile id="4368">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="16" height="16"/>
