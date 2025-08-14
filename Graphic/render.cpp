@@ -411,7 +411,7 @@ void Renderer::DrawBox(Rect rect) {
 
 void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props) {
   Font* font = Font::GetFont(font_key);
-  
+
   StringSpriteSize size = font->GetStringSize(str, transform, props);
   std::array<Rect, 1> ary({
     Rect{
@@ -420,7 +420,7 @@ void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transfor
       color::setOpacity(color::grey600, 0.2f)
     }
   });
-  
+
   DrawRects(ary);
   std::vector<RenderInstanceItem> items = font->MakeStringRenderInstanceItems(str, transform, props);
   std::span<RenderInstanceItem> items_span = std::span(items.data(), items.size());
@@ -448,7 +448,10 @@ void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_i
       const auto& [x, y, _] = it.transform.position;
       const auto& [scale_x, scale_y] = it.transform.scale;
       const auto& [w, h] = it.transform.size;
-      instances[i].pos = {x, y};
+      auto& anchor_x = it.transform.position_anchor.x;
+      auto& anchor_y = it.transform.position_anchor.y;
+
+      instances[i].pos = {anchor_x + x, anchor_y + y};
       instances[i].size = {w * scale_x, h * scale_y};
     }
     { // uvRect（u0,v0,u1,v1）

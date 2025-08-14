@@ -3,6 +3,7 @@ module;
 export module game.map;
 
 import std;
+import graphic.utils.types;
 import game.context;
 import game.types;
 import game.map.tile_repository;
@@ -29,10 +30,7 @@ private:
   unsigned int map_height_{16};  // blocks
   std::vector<MapLayer> layers_;
 
-  unsigned int offset_x_{0};
-  unsigned int offset_y_{0};
-  float scale_x_{2.0f};
-  float scale_y_{2.0f};
+  Transform transform_{};
 
   FixedPoolIndexType texture_id_{0};
 
@@ -45,9 +43,6 @@ public:
   void OnUpdate(GameContext* ctx, float delta_time);
   void OnRender(GameContext* ctx);
 
-  void SetOffset(unsigned int x, unsigned int y) {
-    offset_x_ = x;
-    offset_y_ = y;
-  }
-  std::pair<unsigned int, unsigned int> GetOffset() const { return {offset_x_, offset_y_}; }
+  void SetTransform(const Transform& t) { transform_ = t; }
+  Transform GetTransform() const { return transform_; }
 };

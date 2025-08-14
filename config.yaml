@@ -4,6 +4,7 @@ config:
     window_size_width: 1280
     window_size_height: 720
     handle_dps: false
+    targeted_fps: 144
     shader_files:
       vertex_shader: "assets/shaders/shader_vertex_2d.cso"
       instanced_vertex_shader: "assets/shaders/instanced_shader_vertex_2d.cso"

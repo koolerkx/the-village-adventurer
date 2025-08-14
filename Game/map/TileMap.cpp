@@ -23,14 +23,17 @@ void TileMap::OnRender(GameContext* ctx) {
       if (layer.tiles.tile_id[i] == 0) continue;
       render_items.emplace_back(RenderInstanceItem{
         .transform = {
-          {
-            static_cast<float>(layer.tiles.x[i] * scale_x_ + offset_x_),
-            static_cast<float>(layer.tiles.y[i] * scale_y_ + offset_y_), 0
+          .position = {
+            layer.tiles.x[i] * transform_.scale.x + transform_.position.x,
+            layer.tiles.y[i] * transform_.scale.y + transform_.position.y,
+            transform_.position.z
           },
-          {
-            static_cast<float>(tile_width_ * scale_x_),
-            static_cast<float>(tile_height_ * scale_y_)
-          }
+          .size = {
+            static_cast<float>(tile_width_),
+            static_cast<float>(tile_height_)
+          },
+          .scale = transform_.scale,
+          .position_anchor = transform_.position_anchor,
         },
         .uv = {
           {static_cast<float>(layer.tiles.u[i]), static_cast<float>(layer.tiles.v[i])},
