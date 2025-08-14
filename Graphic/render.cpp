@@ -411,11 +411,7 @@ void Renderer::DrawBox(Rect rect) {
 
 void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props) {
   Font* font = Font::GetFont(font_key);
-
-  std::vector<RenderInstanceItem> items = font->MakeStringRenderInstanceItems(str, transform, props);
-  std::span<RenderInstanceItem> items_span = std::span(items.data(), items.size());
-  DrawSpritesInstanced(items_span, font->GetTextureId());
-
+  
   StringSpriteSize size = font->GetStringSize(str, transform, props);
   std::array<Rect, 1> ary({
     Rect{
@@ -424,7 +420,11 @@ void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transfor
       color::setOpacity(color::grey600, 0.2f)
     }
   });
+  
   DrawRects(ary);
+  std::vector<RenderInstanceItem> items = font->MakeStringRenderInstanceItems(str, transform, props);
+  std::span<RenderInstanceItem> items_span = std::span(items.data(), items.size());
+  DrawSpritesInstanced(items_span, font->GetTextureId());
 }
 
 void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_items, FixedPoolIndexType texture_id) {
