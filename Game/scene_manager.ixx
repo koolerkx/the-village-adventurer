@@ -11,6 +11,7 @@ import game.map.tile_repository;
 
 export struct GameConfig {
   std::string default_map;
+  std::string map_texture_filepath;
   std::string map_tile_filepath;
 };
 

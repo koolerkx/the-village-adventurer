@@ -32,11 +32,13 @@ private:
   unsigned int offset_x_{0};
   unsigned int offset_y_{0};
 
+  FixedPoolIndexType texture_id_{0};
+
   // TODO Collision Data
 
 public:
   TileMap();
-  void Load(std::string_view filepath, TileRepository* tr);
+  void Load(std::string_view filepath, FixedPoolIndexType texture_id, TileRepository* tr);
 
   void OnUpdate(GameContext* ctx, float delta_time);
   void OnRender(GameContext* ctx);

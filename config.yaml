@@ -1,6 +1,6 @@
 config:
   graphic:
-    vsync: true
+    vsync: false
     window_size_width: 1280
     window_size_height: 720
     handle_dps: false
@@ -10,6 +10,7 @@ config:
       pixel_shader: "assets/shaders/shader_pixel_2d.cso"
   map:
     default_map: "forest1"
+    map_texture: "map/map_assets.png"
     map_metadata: "map/map_assets.tsx"
     map:
       files:

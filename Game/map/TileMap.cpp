@@ -4,6 +4,7 @@ module;
 
 module game.map;
 import game.map.tile_repository;
+import graphic.utils.types;
 
 TileMap::TileMap() {}
 
@@ -12,10 +13,36 @@ void TileMap::OnUpdate(GameContext* ctx, float delta_time) {
 }
 
 void TileMap::OnRender(GameContext* ctx) {
-  // TODO: Render with map offset
+  for (auto& layer : layers_) {
+    std::vector<RenderInstanceItem> render_items;
+    size_t size = layer.tiles.tile_id.size();
+
+    render_items.reserve(size);
+
+    for (size_t i = 0; i < size; ++i) {
+      if (layer.tiles.tile_id[i] == 0) continue;
+      render_items.emplace_back(RenderInstanceItem{
+        .transform = {
+          {static_cast<float>(layer.tiles.x[i]), static_cast<float>(layer.tiles.y[i]), 0},
+          {static_cast<float>(tile_width_), static_cast<float>(tile_height_)}
+        },
+        .uv = {
+          {static_cast<float>(layer.tiles.u[i]), static_cast<float>(layer.tiles.v[i])},
+          {static_cast<float>(tile_width_), static_cast<float>(tile_height_)},
+        },
+        .color = color::white
+      });
+    }
+
+    ctx->render_resource_manager->renderer->DrawSpritesInstanced(
+      std::span<RenderInstanceItem>(render_items.data(), render_items.size()),
+      texture_id_);
+    render_items.clear();
+  }
 }
 
-void TileMap::Load(std::string_view filepath, TileRepository* tr) {
+void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, TileRepository* tr) {
+  texture_id_ = texture_id;
   tinyxml2::XMLDocument doc;
   if (doc.LoadFile(filepath.data()) != tinyxml2::XML_SUCCESS) {
     std::cerr << "Failed to load XML file: " + std::string(filepath) << std::endl;

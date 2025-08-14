@@ -16,7 +16,11 @@ void GameScene::OnEnter(GameContext* ctx) {
   map_.reset(new TileMap());
   std::string default_map_path = "map/map_data/" + default_map + ".tmx";
 
-  map_->Load(default_map_path, tr);
+  std::string texture_path = SceneManager::GetInstance().GetGameConfig()->map_texture_filepath;
+  std::wstring w_texture_path = std::wstring(texture_path.begin(), texture_path.end());
+  
+  FixedPoolIndexType id = ctx->render_resource_manager->texture_manager->Load(w_texture_path);
+  map_->Load(default_map_path, id, tr);
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
@@ -27,8 +31,6 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
 
 void GameScene::OnRender(GameContext* ctx) {
   // std::cout << "GameScene> OnRender" << std::endl;
-
-  
 
   map_->OnRender(ctx);
 }
