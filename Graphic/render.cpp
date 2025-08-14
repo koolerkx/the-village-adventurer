@@ -465,13 +465,12 @@ void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_i
       const float v1 = (uv_y + uv_h) / static_cast<float>(size_y);
 
       instances[i].uv = {u0, v0, u1, v1};
-
-      {
-        auto& [rotation_x, rotation_y, _] = it.transform.rotation_pivot;
-        auto& rad = it.transform.rotation_radian;
-        instances[i].rotation_pivot = {rotation_x, rotation_y};
-        instances[i].radian = rad;
-      }
+    }
+    {
+      auto& [rotation_x, rotation_y, _] = it.transform.rotation_pivot;
+      auto& rad = it.transform.rotation_radian;
+      instances[i].rotation_pivot = {rotation_x, rotation_y};
+      instances[i].radian = rad;
     }
     {
       instances[i].color = it.color;
