@@ -15,12 +15,12 @@ struct VS_INPUT {
   float2 uv : TEXCOORD0;
 
   // per-instance (slot 1)
-  float2 iPos : TEXCOORD1;    // translate (x,y)
-  float2 iScale : TEXCOORD2;  // scale (w,h)
+  float2 iPos : IPOSITION0;    // translate (x,y)
+  float2 iScale : ISCALE0;  // scale (w,h)
   float4 iUVRect : TEXCOORD3; // uvRect(u0, v0, u1, v1)
   float1 iRad : TEXCOORD4;    // float(rad)
   float2 iPivot : TEXCOORD5;  // pivot(x, y)
-  float4 iColor : TEXCOORD6;  // per-instance color
+  float4 iColor : ICOLOR0;  // per-instance color
 };
 
 cbuffer CbProj : register(b0) {

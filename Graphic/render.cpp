@@ -57,7 +57,8 @@ Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
 
 void Renderer::CreateRectBuffer(const size_t max_rect_num) {
   if (max_rect_num < rects_buffer_can_store_) return;
-
+  rects_buffer_can_store_ = max_rect_num;
+  
   // Vertex Buffer
   D3D11_BUFFER_DESC rect_buff_desc = {};
   rect_buff_desc.Usage = D3D11_USAGE_DYNAMIC;
@@ -82,6 +83,7 @@ void Renderer::CreateRectBuffer(const size_t max_rect_num) {
 
 void Renderer::CreateInstanceBuffer(const size_t max_instance_num) {
   if (max_instance_num < instance_buffer_can_store_) return;
+  instance_buffer_can_store_ = max_instance_num;
 
   Vertex unitQuad[4] = {
     {{-0.5f, -0.5f, 0.f}, color::white, {0.f, 0.f}},
@@ -320,6 +322,10 @@ void Renderer::DrawLines(const std::span<Line> lines) {
 void Renderer::DrawRects(const std::span<Rect> rects) {
   if (rects.empty()) return;
 
+  if (rects.size() > rects_buffer_can_store_) {
+    CreateRectBuffer(rects_buffer_can_store_ * 2);
+  }
+
   const std::wstring texture_filename = L"assets/block_white.png";
   const FixedPoolIndexType texture_id = texture_manager_->Load(texture_filename);
 
@@ -429,6 +435,9 @@ void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transfor
 
 void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_items, FixedPoolIndexType texture_id) {
   if (render_items.empty()) return;
+  if (render_items.size() > instance_buffer_can_store_) {
+    CreateInstanceBuffer(instance_buffer_can_store_ * 2);
+  }
 
   texture_manager_->SetShaderById(texture_id);
 
@@ -465,14 +474,12 @@ void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_i
       const float v1 = (uv_y + uv_h) / static_cast<float>(size_y);
 
       instances[i].uv = {u0, v0, u1, v1};
-      instances[i].uv = {u0, v0, u1, v1};
-
-      {
-        auto& [rotation_x, rotation_y, _] = it.transform.rotation_pivot;
-        auto& rad = it.transform.rotation_radian;
-        instances[i].rotation_pivot = {rotation_x, rotation_y};
-        instances[i].radian = rad;
-      }
+    }
+    {
+      auto& [rotation_x, rotation_y, _] = it.transform.rotation_pivot;
+      auto& rad = it.transform.rotation_radian;
+      instances[i].rotation_pivot = {rotation_x, rotation_y};
+      instances[i].radian = rad;
     }
     {
       instances[i].color = it.color;
