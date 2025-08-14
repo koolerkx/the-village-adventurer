@@ -9,7 +9,32 @@ import graphic.utils.types;
 TileMap::TileMap() {}
 
 void TileMap::OnUpdate(GameContext* ctx, float delta_time) {
-  // TODO: Update Animation -> loop layer -> loop animation state
+  for (auto& layer : layers_) {
+    for (auto& [index, state] : layer.tile_animation_states_) {
+      if (!state.is_playing || state.frames.empty()) continue;
+      state.current_frame_time += delta_time;
+
+      if (state.current_frame_time < state.frame_durations[state.current_frame]) continue;
+
+      // next frame
+      state.current_frame_time -= state.frame_durations[state.current_frame];
+      state.current_frame++;
+
+      // end frame handle
+      if (state.current_frame >= state.frames.size()) {
+        if (state.is_loop) {
+          state.current_frame = 0;
+        }
+        else {
+          state.current_frame = state.frames.size() - 1;
+          state.is_playing = false;
+        }
+      }
+
+      layer.tiles.u[index] = state.frames[state.current_frame].u;
+      layer.tiles.v[index] = state.frames[state.current_frame].v;
+    }
+  }
 }
 
 void TileMap::OnRender(GameContext* ctx) {
@@ -20,7 +45,7 @@ void TileMap::OnRender(GameContext* ctx) {
     render_items.reserve(size);
 
     for (size_t i = 0; i < size; ++i) {
-      if (layer.tiles.tile_id[i] == 0) continue;
+      if (layer.tiles.tile_id[i] < 0) continue;
       render_items.emplace_back(RenderInstanceItem{
         .transform = {
           .position = {
@@ -107,7 +132,7 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
     }
 
     std::string csvData = dataElement->GetText();
-    std::vector<unsigned int> tile_ids;
+    std::vector<int> tile_ids;
     std::stringstream ss(csvData);
     std::string item;
 
@@ -119,7 +144,7 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
       if (!item.empty()) {
         try {
           unsigned int tile_id = std::stoul(item);
-          tile_ids.push_back(tile_id);
+          tile_ids.push_back((tile_id - 1));
         }
         catch (const std::exception& e) {
           std::cerr << "Invalid tile id: " + item << std::endl;
@@ -135,12 +160,12 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
     }
 
     for (unsigned int i = 0; i < tile_ids.size(); ++i) {
-      if (tile_ids[i] == 0) {
+      if (tile_ids[i] < 0) {
         layer.tiles.x.push_back(-1);
         layer.tiles.y.push_back(-1);
         layer.tiles.u.push_back(-1);
         layer.tiles.v.push_back(-1);
-        layer.tiles.tile_id.push_back(0);
+        layer.tiles.tile_id.push_back(-1);
         continue;
       }
 
@@ -160,9 +185,10 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
         tile_animation_data.has_value()) {
         TileAnimationData data = tile_animation_data.value();
 
-        layer.tile_animation_states_[layer.tiles.tile_id.size() - 1] = {
+        layer.tile_animation_states_[i] = {
           .is_loop = data.is_loop,
           .play_on_start = data.play_on_start,
+          .is_playing = data.play_on_start,
           .frames = data.frames,
           .frame_durations = data.frame_durations
         };

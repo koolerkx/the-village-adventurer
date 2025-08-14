@@ -13,7 +13,7 @@ struct MapTile {
   std::vector<unsigned int> y{}; // 0 ~ (map_width - 1) * tile_height
   std::vector<unsigned int> u{}; // 0 ~ map_width * tile_width
   std::vector<unsigned int> v{}; // 0 ~ map_width * tile_width
-  std::vector<unsigned int> tile_id{};
+  std::vector<int> tile_id{};
 };
 
 struct MapLayer {

@@ -19,8 +19,8 @@ public:
 
   inline TileUV GetUvById(unsigned int tileId) const {
     return TileUV{
-      .u = static_cast<unsigned short>(((tileId - 1) % columns_count_) * tile_width_),
-      .v = static_cast<unsigned short>(((tileId - 1) / columns_count_) * tile_height_),
+      .u = static_cast<unsigned short>(((tileId) % columns_count_) * tile_width_),
+      .v = static_cast<unsigned short>(((tileId) / columns_count_) * tile_height_),
       .w = tile_width_,
       .h = tile_height_
     };

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="left-up" width="32" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="6">
  <tileset firstgid="1" source="../map_assets.tsx"/>
- <layer id="1" name="Ground" width="32" height="32" locked="1">
+ <layer id="1" name="Ground" width="32" height="32">
   <data encoding="csv">
 1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,2031,2033,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,
 1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,2031,2033,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,1569,
@@ -73,7 +73,7 @@
 4425,4537,4538,4426,4425,4426,4425,4426,4425,4426,4425,4426,4425,4426,0,0,0,0,4425,4426,4425,4426,4425,4426,4425,4426,4425,4426,4425,4537,4538,4426
 </data>
  </layer>
- <layer id="3" name="Object" width="32" height="32">
+ <layer id="3" name="Object" width="32" height="32" locked="1">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -109,7 +109,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="5" name="Marker" locked="1">
+ <objectgroup id="5" name="Marker" visible="0" locked="1">
   <object id="1" name="active_area" type="trigger_area" x="64" y="64" width="384" height="384"/>
   <object id="2" template="../editor_templete/enemy.tx" name="enemy1" type="enemy" x="184.5" y="185.25"/>
   <object id="3" template="../editor_templete/enemy.tx" name="enemy2" type="enemy" x="326.75" y="182.5"/>
