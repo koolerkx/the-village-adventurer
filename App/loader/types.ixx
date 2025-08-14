@@ -18,7 +18,7 @@ export struct ShaderFiles {
 };
 
 export struct GraphicConfig {
-  bool horizontal_sync{true};
+  bool vsync{true};
   int window_size_width{1280};
   int window_size_height{720};
   ShaderFiles shader_files{};
@@ -27,6 +27,8 @@ export struct GraphicConfig {
 
 export struct MapConfig {
   std::string default_map;
+  std::string map_metadata;
+  std::string map_texture;
   std::vector<std::string> files;
   std::vector<std::string> animate_files;
 };

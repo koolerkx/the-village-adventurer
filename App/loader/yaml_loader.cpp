@@ -23,8 +23,8 @@ void YAMLConfigLoader::loadConfig(const std::string& config_path) {
     YAML::Node config = YAML::LoadFile(config_path);
 
     if (auto graphic_node = config["config"]["graphic"]) {
-      config_.graphic.horizontal_sync =
-        graphic_node["horizontal_sync"].as<bool>(config_.graphic.horizontal_sync);
+      config_.graphic.vsync =
+        graphic_node["vsync"].as<bool>(config_.graphic.vsync);
       config_.graphic.window_size_width =
         graphic_node["window_size_width"].as<int>(config_.graphic.window_size_width);
       config_.graphic.window_size_height =
@@ -46,6 +46,10 @@ void YAMLConfigLoader::loadConfig(const std::string& config_path) {
     if (auto map_node = config["config"]["map"]) {
       config_.map.default_map =
         map_node["default_map"].as<std::string>(config_.map.default_map);
+      config_.map.map_texture =
+        map_node["map_texture"].as<std::string>(config_.map.map_texture);
+      config_.map.map_metadata =
+        map_node["map_metadata"].as<std::string>(config_.map.map_metadata);
 
       if (auto files_node = map_node["map"]["files"]) {
         config_.map.files = files_node.as<std::vector<std::string>>();

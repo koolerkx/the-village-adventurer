@@ -119,7 +119,7 @@ bool Application::Init() {
   CreateGameWindow(hwnd_, window_class_, config.graphic);
 
   direct3d_.reset(new Dx11Wrapper(hwnd_, {
-                                    .horizontal_sync{config.graphic.horizontal_sync},
+                                    .vsync{config.graphic.vsync},
                                     .window_size_width{config.graphic.window_size_width},
                                     .window_size_height{config.graphic.window_size_height},
                                     .vertex_shader = config.graphic.shader_files.vertex_shader,
@@ -130,12 +130,16 @@ bool Application::Init() {
   std::unique_ptr<GameContext> initial_context = std::make_unique<GameContext>();
   initial_context->render_resource_manager = direct3d_->GetResourceManager();
 
-  scene_manager_.reset(
-    new SceneManager(std::move(
+  SceneManager::Init(std::move(
                        std::make_unique<TitleScene>()
                      ),
-                     std::move(initial_context)
-    )
+                     std::move(initial_context),
+                     std::make_unique<GameConfig>(GameConfig{
+                         .default_map = config.map.default_map,
+                         .map_texture_filepath = config.map.map_texture,
+                         .map_tile_filepath = config.map.map_metadata
+                       }
+                     )
   );
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -184,14 +188,14 @@ Application::Application() {}
 Application::~Application() {}
 
 void Application::OnUpdate(float delta_time) {
-  scene_manager_->OnUpdate(delta_time);
+  SceneManager::GetInstance().OnUpdate(delta_time);
 
 #if defined(DEBUG) || defined(_DEBUG)
   debug_manager_->OnUpdate(delta_time);
 #endif
 
   direct3d_->BeginDraw();
-  scene_manager_->OnRender();
+  SceneManager::GetInstance().OnRender();
   // direct3d_->Dispatch(on_update_function);
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -202,6 +206,7 @@ void Application::OnUpdate(float delta_time) {
 
 void Application::OnFixedUpdate(float delta_time) {
 #if defined(DEBUG) || defined(_DEBUG)
+  SceneManager::GetInstance().OnFixedUpdate(delta_time);
   debug_manager_->OnFixedUpdate(delta_time);
 #endif
 }

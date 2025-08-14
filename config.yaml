@@ -1,15 +1,18 @@
 config:
   graphic:
-    horizontal_sync: true
+    vsync: false
     window_size_width: 1280
     window_size_height: 720
     handle_dps: false
+    targeted_fps: 144
     shader_files:
       vertex_shader: "assets/shaders/shader_vertex_2d.cso"
       instanced_vertex_shader: "assets/shaders/instanced_shader_vertex_2d.cso"
       pixel_shader: "assets/shaders/shader_pixel_2d.cso"
   map:
     default_map: "forest1"
+    map_texture: "map/map_assets.png"
+    map_metadata: "map/map_assets.tsx"
     map:
       files:
         - "map/forest1.tmx"
