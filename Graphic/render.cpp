@@ -125,7 +125,7 @@ DirectX::XMMATRIX Renderer::MakeTransformMatrix(const Transform& transform) {
     XMVectorSet(transform.rotation_pivot.x, transform.rotation_pivot.y, 0, 0),                     // 回転ピボットポイント
     transform.rotation_radian,                                                                     // 回転角度
     XMVectorSet(transform.position.x + transform.size.x * transform.scale.x / 2,
-                transform.position.y + transform.scale.y / 2, 0,
+                transform.position.y + transform.size.y * transform.scale.y / 2, 0,
                 0) // 平行移動
   );
 }
