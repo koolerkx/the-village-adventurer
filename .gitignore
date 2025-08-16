@@ -13,6 +13,9 @@
 *.cso
 map/roguelike-topdown-game.tiled-session
 
+# ide specific
+.idea/.idea.roguelike-topdown-game/.idea/discord.xml
+
 # assets
 map/assets/BrightForest-A1.png
 map/assets/BrightForest-A2.png
