@@ -33,7 +33,7 @@ encrypt-all: $(GPG_FILES_FILE) $(GPG_EMAILS_FILE)
 	@for file in $(PLAINTEXT_FILES); do \
 		if [ -f "$$file" ]; then \
 			echo "Encrypting $$file -> $$file.gpg"; \
-			gpg --encrypt $(GPG_OPTS) $(GPG_RECIPIENTS) -o "$$file.gpg" "$$file"; \
+			gpg --yes --encrypt $(GPG_OPTS) $(GPG_RECIPIENTS) -o "$$file.gpg" "$$file"; \
 		else \
 			echo "Warning: Source file '$$file' not found. Skipping."; \
 		fi; \

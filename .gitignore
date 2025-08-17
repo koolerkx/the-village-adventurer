@@ -23,6 +23,7 @@ map/assets/BrightForest-B.png
 map/assets/base.png
 map/assets/chest.png
 map/map_assets.png
+assets/character_01.png
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
