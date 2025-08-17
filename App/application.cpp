@@ -41,15 +41,21 @@ LRESULT CALLBACK Application::WindowProcedure(HWND hWnd, UINT message, WPARAM wP
 
 LRESULT Application::HandleWindowMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
-  case WM_KEYDOWN:
-    if (wParam == VK_ESCAPE) {
-      SendMessage(hWnd, WM_CLOSE, 0, 0);
-    }
-    break;
   case WM_CLOSE:
     if (MessageBox(hWnd, "本当に終了してよろしいですか？", "確認", MB_YESNO | MB_DEFBUTTON2) == IDYES) {
       DestroyWindow(hWnd);
     }
+    break;
+  case WM_ACTIVATEAPP:
+  case WM_KEYDOWN:
+    // https://learn.microsoft.com/ja-jp/windows/win32/inputdev/virtual-key-codes
+    if (wParam == VK_ESCAPE) {
+      SendMessage(hWnd, WM_CLOSE, 0, 0);
+    }
+  case WM_SYSKEYDOWN:
+  case WM_KEYUP:
+  case WM_SYSKEYUP:
+    input_handler_->ProcessMessage(message, wParam, lParam);
     break;
   case WM_DESTROY:
     PostQuitMessage(0);
@@ -164,6 +170,7 @@ bool Application::Init() {
 #endif
 
   timer_updater_.reset(new TimerUpdater(60.0f));
+  input_handler_.reset(new InputHandler());
 
   return true;
 }
@@ -202,6 +209,7 @@ Application::Application() {}
 Application::~Application() {}
 
 void Application::OnUpdate(float delta_time) {
+  input_handler_->OnUpdate();
   SceneManager::GetInstance().OnUpdate(delta_time);
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -219,8 +227,9 @@ void Application::OnUpdate(float delta_time) {
 }
 
 void Application::OnFixedUpdate(float delta_time) {
-#if defined(DEBUG) || defined(_DEBUG)
   SceneManager::GetInstance().OnFixedUpdate(delta_time);
+  
+#if defined(DEBUG) || defined(_DEBUG)
   debug_manager_->OnFixedUpdate(delta_time);
 #endif
 }

@@ -5,7 +5,7 @@ module;
 export module application;
 
 import std;
-import app.input;
+import game.input;
 import app.timer;
 import app.loader.types;
 import graphic.direct3D;
