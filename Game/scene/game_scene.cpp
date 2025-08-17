@@ -42,7 +42,8 @@ void GameScene::OnEnter(GameContext* ctx) {
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
-  std::cout << "GameScene> OnUpdate: " << delta_time << std::endl;
+  // std::cout << "GameScene> OnUpdate: " << delta_time << std::endl;
+  player_->HandleMovement(ctx->input_handler, delta_time);
 
   map_->OnUpdate(ctx, delta_time);
   scene_object::UpdateAnimation(player_->animation_state, delta_time, player_->uv);

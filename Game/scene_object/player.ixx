@@ -3,11 +3,13 @@ module;
 export module game.scene_object.player;
 
 import std;
+import game.input;
 import graphic.utils.fixed_pool;
 import graphic.utils.types;
 import graphic.utils.color;
 import game.types;
 import game.scene_object;
+
 
 export struct Player {
   FixedPoolIndexType texture_id = 0;
@@ -37,4 +39,16 @@ export struct Player {
 
   COLOR color = color::white;
   CollisionData collision{};
+
+  void HandleMovement(InputHandler* inputHandler, float delta_time) {
+    if (inputHandler->IsKeyDown(KeyCode::KK_W)) {
+      std::cout << "IsKeyDown W" << std::endl;
+    }
+    if (inputHandler->GetKey(KeyCode::KK_A)) {
+      std::cout << "GetKey A" << std::endl;
+    }
+    if (inputHandler->IsKeyUp(KeyCode::KK_D)) {
+      std::cout << "IsKeyUp D" << std::endl;
+    }
+  }
 };
