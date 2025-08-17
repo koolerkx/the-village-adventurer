@@ -116,23 +116,40 @@ void Renderer::CreateInstanceBuffer(const size_t max_instance_num) {
   device_->CreateBuffer(&instDesc, nullptr, instance_vertex_buffer_.GetAddressOf());
 }
 
-DirectX::XMMATRIX Renderer::MakeProjectMatrix(SIZE window_size, CameraProps camera_props) {
-  if (camera_props.algin_pivot == AlginPivot::CENTER_CENTER) {
-    const float half_width = window_size.cx / (2.0f * camera_props.zoom);
-    const float half_height = window_size.cy / (2.0f * camera_props.zoom);
+DirectX::XMMATRIX Renderer::MakeProjectMatrix(SIZE window_size, CameraProps camera_props,
+                                              bool is_half_pixel_offset_correction) {
+  const float zoom = camera_props.zoom;
+  const float width = static_cast<float>(window_size.cx);
+  const float height = static_cast<float>(window_size.cy);
 
-    return DirectX::XMMatrixOrthographicOffCenterLH(
-      camera_props.position.x - half_width,
-      camera_props.position.x + half_width,
-      camera_props.position.y + half_height,
-      camera_props.position.y - half_height,
+  // half pixel offset correction
+  const float half_pixel_x = is_half_pixel_offset_correction ? 0.5f * (2.0f / width) : 0;
+  const float half_pixel_y = is_half_pixel_offset_correction ? 0.5f * (2.0f / height) : 0;
+
+  if (camera_props.algin_pivot == AlginPivot::CENTER_CENTER) {
+    const float half_width = width / (2.0f * zoom);
+    const float half_height = height / (2.0f * zoom);
+
+    return
+      DirectX::XMMatrixTranslation(-half_pixel_x, +half_pixel_y, 0.0f) *
+      DirectX::XMMatrixOrthographicOffCenterLH(
+        camera_props.position.x - half_width,
+        camera_props.position.x + half_width,
+        camera_props.position.y + half_height,
+        camera_props.position.y - half_height,
+        0.0f, 1.0f
+      );
+  }
+
+  return
+    DirectX::XMMatrixTranslation(-half_pixel_x, +half_pixel_y, 0.0f) *
+    DirectX::XMMatrixOrthographicOffCenterLH(
+      camera_props.position.x,
+      camera_props.position.x + width / zoom,
+      camera_props.position.y + height / zoom,
+      camera_props.position.y,
       0.0f, 1.0f
     );
-  }
-  return DirectX::XMMatrixOrthographicOffCenterLH(camera_props.position.x,
-                                                  camera_props.position.x + window_size.cx / camera_props.zoom,
-                                                  camera_props.position.y + window_size.cy / camera_props.zoom,
-                                                  camera_props.position.y, 0.0f, 1.0f);
 }
 
 DirectX::XMMATRIX Renderer::MakeTransformMatrix(const Transform& transform) {
@@ -509,8 +526,9 @@ void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transfor
   DrawSpritesInstanced(items_span, font->GetTextureId());
 }
 
-void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_items, FixedPoolIndexType texture_id,
-                                    CameraProps camera_props) {
+void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_items,
+                                    FixedPoolIndexType texture_id,
+                                    CameraProps camera_props, bool is_half_pixel_offset_correction) {
   if (render_items.empty()) return;
   if (render_items.size() > instance_buffer_can_store_) {
     CreateInstanceBuffer(instance_buffer_can_store_ * 2);
@@ -520,7 +538,7 @@ void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_i
 
   shader_manager_->Begin(VertexShaderType::Instance);
 
-  shader_manager_->SetProjectionMatrix(MakeProjectMatrix(window_size_, camera_props));
+  shader_manager_->SetProjectionMatrix(MakeProjectMatrix(window_size_, camera_props, is_half_pixel_offset_correction));
   shader_manager_->SetWorldMatrix(DirectX::XMMatrixIdentity()); // FIXME
 
   D3D11_MAPPED_SUBRESOURCE msr{};
@@ -545,12 +563,22 @@ void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_i
       const auto& [uv_w, uv_h] = it.uv.size;
       const auto& [size_x, size_y] = texture_manager_->GetSizeById(texture_id);
 
-      const float u0 = uv_x / static_cast<float>(size_x);
-      const float v0 = uv_y / static_cast<float>(size_y);
-      const float u1 = (uv_x + uv_w) / static_cast<float>(size_x);
-      const float v1 = (uv_y + uv_h) / static_cast<float>(size_y);
+      if (is_half_pixel_offset_correction) {
+        const float u0 = (uv_x + 0.5f) / static_cast<float>(size_x);
+        const float v0 = (uv_y + 0.5f) / static_cast<float>(size_y);
+        const float u1 = (uv_x + uv_w - 0.5f) / static_cast<float>(size_x);
+        const float v1 = (uv_y + uv_h - 0.5f) / static_cast<float>(size_y);
 
-      instances[i].uv = {u0, v0, u1, v1};
+        instances[i].uv = {u0, v0, u1, v1};
+      }
+      else {
+        const float u0 = uv_x / static_cast<float>(size_x);
+        const float v0 = uv_y / static_cast<float>(size_y);
+        const float u1 = (uv_x + uv_w) / static_cast<float>(size_x);
+        const float v1 = (uv_y + uv_h) / static_cast<float>(size_y);
+
+        instances[i].uv = {u0, v0, u1, v1};
+      }
     }
     {
       auto& [rotation_x, rotation_y, _] = it.transform.rotation_pivot;

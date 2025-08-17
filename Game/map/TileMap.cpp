@@ -71,7 +71,9 @@ void TileMap::OnRender(GameContext* ctx, Camera* camera) {
 
     ctx->render_resource_manager->renderer->DrawSpritesInstanced(
       std::span<RenderInstanceItem>(render_items.data(), render_items.size()),
-      texture_id_, camera->GetCameraProps());
+      texture_id_,
+      camera->GetCameraProps(),
+      true);
     render_items.clear();
   }
 }

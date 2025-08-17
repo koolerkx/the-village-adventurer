@@ -57,7 +57,8 @@ private:
 
   SIZE window_size_;
 
-  static DirectX::XMMATRIX MakeProjectMatrix(SIZE window_size, CameraProps camera_props = {});
+  static DirectX::XMMATRIX MakeProjectMatrix(SIZE window_size, CameraProps camera_props = {},
+                                             bool is_half_pixel_offset_correction = false);
   static DirectX::XMMATRIX MakeTransformMatrix(const Transform& transform);
 
   DirectX::XMMATRIX mat_ortho_;
@@ -91,6 +92,8 @@ public:
   void DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props);
 
   // Instanced Indexed Draw
-  void DrawSpritesInstanced(std::span<RenderInstanceItem> render_items, FixedPoolIndexType texture_id,
-                            CameraProps camera_props = {});
+  void DrawSpritesInstanced(std::span<RenderInstanceItem> render_items,
+                            FixedPoolIndexType texture_id,
+                            CameraProps camera_props = {},
+                            bool is_half_pixel_offset_correction = false);
 };
