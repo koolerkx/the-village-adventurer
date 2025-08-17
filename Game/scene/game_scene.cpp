@@ -33,32 +33,25 @@ void GameScene::OnEnter(GameContext* ctx) {
   t.position_anchor.y = 0.0f;
   map_->SetTransform(t);
 
-  // Player Initialize
-  player_ = std::make_unique<Player>();
-  scene_object::LoadTexture(
-    player_->texture_id,
-    player_->texture_path,
-    ctx->render_resource_manager->texture_manager.get());
+  player_ = std::make_unique<Player>(ctx);
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   // std::cout << "GameScene> OnUpdate: " << delta_time << std::endl;
-  player_->HandleMovement(ctx->input_handler, delta_time);
 
   map_->OnUpdate(ctx, delta_time);
-  scene_object::UpdateAnimation(player_->animation_state, delta_time, player_->uv);
+  player_->OnUpdate(ctx, delta_time);
+}
+
+void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
+  player_->OnFixedUpdate(ctx, delta_time);
 }
 
 void GameScene::OnRender(GameContext* ctx) {
   // std::cout << "GameScene> OnRender" << std::endl;
 
   map_->OnRender(ctx);
-  scene_object::Render(RenderItem{
-                         .texture_id = player_->texture_id,
-                         .transform = player_->transform,
-                         .uv = player_->uv,
-                         .color = player_->color
-                       }, ctx->render_resource_manager->renderer.get());
+  player_->OnRender(ctx);
 }
 
 void GameScene::OnExit(GameContext*) {

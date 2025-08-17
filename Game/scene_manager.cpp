@@ -55,7 +55,9 @@ void SceneManager::OnUpdate(float delta_time) {
   ProcessPendingSceneChange();
 }
 
-void SceneManager::OnFixedUpdate(float delta_time) const {}
+void SceneManager::OnFixedUpdate(float delta_time) const {
+  current_scene_->OnFixedUpdate(game_context_.get(), delta_time);
+}
 
 void SceneManager::OnRender() const {
   current_scene_->OnRender(game_context_.get());

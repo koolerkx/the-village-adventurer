@@ -19,6 +19,8 @@ void TitleScene::OnUpdate(GameContext*, float delta_time) {
   // std::cout << "TitleScene> OnUpdate" << std::endl;
 }
 
+void TitleScene::OnFixedUpdate(GameContext* ctx, float delta_time) {}
+
 void TitleScene::OnRender(GameContext* ctx) {
   Transform transform1 = {
     .position = POSITION(100.0f, 100.0f, 0.0f),

@@ -3,21 +3,19 @@ module;
 export module game.scene_object.player;
 
 import std;
-import game.input;
 import graphic.utils.fixed_pool;
 import graphic.utils.types;
 import graphic.utils.color;
+import game.input;
+import game.scene_manager;
 import game.types;
 import game.scene_object;
 
+export class Player {
+private:
+  FixedPoolIndexType texture_id_ = 0;
 
-export struct Player {
-  FixedPoolIndexType texture_id = 0;
-
-  // Texture data
-  static constexpr std::wstring_view texture_path = L"assets/character_01.png"; // TODO: extract
-
-  scene_object::AnimationState animation_state{
+  scene_object::AnimationState animation_state_{
     .is_loop = true,
     .play_on_start = true,
     .is_playing = true,
@@ -27,28 +25,30 @@ export struct Player {
     .current_frame_time = 0
   };
 
-  Transform transform = Transform{
+  Transform transform_ = Transform{
     {0, 0, 0},
     {128, 128},
     {1, 1}
   };
-  UV uv{
+  UV uv_{
     {0, 0},
     {32, 32}
   };
 
-  COLOR color = color::white;
-  CollisionData collision{};
+  COLOR color_ = color::white;
+  CollisionData collision_{};
 
-  void HandleMovement(InputHandler* inputHandler, float delta_time) {
-    if (inputHandler->IsKeyDown(KeyCode::KK_W)) {
-      std::cout << "IsKeyDown W" << std::endl;
-    }
-    if (inputHandler->GetKey(KeyCode::KK_A)) {
-      std::cout << "GetKey A" << std::endl;
-    }
-    if (inputHandler->IsKeyUp(KeyCode::KK_D)) {
-      std::cout << "IsKeyUp D" << std::endl;
-    }
-  }
+  Vector2 direction_;
+  Vector2 velocity_;
+
+  float move_speed_ = 100.0f; // px per second
+
+  void UpdateAnimation(float delta_time);
+
+public:
+  Player(GameContext* ctx);
+
+  void OnUpdate(GameContext* ctx, float delta_time);
+  void OnFixedUpdate(GameContext* ctx, float delta_time);
+  void OnRender(GameContext* ctx);
 };
