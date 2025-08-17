@@ -19,6 +19,12 @@ export namespace scene_object {
   using AnimationState = TileAnimationState;
   using AnimationData = TileAnimationData;
 
+  // static data used to hardcode the animation data
+  struct AnimationFrameData {
+    std::vector<TileUV> frames;
+    std::vector<float> frame_durations;
+  };
+
   template <unsigned int FramesPerLine, unsigned short FrameWidth, unsigned short FrameHeight, std::size_t... I>
   constexpr std::array<TileUV, sizeof...(I)> MakeFramesArray(std::index_sequence<I...>) {
     return {
