@@ -23,16 +23,30 @@ static constexpr char TITLE[] = "Game";              // 	タイトルバーの�
 // constexpr unsigned int WINDOW_WIDTH = 1280;
 // constexpr unsigned int WINDOW_HEIGHT = 720;
 
-LRESULT CALLBACK WindowProcedure(const HWND hWnd, const UINT message, const WPARAM wParam, const LPARAM lParam) {
+LRESULT CALLBACK Application::WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+  if (message == WM_NCCREATE) {
+    CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+    Application* pApp = reinterpret_cast<Application*>(pCreate->lpCreateParams);
+    SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pApp));
+    return DefWindowProc(hWnd, message, wParam, lParam);
+  }
+
+  Application* pApp = reinterpret_cast<Application*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+  if (pApp) {
+    return pApp->HandleWindowMessage(hWnd, message, wParam, lParam);
+  }
+
+  return DefWindowProc(hWnd, message, wParam, lParam);
+}
+
+LRESULT Application::HandleWindowMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
   case WM_KEYDOWN:
-    // https://learn.microsoft.com/ja-jp/windows/win32/inputdev/virtual-key-codes
     if (wParam == VK_ESCAPE) {
       SendMessage(hWnd, WM_CLOSE, 0, 0);
     }
     break;
   case WM_CLOSE:
-    // TODO: Load from config file
     if (MessageBox(hWnd, "本当に終了してよろしいですか？", "確認", MB_YESNO | MB_DEFBUTTON2) == IDYES) {
       DestroyWindow(hWnd);
     }
@@ -97,7 +111,7 @@ void Application::CreateGameWindow(HWND& hwnd, WNDCLASSEX& windowClass, const Gr
     nullptr,
     nullptr,
     hinst,
-    nullptr
+    this
   );
 }
 

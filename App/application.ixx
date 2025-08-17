@@ -5,6 +5,7 @@ module;
 export module application;
 
 import std;
+import app.input;
 import app.timer;
 import app.loader.types;
 import graphic.direct3D;
@@ -24,7 +25,9 @@ private:
 
   // ゲーム用ウィンドウの生成
   void CreateGameWindow(HWND& hwnd, WNDCLASSEX& windowClass, const GraphicConfig& graphic_config);
-
+  static LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+  LRESULT HandleWindowMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+  
   // シングルトン、コピー・代入禁止
   Application();
   Application(const Application&) = delete;
@@ -36,14 +39,16 @@ private:
 
   std::unique_ptr<TimerUpdater> timer_updater_ = nullptr;
 
+  std::unique_ptr<InputHandler> input_handler_ = nullptr;
+
   void OnUpdate(float delta_time);
   void OnFixedUpdate(float delta_time);
 
 public:
   static Application& Instance();
 
-  bool Init();      /// 初期化
-  void Run(); /// ループ起動
+  bool Init(); /// 初期化
+  void Run();  /// ループ起動
 
   /// 後処理
   void Terminate() const;
