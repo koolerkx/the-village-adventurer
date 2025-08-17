@@ -204,7 +204,7 @@ void Renderer::DrawSprite(const FixedPoolIndexType texture_id,
   float u0 = uv.position.x / static_cast<float>(size.width);
   float v0 = uv.position.y / static_cast<float>(size.height);
   float u1 = (uv.position.x + uv.size.x) / static_cast<float>(size.width);
-  float v1 = (uv.position.x + uv.size.y) / static_cast<float>(size.height);
+  float v1 = (uv.position.y + uv.size.y) / static_cast<float>(size.height);
 
   v[0].uv = {u0, v0};
   v[1].uv = {u1, v0};
