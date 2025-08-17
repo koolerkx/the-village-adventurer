@@ -67,3 +67,15 @@ export struct StringSpriteProps {
   float line_spacing = 0;
   COLOR color = color::white;
 };
+
+export enum class AlginPivot: unsigned char {
+  LEFT_TOP,
+  CENTER_CENTER,
+  // RIGHT_BOTTOM ...
+};
+
+export struct CameraProps {
+  POSITION position = {0.0f, 0.0f, 0.0f};
+  float zoom = 1.0f;
+  AlginPivot algin_pivot = AlginPivot::LEFT_TOP;
+};

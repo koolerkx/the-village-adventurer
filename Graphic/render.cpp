@@ -58,7 +58,7 @@ Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
 void Renderer::CreateRectBuffer(const size_t max_rect_num) {
   if (max_rect_num < rects_buffer_can_store_) return;
   rects_buffer_can_store_ = max_rect_num;
-  
+
   // Vertex Buffer
   D3D11_BUFFER_DESC rect_buff_desc = {};
   rect_buff_desc.Usage = D3D11_USAGE_DYNAMIC;
@@ -116,6 +116,25 @@ void Renderer::CreateInstanceBuffer(const size_t max_instance_num) {
   device_->CreateBuffer(&instDesc, nullptr, instance_vertex_buffer_.GetAddressOf());
 }
 
+DirectX::XMMATRIX Renderer::MakeProjectMatrix(SIZE window_size, CameraProps camera_props) {
+  if (camera_props.algin_pivot == AlginPivot::CENTER_CENTER) {
+    const float half_width = window_size.cx / (2.0f * camera_props.zoom);
+    const float half_height = window_size.cy / (2.0f * camera_props.zoom);
+
+    return DirectX::XMMatrixOrthographicOffCenterLH(
+      camera_props.position.x - half_width,
+      camera_props.position.x + half_width,
+      camera_props.position.y + half_height,
+      camera_props.position.y - half_height,
+      0.0f, 1.0f
+    );
+  }
+  return DirectX::XMMatrixOrthographicOffCenterLH(camera_props.position.x,
+                                                  camera_props.position.x + window_size.cx / camera_props.zoom,
+                                                  camera_props.position.y + window_size.cy / camera_props.zoom,
+                                                  camera_props.position.y, 0.0f, 1.0f);
+}
+
 DirectX::XMMATRIX Renderer::MakeTransformMatrix(const Transform& transform) {
   using namespace DirectX;
   return XMMatrixTransformation2D(
@@ -124,8 +143,8 @@ DirectX::XMMATRIX Renderer::MakeTransformMatrix(const Transform& transform) {
     XMVectorSet(transform.size.x * transform.scale.x, transform.size.y * transform.scale.y, 0, 0), // 拡大縮小
     XMVectorSet(transform.rotation_pivot.x, transform.rotation_pivot.y, 0, 0),                     // 回転ピボットポイント
     transform.rotation_radian,                                                                     // 回転角度
-    XMVectorSet(transform.position.x + transform.size.x * transform.scale.x / 2,
-                transform.position.y + transform.size.y * transform.scale.y / 2, 0,
+    XMVectorSet(transform.position_anchor.x + transform.position.x + transform.size.x * transform.scale.x / 2,
+                transform.position_anchor.y + transform.position.y + transform.size.y * transform.scale.y / 2, 0,
                 0) // 平行移動
   );
 }
@@ -161,7 +180,7 @@ void Renderer::Draw(const Transform& transform, const COLOR& color) {
   device_context_->IASetVertexBuffers(0, 1, vertex_buffer_.GetAddressOf(), &stride, &offset);
 
   // 頂点シェーダーに変換行列を設定
-  shader_manager_->SetProjectionMatrix(mat_ortho_);
+  shader_manager_->SetProjectionMatrix(MakeProjectMatrix(window_size_));
 
   DirectX::XMMATRIX mat = MakeTransformMatrix(transform);
 
@@ -220,9 +239,66 @@ void Renderer::DrawSprite(const FixedPoolIndexType texture_id,
   device_context_->IASetVertexBuffers(0, 1, vertex_buffer_.GetAddressOf(), &stride, &offset);
 
   // 頂点シェーダーに変換行列を設定
-  shader_manager_->SetProjectionMatrix(mat_ortho_);
+  shader_manager_->SetProjectionMatrix(MakeProjectMatrix(window_size_));
 
   DirectX::XMMATRIX mat = MakeTransformMatrix(transform);
+
+  shader_manager_->SetWorldMatrix(mat);
+
+  // プリミティブトポロジ設定
+  device_context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+  // ポリゴン描画命令発行
+  device_context_->Draw(vertex_num_, 0);
+}
+
+void Renderer::DrawSprite(RenderItem render_item, CameraProps camera_props) {
+  texture_manager_->SetShaderById(render_item.texture_id);
+  shader_manager_->Begin();
+
+  // 頂点バッファをロックする
+  D3D11_MAPPED_SUBRESOURCE msr;
+  device_context_->Map(vertex_buffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+
+  // 頂点バッファへの仮想ポインタを取得
+  Vertex* v = static_cast<Vertex*>(msr.pData);
+
+  // 画面の左上から右下に向かう線分を描画する
+  v[0].position = {-0.5f, -0.5f, 0.0f}; // LT
+  v[1].position = {+0.5f, -0.5f, 0.0f}; // RT
+  v[2].position = {-0.5f, +0.5f, 0.0f}; // LB
+  v[3].position = {+0.5f, +0.5f, 0.0f}; // RB
+
+  v[0].color = render_item.color;
+  v[1].color = render_item.color;
+  v[2].color = render_item.color;
+  v[3].color = render_item.color;
+
+  // UVマップ
+  TextureSize size = texture_manager_->GetSizeById(render_item.texture_id);
+
+  float u0 = render_item.uv.position.x / static_cast<float>(size.width);
+  float v0 = render_item.uv.position.y / static_cast<float>(size.height);
+  float u1 = (render_item.uv.position.x + render_item.uv.size.x) / static_cast<float>(size.width);
+  float v1 = (render_item.uv.position.y + render_item.uv.size.y) / static_cast<float>(size.height);
+
+  v[0].uv = {u0, v0};
+  v[1].uv = {u1, v0};
+  v[2].uv = {u0, v1};
+  v[3].uv = {u1, v1};
+
+  // 頂点バッファのロックを解除
+  device_context_->Unmap(vertex_buffer_.Get(), 0);
+
+  // 頂点バッファを描画パイプラインに設定
+  UINT stride = sizeof(Vertex);
+  UINT offset = 0;
+  device_context_->IASetVertexBuffers(0, 1, vertex_buffer_.GetAddressOf(), &stride, &offset);
+
+  // 頂点シェーダーに変換行列を設定
+  shader_manager_->SetProjectionMatrix(MakeProjectMatrix(window_size_, camera_props));
+
+  DirectX::XMMATRIX mat = MakeTransformMatrix(render_item.transform);
 
   shader_manager_->SetWorldMatrix(mat);
 
@@ -267,7 +343,7 @@ void Renderer::DrawLine(const POSITION& start, const POSITION& end, const COLOR&
   device_context_->IASetVertexBuffers(0, 1, vertex_buffer_.GetAddressOf(), &stride, &offset);
 
   // 頂点シェーダーに変換行列を設定
-  shader_manager_->SetProjectionMatrix(mat_ortho_);
+  shader_manager_->SetProjectionMatrix(MakeProjectMatrix(window_size_));
 
   shader_manager_->SetWorldMatrix(DirectX::XMMatrixIdentity());
 
@@ -288,7 +364,7 @@ void Renderer::DrawLines(const std::span<Line> lines) {
 
   shader_manager_->Begin();
 
-  shader_manager_->SetProjectionMatrix(mat_ortho_);
+  shader_manager_->SetProjectionMatrix(MakeProjectMatrix(window_size_));
   shader_manager_->SetWorldMatrix(DirectX::XMMatrixIdentity());
 
   D3D11_MAPPED_SUBRESOURCE msr{};
@@ -333,7 +409,7 @@ void Renderer::DrawRects(const std::span<Rect> rects) {
 
   shader_manager_->Begin();
 
-  shader_manager_->SetProjectionMatrix(mat_ortho_);
+  shader_manager_->SetProjectionMatrix(MakeProjectMatrix(window_size_));
   shader_manager_->SetWorldMatrix(DirectX::XMMatrixIdentity());
 
   // Vertex Buffer
@@ -433,7 +509,8 @@ void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transfor
   DrawSpritesInstanced(items_span, font->GetTextureId());
 }
 
-void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_items, FixedPoolIndexType texture_id) {
+void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_items, FixedPoolIndexType texture_id,
+                                    CameraProps camera_props) {
   if (render_items.empty()) return;
   if (render_items.size() > instance_buffer_can_store_) {
     CreateInstanceBuffer(instance_buffer_can_store_ * 2);
@@ -443,7 +520,7 @@ void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_i
 
   shader_manager_->Begin(VertexShaderType::Instance);
 
-  shader_manager_->SetProjectionMatrix(mat_ortho_);
+  shader_manager_->SetProjectionMatrix(MakeProjectMatrix(window_size_, camera_props));
   shader_manager_->SetWorldMatrix(DirectX::XMMatrixIdentity()); // FIXME
 
   D3D11_MAPPED_SUBRESOURCE msr{};

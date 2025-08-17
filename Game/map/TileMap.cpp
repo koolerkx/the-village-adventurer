@@ -5,6 +5,7 @@ module;
 module game.map;
 import game.map.tile_repository;
 import graphic.utils.types;
+import game.scene_object.camera;
 
 TileMap::TileMap() {}
 
@@ -37,7 +38,7 @@ void TileMap::OnUpdate(GameContext* ctx, float delta_time) {
   }
 }
 
-void TileMap::OnRender(GameContext* ctx) {
+void TileMap::OnRender(GameContext* ctx, Camera* camera) {
   for (auto& layer : layers_) {
     std::vector<RenderInstanceItem> render_items;
     size_t size = layer.tiles.tile_id.size();
@@ -70,7 +71,7 @@ void TileMap::OnRender(GameContext* ctx) {
 
     ctx->render_resource_manager->renderer->DrawSpritesInstanced(
       std::span<RenderInstanceItem>(render_items.data(), render_items.size()),
-      texture_id_);
+      texture_id_, camera->GetCameraProps());
     render_items.clear();
   }
 }

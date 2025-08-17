@@ -3,6 +3,7 @@ module;
 module game.scene_object.player;
 
 import std;
+import game.scene_object.camera;
 
 // Texture data
 static constexpr std::wstring_view texture_path = L"assets/character_01.png"; // TODO: extract
@@ -48,13 +49,17 @@ void Player::OnFixedUpdate(GameContext* ctx, float delta_time) {
   // TODO: Collision
 }
 
-void Player::OnRender(GameContext* ctx) {
+void Player::OnRender(GameContext* ctx, Camera* camera) {
   auto rr = ctx->render_resource_manager->renderer.get();
 
-  rr->DrawSprite(texture_id_,
-                 transform_,
-                 uv_,
-                 color_);
+  CameraProps props = camera->GetCameraProps();
+  props.algin_pivot = AlginPivot::CENTER_CENTER;
+  rr->DrawSprite(RenderItem{
+                   texture_id_,
+                   transform_,
+                   uv_,
+                   color_
+                 }, props);
 }
 
 void Player::SetState(PlayerState state) {
