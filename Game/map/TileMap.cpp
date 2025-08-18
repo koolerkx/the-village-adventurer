@@ -229,22 +229,22 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
             ColliderShape shape;
             if (collision_data[k].is_circle) {
               shape = CircleCollider{
-                .x = static_cast<float>(collision_data[k].x),
-                .y = static_cast<float>(collision_data[k].y),
+                .x = static_cast<float>(x + collision_data[k].x),
+                .y = static_cast<float>(y + collision_data[k].y),
                 .radius = static_cast<float>(collision_data[k].width) // 通常 width 為 radius
               };
             }
             else {
               shape = RectCollider{
-                .x = static_cast<float>(collision_data[k].x),
-                .y = static_cast<float>(collision_data[k].y),
+                .x = static_cast<float>(x + collision_data[k].x),
+                .y = static_cast<float>(y + collision_data[k].y),
                 .width = static_cast<float>(collision_data[k].width),
                 .height = static_cast<float>(collision_data[k].height)
               };
             }
 
             wall_collider_.Add(Collider<Wall>{
-              .position = {static_cast<float>(x), static_cast<float>(y)},
+              .position = {static_cast<float>(x + collision_data[k].x), static_cast<float>(y + collision_data[k].y)},
               .rotation = 0,
               .owner = nullptr, // placeholder, wall not own logic
               .shape = shape,
