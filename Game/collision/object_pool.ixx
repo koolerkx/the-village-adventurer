@@ -19,4 +19,11 @@ struct ObjectPool {
   void Clear() { size = 0; }
 
   std::span<T> GetAll() { return std::span(objects.begin(), size); }
+
+  template <typename Func>
+  void EditAll(Func&& fn) {
+    for (size_t i = 0; i < size; ++i) {
+      fn(objects[i]);
+    }
+  }
 };

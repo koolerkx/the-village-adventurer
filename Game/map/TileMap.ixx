@@ -42,6 +42,7 @@ private:
 
   FixedPoolIndexType texture_id_{0};
 
+  // Note: Collider not support scaling
   ObjectPool<Collider<Wall>, MAX_WALL_COUNT> wall_collider_;
 
 public:
@@ -50,8 +51,21 @@ public:
 
   void OnUpdate(GameContext* ctx, float delta_time);
   void OnRender(GameContext* ctx, Camera* camera);
+  
+  void SetTransform(const Transform& t) {
+    transform_ = t;
+    wall_collider_.EditAll([&](Collider<Wall>& c) {
+      std::visit([&]<typename Shape>(Shape& shape) {
+        if constexpr (std::is_same_v<Shape, RectCollider> || std::is_same_v<Shape, CircleCollider>) {
+          c.position = {
+            transform_.position.x + shape.x,
+            transform_.position.y + shape.y
+          };
+        }
+      }, c.shape);
+    });
+  }
 
-  void SetTransform(const Transform& t) { transform_ = t; }
   Transform GetTransform() const { return transform_; }
 
   std::span<Collider<Wall>> GetWallColliders() { return wall_collider_.GetAll(); }

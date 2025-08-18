@@ -26,8 +26,8 @@ void GameScene::OnEnter(GameContext* ctx) {
   Transform t = map_->GetTransform();
 
   // TODO: remove debug data
-  t.position.x = 0.0f;
-  t.position.y = 0.0f;
+  t.position.x = -128.0f;
+  t.position.y = -256.0f;
   t.scale.x = 1.0f;
   t.scale.y = 1.0f;
   t.position_anchor.x = 0.0f;

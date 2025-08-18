@@ -87,7 +87,7 @@ void TileMap::OnRender(GameContext* ctx, Camera* camera) {
       rect_view.push_back({
         {collider.position.x, collider.position.y, 0},
         {collider.position.x + shape.width, collider.position.y + shape.height, 0},
-        color::lightGreenA400
+        color::red
       });
     }
   }

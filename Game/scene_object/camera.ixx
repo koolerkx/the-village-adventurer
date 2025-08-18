@@ -33,5 +33,5 @@ public:
     };
   }
 
-  CameraProps GetCameraProps() const { return {{position_.x, position_.y, 0.0f}, zoom_}; }
+  CameraProps GetCameraProps() const { return {{position_.x, position_.y, 0.0f}, zoom_, AlginPivot::CENTER_CENTER}; }
 };

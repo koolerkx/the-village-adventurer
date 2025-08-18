@@ -53,7 +53,7 @@ void Player::OnRender(GameContext* ctx, Camera* camera) {
   auto rr = ctx->render_resource_manager->renderer.get();
 
   CameraProps props = camera->GetCameraProps();
-  props.algin_pivot = AlginPivot::CENTER_CENTER;
+  // props.algin_pivot = AlginPivot::CENTER_CENTER;
   rr->DrawSprite(RenderItem{
                    texture_id_,
                    transform_,
