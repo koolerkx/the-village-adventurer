@@ -4,12 +4,14 @@ module game.scene_object.player;
 
 import std;
 import game.scene_object.camera;
+import game.scene_game.context;
+import game.collision_handler;
 
 // Texture data
 static constexpr std::wstring_view texture_path = L"assets/character_01.png"; // TODO: extract
 static constexpr PlayerState default_state = PlayerState::IDLE_UP;
 
-Player::Player(GameContext* ctx) {
+Player::Player(GameContext* ctx, SceneContext* scene_ctx) {
   const auto tm = ctx->render_resource_manager->texture_manager.get();
 
   texture_id_ = tm->Load(texture_path.data());
@@ -31,7 +33,7 @@ Player::Player(GameContext* ctx) {
   };
 }
 
-void Player::OnUpdate(GameContext* ctx, float delta_time) {
+void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
   // Handle Input
   direction_ = {0, 0};
   if (ctx->input_handler->GetKey(KeyCode::KK_W)) direction_.y -= 1.0f;
@@ -42,7 +44,7 @@ void Player::OnUpdate(GameContext* ctx, float delta_time) {
   UpdateAnimation(delta_time);
 }
 
-void Player::OnFixedUpdate(GameContext* ctx, float delta_time) {
+void Player::OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
   // apply input to velocity
   if (direction_.x == 0 && direction_.y == 0) {
     velocity_ = {0, 0};
@@ -56,17 +58,31 @@ void Player::OnFixedUpdate(GameContext* ctx, float delta_time) {
   }
 
   // movement
-  transform_.position.x += velocity_.x * delta_time;
-  transform_.position.y += velocity_.y * delta_time;
-  collider_.position.x = transform_.position.x + transform_.position_anchor.x;
-  collider_.position.y = transform_.position.y + transform_.position_anchor.y;
+  SetTransform([=](Transform& t) {
+    t.position.x += velocity_.x * delta_time;
+    // t.position.y += velocity_.y * delta_time;
+  });
+  collision::HandleDetection(GetCollider(), scene_ctx->map->GetWallColliders(),
+                             [&](Player* player_, Wall*, collision::CollisionResult result) {
+                               player_->SetTransform([result](Transform& t) {
+                                 t.position.x += result.mtv.x;
+                               });
+                             });
   
+  SetTransform([=](Transform& t) {
+    t.position.y += velocity_.y * delta_time;
+  });
+  collision::HandleDetection(GetCollider(), scene_ctx->map->GetWallColliders(),
+                             [&](Player* player_, Wall*, collision::CollisionResult result) {
+                               player_->SetTransform([result](Transform& t) {
+                                 t.position.y += result.mtv.y;
+                               });
+                             });
   UpdateState();
 }
 
 
-
-void Player::OnRender(GameContext* ctx, Camera* camera) {
+void Player::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera) {
   auto rr = ctx->render_resource_manager->renderer.get();
 
   CameraProps props = camera->GetCameraProps();

@@ -19,6 +19,7 @@
         <ClCompile Include="map\TileMap.ixx" />
         <ClCompile Include="scene\game_scene.cpp" />
         <ClCompile Include="scene\game_scene.ixx" />
+        <ClCompile Include="scene\game_scene_context.ixx" />
         <ClCompile Include="scene\title_scene.cpp" />
         <ClCompile Include="scene\title_scene.ixx" />
         <ClCompile Include="scene.ixx" />

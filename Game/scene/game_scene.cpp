@@ -35,36 +35,23 @@ void GameScene::OnEnter(GameContext* ctx) {
   t.position_anchor.y = 0.0f;
   map_->SetTransform(t);
 
-  player_ = std::make_unique<Player>(ctx);
+  player_ = std::make_unique<Player>(ctx, scene_context.get());
   camera_ = std::make_unique<Camera>();
+
+  // Scene
+  scene_context.reset(new SceneContext());
+  scene_context->map = map_.get();
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   // std::cout << "GameScene> OnUpdate: " << delta_time << std::endl;
 
   map_->OnUpdate(ctx, delta_time);
-  player_->OnUpdate(ctx, delta_time);
+  player_->OnUpdate(ctx, scene_context.get(), delta_time);
 }
 
 void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
-  player_->OnFixedUpdate(ctx, delta_time);
-
-  // Collision
-  collision::HandleDetection(player_->GetCollider(), map_->GetWallColliders(),
-                             [&](Player* player_, Wall*, collision::CollisionResult result) {
-                               player_->SetTransform([result](Transform& t) {
-                                 t.position.y += result.mtv.y;
-                               });
-                             });
-
-  collision::HandleDetection(player_->GetCollider(), map_->GetWallColliders(),
-                             [&](Player* player_, Wall*, collision::CollisionResult result) {
-                               player_->SetTransform([result](Transform& t) {
-                                 t.position.x += result.mtv.x;
-                               });
-                             });
-
-
+  player_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
   camera_->UpdatePosition(player_->GetPositionVector(), delta_time);
 }
 
@@ -72,7 +59,7 @@ void GameScene::OnRender(GameContext* ctx) {
   // std::cout << "GameScene> OnRender" << std::endl;
 
   map_->OnRender(ctx, camera_.get());
-  player_->OnRender(ctx, camera_.get());
+  player_->OnRender(ctx, scene_context.get(), camera_.get());
 }
 
 void GameScene::OnExit(GameContext*) {

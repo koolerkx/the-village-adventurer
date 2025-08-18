@@ -13,6 +13,7 @@ import game.scene_object;
 import game.scene_object.camera;
 import game.collision.collider;
 import game.map;
+import game.scene_game.context;
 
 export enum class PlayerState: unsigned char {
   IDLE_LEFT,
@@ -88,6 +89,8 @@ private:
     .scale = {1, 1},
     .position_anchor = {-8, -8, 0}
   };
+  Transform transform_before_ = transform_;
+  
   UV uv_{
     {0, 0},
     {32, 32}
@@ -116,7 +119,6 @@ private:
   void UpdateAnimation(float delta_time);
 
 public:
-  Player(GameContext* ctx);
 
   void SetState(PlayerState state);
 
@@ -127,6 +129,8 @@ public:
   }
 
   void SetTransform(std::function<void(Transform&)> func) {
+    transform_before_ = transform_;
+    
     collider_.position.x -= (transform_.position.x + transform_.position_anchor.x);
     collider_.position.y -= (transform_.position.y + transform_.position_anchor.y);
 
@@ -136,12 +140,16 @@ public:
     collider_.position.y = transform_.position.y + transform_.position_anchor.y;
   }
 
+  void ResetTransform() {
+    transform_ = transform_before_;
+  }
+
   void SetCollider(std::function<void(Collider<Player>&)> func) {
     func(collider_);
   }
-
-
-  void OnUpdate(GameContext* ctx, float delta_time);
-  void OnFixedUpdate(GameContext* ctx, float delta_time);
-  void OnRender(GameContext* ctx, Camera* camera);
+  
+  Player(GameContext* ctx, SceneContext* scene_ctx);
+  void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
+  void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
+  void OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
 };
