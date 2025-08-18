@@ -82,11 +82,18 @@ public:
 
   void DrawLine(const POSITION& start, const POSITION& end, const COLOR& color);
   // Indexed Draw
-  void DrawLines(const std::span<Line> lines);
-  void DrawRects(const std::span<Rect> rects);
+  void DrawLines(const std::span<Line> lines,
+                 CameraProps camera_props = {},
+                 bool is_half_pixel_offset_correction = false);
+  void DrawRects(const std::span<Rect> rects,
+                 CameraProps camera_props = {},
+                 bool is_half_pixel_offset_correction = false);
 
   // Indexed Draw
   void DrawBox(Rect rect);
+  void DrawBoxes(const std::span<const Rect> boxes,
+                 CameraProps camera_props,
+                 bool is_half_pixel_offset_correction);
 
   // Instanced Indexed Draw
   void DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props);

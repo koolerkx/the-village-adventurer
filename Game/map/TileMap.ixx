@@ -42,7 +42,7 @@ private:
 
   FixedPoolIndexType texture_id_{0};
 
-  ObjectPool<Collider<Wall>, MAX_WALL_COUNT> wall_collider;
+  ObjectPool<Collider<Wall>, MAX_WALL_COUNT> wall_collider_;
 
 public:
   TileMap();
@@ -53,4 +53,6 @@ public:
 
   void SetTransform(const Transform& t) { transform_ = t; }
   Transform GetTransform() const { return transform_; }
+
+  std::span<Collider<Wall>> GetWallColliders() { return wall_collider_.GetAll(); }
 };
