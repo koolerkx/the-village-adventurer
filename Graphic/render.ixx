@@ -90,10 +90,11 @@ public:
                  bool is_half_pixel_offset_correction = false);
 
   // Indexed Draw
-  void DrawBox(Rect rect);
+  void DrawBox(Rect rect, CameraProps camera_props = {},
+               bool is_half_pixel_offset_correction = false);
   void DrawBoxes(const std::span<const Rect> boxes,
-                 CameraProps camera_props,
-                 bool is_half_pixel_offset_correction);
+                 CameraProps camera_props = {},
+                 bool is_half_pixel_offset_correction = false);
 
   // Instanced Indexed Draw
   void DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props);

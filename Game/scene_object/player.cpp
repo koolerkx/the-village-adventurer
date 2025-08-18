@@ -44,6 +44,8 @@ void Player::OnFixedUpdate(GameContext* ctx, float delta_time) {
   // movement
   transform_.position.x += velocity_.x * delta_time;
   transform_.position.y += velocity_.y * delta_time;
+  collider_.position.x = transform_.position.x;
+  collider_.position.y = transform_.position.y;
 
   UpdateState();
   // TODO: Collision
@@ -60,6 +62,25 @@ void Player::OnRender(GameContext* ctx, Camera* camera) {
                    uv_,
                    color_
                  }, props);
+
+  // DEBUG: draw collider
+#if defined(DEBUG) || defined(_DEBUG)
+  RectCollider shape = std::get<RectCollider>(collider_.shape);
+  rr->DrawBox(Rect{
+                {
+                  collider_.position.x + transform_.position_anchor.x + COLLIDER_PADDING,
+                  collider_.position.y + transform_.position_anchor.x + COLLIDER_PADDING, 0
+                },
+                {
+                  collider_.position.x + transform_.position_anchor.x
+                  + transform_.scale.x * shape.width - COLLIDER_PADDING,
+                  collider_.position.y + transform_.position_anchor.x
+                  + transform_.scale.y * shape.height - COLLIDER_PADDING,
+                  0
+                },
+                color::red
+              }, props, true);
+#endif
 }
 
 void Player::SetState(PlayerState state) {

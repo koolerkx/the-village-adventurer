@@ -11,6 +11,7 @@ import game.scene_manager;
 import game.types;
 import game.scene_object;
 import game.scene_object.camera;
+import game.collision.collider;
 
 export enum class PlayerState: unsigned char {
   IDLE_LEFT,
@@ -91,6 +92,15 @@ private:
     {32, 32}
   };
 
+  static constexpr float COLLIDER_PADDING = 1.0f; 
+  Collider<Player> collider_ {
+    .is_trigger = false,
+    .position = {0, 0},
+    .rotation = 0,
+    .owner = this,
+    .shape = RectCollider{0, 0, 16, 16}
+  };
+
   PlayerState state_;
 
   COLOR color_ = color::white;
@@ -98,7 +108,7 @@ private:
 
   Vector2 direction_;
   Vector2 velocity_;
-
+  
   float move_speed_ = 125.0f; // px per second
 
   void UpdateState();

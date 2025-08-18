@@ -495,7 +495,7 @@ void Renderer::DrawRects(const std::span<Rect> rects,
   device_context_->DrawIndexed(static_cast<UINT>(index_count), 0, 0);
 }
 
-void Renderer::DrawBox(Rect rect) {
+void Renderer::DrawBox(Rect rect, CameraProps camera_props, bool is_half_pixel_offset_correction) {
   POSITION left_top = rect.left_top;
   POSITION right_top = {rect.right_bottom.x, rect.left_top.y, 0};
   POSITION left_bottom = {rect.left_top.x, rect.right_bottom.y, 0};
@@ -508,7 +508,7 @@ void Renderer::DrawBox(Rect rect) {
     Line{left_top, left_bottom, rect.color},
   };
 
-  DrawLines(lines);
+  DrawLines(lines, camera_props, is_half_pixel_offset_correction);
 }
 
 void Renderer::DrawBoxes(const std::span<const Rect> boxes,
