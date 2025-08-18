@@ -148,6 +148,10 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
   for (auto* layerElement = mapElement->FirstChildElement("layer"); layerElement; layerElement = layerElement->
        NextSiblingElement("layer")) {
     MapLayer layer;
+    std::string layer_class = layerElement->Attribute("class") ? layerElement->Attribute("class") : "";
+    if (layer_class == "Object") {
+      continue;
+    }
 
     auto* dataElement = layerElement->FirstChildElement("data");
     if (!dataElement || !dataElement->GetText()) {
@@ -218,7 +222,6 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
       }
 
       // handle collision
-      std::string layer_class = layerElement->Attribute("class") ? layerElement->Attribute("class") : "";
 
       if (layer_class == "Wall") {
         auto result = tr->GetTileCollisionData(tile_ids[i]);
