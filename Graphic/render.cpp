@@ -125,7 +125,7 @@ DirectX::XMMATRIX Renderer::MakeTransformMatrix(const Transform& transform) {
     XMVectorSet(transform.rotation_pivot.x, transform.rotation_pivot.y, 0, 0),                     // 回転ピボットポイント
     transform.rotation_radian,                                                                     // 回転角度
     XMVectorSet(transform.position.x + transform.size.x * transform.scale.x / 2,
-                transform.position.y + transform.scale.y / 2, 0,
+                transform.position.y + transform.size.y * transform.scale.y / 2, 0,
                 0) // 平行移動
   );
 }
@@ -204,7 +204,7 @@ void Renderer::DrawSprite(const FixedPoolIndexType texture_id,
   float u0 = uv.position.x / static_cast<float>(size.width);
   float v0 = uv.position.y / static_cast<float>(size.height);
   float u1 = (uv.position.x + uv.size.x) / static_cast<float>(size.width);
-  float v1 = (uv.position.x + uv.size.y) / static_cast<float>(size.height);
+  float v1 = (uv.position.y + uv.size.y) / static_cast<float>(size.height);
 
   v[0].uv = {u0, v0};
   v[1].uv = {u1, v0};

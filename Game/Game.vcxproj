@@ -14,10 +14,10 @@
         <ClCompile Include="game_context.ixx"/>
         <ClCompile Include="map\TileMap.cpp" />
         <ClCompile Include="map\TileMap.ixx" />
-        <ClCompile Include="scene_game\scene_game.cpp"/>
-        <ClCompile Include="scene_game\scene_game.ixx"/>
-        <ClCompile Include="scene_title\title_scene.cpp"/>
-        <ClCompile Include="scene_title\title_scene.ixx"/>
+        <ClCompile Include="scene\game_scene.cpp" />
+        <ClCompile Include="scene\game_scene.ixx" />
+        <ClCompile Include="scene\title_scene.cpp"/>
+        <ClCompile Include="scene\title_scene.ixx"/>
         <ClCompile Include="scene.ixx"/>
         <ClCompile Include="scene_manager.cpp"/>
         <ClCompile Include="scene_manager.ixx"/>
@@ -25,6 +25,8 @@
         <ClCompile Include="map\tile_repository.ixx"/>
         <ClCompile Include="map\tinyxml\tinyxml2.cpp"/>
         <ClCompile Include="map\tinyxml\tinyxml2.h"/>
+        <ClCompile Include="scene_object\player.ixx" />
+        <ClCompile Include="scene_object\scene_object.ixx" />
         <ClCompile Include="types.ixx"/>
     </ItemGroup>
     <PropertyGroup Label="Globals">

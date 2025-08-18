@@ -13,6 +13,9 @@
 *.cso
 map/roguelike-topdown-game.tiled-session
 
+# ide specific
+.idea/.idea.roguelike-topdown-game/.idea/discord.xml
+
 # assets
 map/assets/BrightForest-A1.png
 map/assets/BrightForest-A2.png
@@ -20,6 +23,7 @@ map/assets/BrightForest-B.png
 map/assets/base.png
 map/assets/chest.png
 map/map_assets.png
+assets/character_01.png
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
