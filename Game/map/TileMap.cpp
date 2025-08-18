@@ -9,7 +9,7 @@ import game.scene_object.camera;
 
 TileMap::TileMap() {}
 
-void TileMap::OnUpdate(GameContext* ctx, float delta_time) {
+void TileMap::OnUpdate(GameContext*, float delta_time) {
   for (auto& layer : layers_) {
     for (auto& [index, state] : layer.tile_animation_states_) {
       if (!state.is_playing || state.frames.empty()) continue;
@@ -169,7 +169,7 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
           unsigned int tile_id = std::stoul(item);
           tile_ids.push_back((tile_id - 1));
         }
-        catch (const std::exception& e) {
+        catch (const std::exception&) {
           std::cerr << "Invalid tile id: " + item << std::endl;
           assert(false);
         }
@@ -184,10 +184,10 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
 
     for (unsigned int i = 0; i < tile_ids.size(); ++i) {
       if (tile_ids[i] < 0) {
-        layer.tiles.x.push_back(-1);
-        layer.tiles.y.push_back(-1);
-        layer.tiles.u.push_back(-1);
-        layer.tiles.v.push_back(-1);
+        layer.tiles.x.push_back(0);
+        layer.tiles.y.push_back(0);
+        layer.tiles.u.push_back(0);
+        layer.tiles.v.push_back(0);
         layer.tiles.tile_id.push_back(-1);
         continue;
       }

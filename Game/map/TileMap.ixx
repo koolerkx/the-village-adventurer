@@ -54,7 +54,7 @@ public:
 
   void SetTransform(const Transform& t) {
     wall_collider_.EditAll([&](Collider<Wall>& c) {
-      std::visit([&]<typename Shape>(Shape& shape) {
+      std::visit([&]<typename Shape>(Shape&) {
         if constexpr (std::is_same_v<Shape, RectCollider> || std::is_same_v<Shape, CircleCollider>) {
           c.position.x -= transform_.position.x;
           c.position.y -= transform_.position.y;
@@ -65,7 +65,7 @@ public:
     transform_ = t;
     
     wall_collider_.EditAll([&](Collider<Wall>& c) {
-      std::visit([&]<typename Shape>(Shape& shape) {
+      std::visit([&]<typename Shape>(Shape&) {
         if constexpr (std::is_same_v<Shape, RectCollider> || std::is_same_v<Shape, CircleCollider>) {
           c.position.x += t.position.x;
           c.position.y += t.position.y;

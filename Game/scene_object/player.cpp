@@ -11,7 +11,7 @@ import game.collision_handler;
 static constexpr std::wstring_view texture_path = L"assets/character_01.png"; // TODO: extract
 static constexpr PlayerState default_state = PlayerState::IDLE_UP;
 
-Player::Player(GameContext* ctx, SceneContext* scene_ctx) {
+Player::Player(GameContext* ctx, SceneContext*) {
   const auto tm = ctx->render_resource_manager->texture_manager.get();
 
   texture_id_ = tm->Load(texture_path.data());
@@ -33,7 +33,7 @@ Player::Player(GameContext* ctx, SceneContext* scene_ctx) {
   };
 }
 
-void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
+void Player::OnUpdate(GameContext* ctx, SceneContext*, float delta_time) {
   // Handle Input
   direction_ = {0, 0};
   if (ctx->input_handler->GetKey(KeyCode::KK_W)) direction_.y -= 1.0f;
@@ -44,7 +44,7 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
   UpdateAnimation(delta_time);
 }
 
-void Player::OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
+void Player::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delta_time) {
   // apply input to velocity
   if (direction_.x == 0 && direction_.y == 0) {
     velocity_ = {0, 0};
@@ -82,7 +82,7 @@ void Player::OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delt
 }
 
 
-void Player::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera) {
+void Player::OnRender(GameContext* ctx, SceneContext*, Camera* camera) {
   auto rr = ctx->render_resource_manager->renderer.get();
 
   CameraProps props = camera->GetCameraProps();
@@ -165,6 +165,6 @@ void Player::UpdateAnimation(float delta_time) {
     }
   }
 
-  uv_.position.x = animation_state_.frames[animation_state_.current_frame].u;
-  uv_.position.y = animation_state_.frames[animation_state_.current_frame].v;
+  uv_.position.x = static_cast<float>((animation_state_.frames[animation_state_.current_frame].u));
+  uv_.position.y = static_cast<float>(animation_state_.frames[animation_state_.current_frame].v);
 }

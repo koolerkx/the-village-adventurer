@@ -16,8 +16,8 @@ struct DebugSetting {
   bool is_show_frame_delta = true;
 
   bool is_show_ui_gridline = true;
-  bool is_show_ui_column = true;
-  bool is_show_ui_row = true;
+  bool is_show_ui_column = false;
+  bool is_show_ui_row = false;
 };
 
 struct TextSpriteProps {

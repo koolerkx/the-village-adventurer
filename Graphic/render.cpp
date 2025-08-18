@@ -52,7 +52,9 @@ Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
   window_size_ = window_size;
 
   mat_ortho_ =
-    DirectX::XMMatrixOrthographicOffCenterLH(0.0f, window_size_.cx, window_size_.cy, 0.0f, 0.0f, 1.0f);
+    DirectX::XMMatrixOrthographicOffCenterLH(0.0f,
+                                             static_cast<float>(window_size_.cx), static_cast<float>(window_size_.cy),
+                                             0.0f, 0.0f, 1.0f);
 }
 
 void Renderer::CreateRectBuffer(const size_t max_rect_num) {
