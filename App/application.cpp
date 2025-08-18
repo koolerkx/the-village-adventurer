@@ -23,19 +23,39 @@ static constexpr char TITLE[] = "Game";              // 	タイトルバーの�
 // constexpr unsigned int WINDOW_WIDTH = 1280;
 // constexpr unsigned int WINDOW_HEIGHT = 720;
 
-LRESULT CALLBACK WindowProcedure(const HWND hWnd, const UINT message, const WPARAM wParam, const LPARAM lParam) {
+LRESULT CALLBACK Application::WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+  if (message == WM_NCCREATE) {
+    CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+    Application* pApp = reinterpret_cast<Application*>(pCreate->lpCreateParams);
+    SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pApp));
+    return DefWindowProc(hWnd, message, wParam, lParam);
+  }
+
+  Application* pApp = reinterpret_cast<Application*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+  if (pApp) {
+    return pApp->HandleWindowMessage(hWnd, message, wParam, lParam);
+  }
+
+  return DefWindowProc(hWnd, message, wParam, lParam);
+}
+
+LRESULT Application::HandleWindowMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
   switch (message) {
+  case WM_CLOSE:
+    if (MessageBox(hWnd, "本当に終了してよろしいですか？", "確認", MB_YESNO | MB_DEFBUTTON2) == IDYES) {
+      DestroyWindow(hWnd);
+    }
+    break;
+  case WM_ACTIVATEAPP:
   case WM_KEYDOWN:
     // https://learn.microsoft.com/ja-jp/windows/win32/inputdev/virtual-key-codes
     if (wParam == VK_ESCAPE) {
       SendMessage(hWnd, WM_CLOSE, 0, 0);
     }
-    break;
-  case WM_CLOSE:
-    // TODO: Load from config file
-    if (MessageBox(hWnd, "本当に終了してよろしいですか？", "確認", MB_YESNO | MB_DEFBUTTON2) == IDYES) {
-      DestroyWindow(hWnd);
-    }
+  case WM_SYSKEYDOWN:
+  case WM_KEYUP:
+  case WM_SYSKEYUP:
+    input_handler_->ProcessMessage(message, wParam, lParam);
     break;
   case WM_DESTROY:
     PostQuitMessage(0);
@@ -97,7 +117,7 @@ void Application::CreateGameWindow(HWND& hwnd, WNDCLASSEX& windowClass, const Gr
     nullptr,
     nullptr,
     hinst,
-    nullptr
+    this
   );
 }
 
@@ -129,6 +149,7 @@ bool Application::Init() {
 
   std::unique_ptr<GameContext> initial_context = std::make_unique<GameContext>();
   initial_context->render_resource_manager = direct3d_->GetResourceManager();
+  initial_context->input_handler = input_handler_.get();
 
   SceneManager::Init(std::move(
                        std::make_unique<TitleScene>()
@@ -150,6 +171,7 @@ bool Application::Init() {
 #endif
 
   timer_updater_.reset(new TimerUpdater(60.0f));
+  input_handler_.reset(new InputHandler());
 
   return true;
 }
@@ -188,6 +210,7 @@ Application::Application() {}
 Application::~Application() {}
 
 void Application::OnUpdate(float delta_time) {
+  input_handler_->OnUpdate();
   SceneManager::GetInstance().OnUpdate(delta_time);
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -205,8 +228,9 @@ void Application::OnUpdate(float delta_time) {
 }
 
 void Application::OnFixedUpdate(float delta_time) {
-#if defined(DEBUG) || defined(_DEBUG)
   SceneManager::GetInstance().OnFixedUpdate(delta_time);
+
+#if defined(DEBUG) || defined(_DEBUG)
   debug_manager_->OnFixedUpdate(delta_time);
 #endif
 }

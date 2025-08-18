@@ -42,3 +42,8 @@ export struct CollisionData {
   unsigned int height;
   bool is_circle = false;
 };
+
+export struct Vector2 {
+  float x = .0f;
+  float y = .0f;
+};

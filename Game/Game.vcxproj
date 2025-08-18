@@ -12,10 +12,10 @@
     </ItemGroup>
     <ItemGroup>
         <ClCompile Include="game_context.ixx"/>
-        <ClCompile Include="map\TileMap.cpp" />
-        <ClCompile Include="map\TileMap.ixx" />
-        <ClCompile Include="scene\game_scene.cpp" />
-        <ClCompile Include="scene\game_scene.ixx" />
+        <ClCompile Include="map\TileMap.cpp"/>
+        <ClCompile Include="map\TileMap.ixx"/>
+        <ClCompile Include="scene\game_scene.cpp"/>
+        <ClCompile Include="scene\game_scene.ixx"/>
         <ClCompile Include="scene\title_scene.cpp"/>
         <ClCompile Include="scene\title_scene.ixx"/>
         <ClCompile Include="scene.ixx"/>
@@ -25,9 +25,18 @@
         <ClCompile Include="map\tile_repository.ixx"/>
         <ClCompile Include="map\tinyxml\tinyxml2.cpp"/>
         <ClCompile Include="map\tinyxml\tinyxml2.h"/>
-        <ClCompile Include="scene_object\player.ixx" />
-        <ClCompile Include="scene_object\scene_object.ixx" />
+        <ClCompile Include="scene_object\player.cpp" />
+        <ClCompile Include="scene_object\player.ixx"/>
+        <ClCompile Include="scene_object\scene_object.ixx"/>
         <ClCompile Include="types.ixx"/>
+        <ClCompile Include="input\input_handler.cpp"/>
+        <ClCompile Include="input\input_handler.ixx"/>
+        <ClCompile Include="input\keyboard.cpp"/>
+        <ClCompile Include="input\key_logger.cpp"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ClInclude Include="input\keyboard.h"/>
+        <ClInclude Include="input\key_logger.h"/>
     </ItemGroup>
     <PropertyGroup Label="Globals">
         <VCProjectVersion>15.0</VCProjectVersion>
