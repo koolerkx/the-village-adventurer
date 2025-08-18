@@ -10,6 +10,7 @@ import game.map.tile_repository;
 import game.scene_object.camera;
 import game.collision.collider;
 import game.collision.object_pool;
+import game.map.chest;
 
 static constexpr std::size_t MAX_WALL_COUNT = 1024; // TODO: extract
 
@@ -44,6 +45,7 @@ private:
 
   // Note: Collider not support scaling
   ObjectPool<Collider<Wall>, MAX_WALL_COUNT> wall_collider_;
+  ObjectPool<FieldObject, 32> field_object_pool_;
 
 public:
   TileMap();
@@ -62,8 +64,19 @@ public:
       }, c.shape);
     });
 
+    field_object_pool_.EditAll([&](FieldObject& field_object) {
+      std::visit([&]<typename Shape>(Shape&) {
+        if constexpr (std::is_same_v<Shape, RectCollider> || std::is_same_v<Shape, CircleCollider>) {
+          field_object.position.x -= transform_.position.x;
+          field_object.position.y -= transform_.position.y;
+          field_object.collider.position.x -= transform_.position.x;
+          field_object.collider.position.y -= transform_.position.y;
+        }
+      }, field_object.collider.shape);
+    });
+
     transform_ = t;
-    
+
     wall_collider_.EditAll([&](Collider<Wall>& c) {
       std::visit([&]<typename Shape>(Shape&) {
         if constexpr (std::is_same_v<Shape, RectCollider> || std::is_same_v<Shape, CircleCollider>) {
@@ -71,6 +84,17 @@ public:
           c.position.y += t.position.y;
         }
       }, c.shape);
+    });
+
+    field_object_pool_.EditAll([&](FieldObject& field_object) {
+      std::visit([&]<typename Shape>(Shape&) {
+        if constexpr (std::is_same_v<Shape, RectCollider> || std::is_same_v<Shape, CircleCollider>) {
+          field_object.position.x += transform_.position.x;
+          field_object.position.y += transform_.position.y;
+          field_object.collider.position.x += transform_.position.x;
+          field_object.collider.position.y += transform_.position.y;
+        }
+      }, field_object.collider.shape);
     });
   }
 

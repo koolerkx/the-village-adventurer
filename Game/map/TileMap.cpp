@@ -39,8 +39,8 @@ void TileMap::OnUpdate(GameContext*, float delta_time) {
 }
 
 void TileMap::OnRender(GameContext* ctx, Camera* camera) {
+  std::vector<RenderInstanceItem> render_items;
   for (auto& layer : layers_) {
-    std::vector<RenderInstanceItem> render_items;
     size_t size = layer.tiles.tile_id.size();
 
     render_items.reserve(size);
@@ -77,11 +77,53 @@ void TileMap::OnRender(GameContext* ctx, Camera* camera) {
     render_items.clear();
   }
 
+  // Field Object
+  for (const auto& field_object : field_object_pool_.GetAll()) {
+    render_items.emplace_back(RenderInstanceItem{
+      .transform = {
+        .position = {
+          field_object.position.x,
+          field_object.position.y,
+          transform_.position.z
+        },
+        .size = {
+          static_cast<float>(tile_width_),
+          static_cast<float>(tile_height_)
+        },
+        .scale = transform_.scale,
+        .position_anchor = transform_.position_anchor,
+      },
+      .uv = {
+        {static_cast<float>(field_object.tile.uv.u), static_cast<float>(field_object.tile.uv.v)},
+        {static_cast<float>(field_object.tile.uv.w), static_cast<float>(field_object.tile.uv.h)},
+      },
+      .color = color::white
+    });
+  }
+
+  ctx->render_resource_manager->renderer->DrawSpritesInstanced(
+    std::span<RenderInstanceItem>(render_items.data(), render_items.size()),
+    texture_id_,
+    camera->GetCameraProps(),
+    true);
+  render_items.clear();
+
 #if defined(DEBUG) || defined(_DEBUG)
   // DEBUG render collider
   std::vector<Rect> rect_view;
-  rect_view.reserve(wall_collider_.GetAll().size());
+  rect_view.reserve(wall_collider_.GetAll().size() + field_object_pool_.GetAll().size());
   for (const auto& collider : GetWallColliders()) {
+    if (std::holds_alternative<RectCollider>(collider.shape)) {
+      const auto& shape = std::get<RectCollider>(collider.shape);
+      rect_view.push_back({
+        {collider.position.x + shape.x, collider.position.y + shape.y, 0},
+        {collider.position.x + shape.x + shape.width, collider.position.y + shape.y + shape.height, 0},
+        color::red
+      });
+    }
+  }
+  for (const auto& field_object : field_object_pool_.GetAll()) {
+    auto& collider = field_object.collider;
     if (std::holds_alternative<RectCollider>(collider.shape)) {
       const auto& shape = std::get<RectCollider>(collider.shape);
       rect_view.push_back({
@@ -149,9 +191,6 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
        NextSiblingElement("layer")) {
     MapLayer layer;
     std::string layer_class = layerElement->Attribute("class") ? layerElement->Attribute("class") : "";
-    if (layer_class == "Object") {
-      continue;
-    }
 
     auto* dataElement = layerElement->FirstChildElement("data");
     if (!dataElement || !dataElement->GetText()) {
@@ -201,6 +240,49 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
 
       TileUV uv = tr->GetUvById(tile_ids[i]);
 
+      if (layer_class == "Object") {
+        if (!tr->GetTileMetadata(tile_ids[i]).has_value()) return;
+
+        TileMetaData data = tr->GetTileMetadata(tile_ids[i]).value();
+
+        if (data.tile_class == "Chest") {
+          std::optional<TileAnimationData> tile_animation_data = tr->GetTileAnimatedData(tile_ids[i]);
+          std::optional<std::vector<CollisionData>> tile_collision_data = tr->GetTileCollisionData(tile_ids[i]);
+          if (!tile_animation_data.has_value()) continue;
+          auto anim_data = tile_animation_data.value();
+
+          if (!tile_collision_data.has_value()) continue;
+          auto collision_data = tile_collision_data.value()[0];
+
+          auto shape = RectCollider{
+            .x = static_cast<float>(collision_data.x),
+            .y = static_cast<float>(collision_data.y),
+            .width = static_cast<float>(collision_data.width),
+            .height = static_cast<float>(collision_data.height)
+          };
+
+          field_object_pool_.Add(FieldObject{
+            {static_cast<float>(x), static_cast<float>(y)},
+            uv,
+            TileAnimationState{
+              .is_loop = anim_data.is_loop,
+              .is_playing = anim_data.play_on_start,
+              .frames = anim_data.frames,
+              .frame_durations = anim_data.frame_durations
+            },
+            Collider<FieldObject>{
+              .position = {static_cast<float>(x), static_cast<float>(y)},
+              .rotation = 0,
+              .owner = nullptr, // placeholder, wall not own logic
+              .shape = shape,
+            },
+            Chest{}
+          });
+        }
+
+        continue;
+      }
+
       layer.tiles.x.push_back(x);
       layer.tiles.y.push_back(y);
       layer.tiles.u.push_back(uv.u);
@@ -222,7 +304,6 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
       }
 
       // handle collision
-
       if (layer_class == "Wall") {
         auto result = tr->GetTileCollisionData(tile_ids[i]);
         if (result.has_value()) {
