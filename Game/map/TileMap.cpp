@@ -198,6 +198,40 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
       }
 
       // handle collision
+      const char* layer_class = layerElement->Attribute("class");
+
+      if (layer_class == "Wall") {
+        auto result = tr->GetTileCollisionData(tile_ids[i]);
+        if (result.has_value()) {
+          auto collision_data = result.value();
+
+          for (int k = 0; k < collision_data.size(); k++) {
+            ColliderShape shape;
+            if (collision_data[k].is_circle) {
+              shape = CircleCollider{
+                .x = static_cast<float>(collision_data[k].x),
+                .y = static_cast<float>(collision_data[k].y),
+                .radius = static_cast<float>(collision_data[k].width) // 通常 width 為 radius
+              };
+            }
+            else {
+              shape = RectCollider{
+                .x = static_cast<float>(collision_data[k].x),
+                .y = static_cast<float>(collision_data[k].y),
+                .width = static_cast<float>(collision_data[k].width),
+                .height = static_cast<float>(collision_data[k].height)
+              };
+            }
+
+            wall_collider.Add(Collider<Wall>{
+              .position = {static_cast<float>(x), static_cast<float>(y)},
+              .rotation = 0,
+              .owner = nullptr, // placeholder, wall not own logic
+              .shape = shape,
+            });
+          }
+        }
+      }
     }
     layers_.push_back(layer);
   }

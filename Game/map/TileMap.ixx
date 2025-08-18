@@ -8,6 +8,10 @@ import game.context;
 import game.types;
 import game.map.tile_repository;
 import game.scene_object.camera;
+import game.collision.collider;
+import game.collision.object_pool;
+
+static constexpr std::size_t MAX_WALL_COUNT = 1024; // TODO: extract
 
 struct MapTile {
   std::vector<unsigned int> x{}; // 0 ~ map_width * tile_width
@@ -23,6 +27,9 @@ struct MapLayer {
   std::unordered_map<unsigned int, TileAnimationState> tile_animation_states_;
 };
 
+// placeholder struct
+struct Wall {};
+
 export class TileMap {
 private:
   unsigned int tile_width_{16};  // px
@@ -35,7 +42,7 @@ private:
 
   FixedPoolIndexType texture_id_{0};
 
-  // TODO Collision Data
+  ObjectPool<Collider<Wall>, MAX_WALL_COUNT> wall_collider;
 
 public:
   TileMap();
