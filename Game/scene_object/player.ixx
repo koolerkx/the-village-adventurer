@@ -10,6 +10,7 @@ import game.input;
 import game.scene_manager;
 import game.types;
 import game.scene_object;
+import game.scene_object.camera;
 
 export enum class PlayerState: unsigned char {
   IDLE_LEFT,
@@ -80,9 +81,10 @@ private:
   scene_object::AnimationState animation_state_{};
 
   Transform transform_ = Transform{
-    {0, 0, 0},
-    {128, 128},
-    {1, 1}
+    .position = {0, 0, 0},
+    .size = {16, 16},
+    .scale = {1, 1},
+    .position_anchor = {-8, -8, 0}
   };
   UV uv_{
     {0, 0},
@@ -97,7 +99,7 @@ private:
   Vector2 direction_;
   Vector2 velocity_;
 
-  float move_speed_ = 300.0f; // px per second
+  float move_speed_ = 125.0f; // px per second
 
   void UpdateState();
   void UpdateAnimation(float delta_time);
@@ -107,7 +109,9 @@ public:
 
   void SetState(PlayerState state);
 
+  Vector2 GetPositionVector() const { return {transform_.position.x, transform_.position.y}; }
+
   void OnUpdate(GameContext* ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, float delta_time);
-  void OnRender(GameContext* ctx);
+  void OnRender(GameContext* ctx, Camera* camera);
 };

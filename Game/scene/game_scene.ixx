@@ -7,13 +7,15 @@ import game.scene;
 import game.map;
 
 import game.scene_object.player;
+import game.scene_object.camera;
 
 export class GameScene : public IScene {
 private:
-  std::unique_ptr<TileMap> map_ {nullptr};
+  std::unique_ptr<TileMap> map_{nullptr};
 
   std::unique_ptr<Player> player_ = nullptr;
-  
+  std::unique_ptr<Camera> camera_ = nullptr;
+
 public:
   void OnEnter(GameContext* ctx) override;
   void OnUpdate(GameContext* ctx, float delta_time) override;

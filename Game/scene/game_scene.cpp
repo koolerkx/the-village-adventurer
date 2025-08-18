@@ -7,6 +7,7 @@ import game.scene_manager;
 import graphic.utils.types;
 import game.map.tile_repository;
 import game.scene_object;
+import game.types;
 
 void GameScene::OnEnter(GameContext* ctx) {
   std::cout << "GameScene> OnEnter" << std::endl;
@@ -26,14 +27,15 @@ void GameScene::OnEnter(GameContext* ctx) {
 
   // TODO: remove debug data
   t.position.x = 0.0f;
-  t.position.y = -384.0f;
-  t.scale.x = 3.0f;
-  t.scale.y = 3.0f;
+  t.position.y = 0.0f;
+  t.scale.x = 1.0f;
+  t.scale.y = 1.0f;
   t.position_anchor.x = 0.0f;
   t.position_anchor.y = 0.0f;
   map_->SetTransform(t);
 
   player_ = std::make_unique<Player>(ctx);
+  camera_ = std::make_unique<Camera>();
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
@@ -45,13 +47,14 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
 
 void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   player_->OnFixedUpdate(ctx, delta_time);
+  camera_->UpdatePosition(player_->GetPositionVector(), delta_time);
 }
 
 void GameScene::OnRender(GameContext* ctx) {
   // std::cout << "GameScene> OnRender" << std::endl;
 
-  map_->OnRender(ctx);
-  player_->OnRender(ctx);
+  map_->OnRender(ctx, camera_.get());
+  player_->OnRender(ctx, camera_.get());
 }
 
 void GameScene::OnExit(GameContext*) {

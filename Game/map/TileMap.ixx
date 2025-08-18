@@ -7,6 +7,7 @@ import graphic.utils.types;
 import game.context;
 import game.types;
 import game.map.tile_repository;
+import game.scene_object.camera;
 
 struct MapTile {
   std::vector<unsigned int> x{}; // 0 ~ map_width * tile_width
@@ -41,7 +42,7 @@ public:
   void Load(std::string_view filepath, FixedPoolIndexType texture_id, TileRepository* tr);
 
   void OnUpdate(GameContext* ctx, float delta_time);
-  void OnRender(GameContext* ctx);
+  void OnRender(GameContext* ctx, Camera* camera);
 
   void SetTransform(const Transform& t) { transform_ = t; }
   Transform GetTransform() const { return transform_; }
