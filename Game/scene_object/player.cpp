@@ -15,6 +15,20 @@ Player::Player(GameContext* ctx) {
   texture_id_ = tm->Load(texture_path.data());
 
   SetState(default_state);
+
+  collider_ = {
+    .position = {
+      transform_.position.x + transform_.position_anchor.x, transform_.position.y + transform_.position_anchor.y
+    },
+    .rotation = 0,
+    .owner = this,
+    .shape = RectCollider{
+      .x = COLLIDER_PADDING,
+      .y = COLLIDER_PADDING,
+      .width = COLLISION_DATA.width - COLLIDER_PADDING * 2,
+      .height = COLLISION_DATA.height - COLLIDER_PADDING * 2,
+    }
+  };
 }
 
 void Player::OnUpdate(GameContext* ctx, float delta_time) {
@@ -44,12 +58,13 @@ void Player::OnFixedUpdate(GameContext* ctx, float delta_time) {
   // movement
   transform_.position.x += velocity_.x * delta_time;
   transform_.position.y += velocity_.y * delta_time;
-  collider_.position.x = transform_.position.x;
-  collider_.position.y = transform_.position.y;
-
+  collider_.position.x = transform_.position.x + transform_.position_anchor.x;
+  collider_.position.y = transform_.position.y + transform_.position_anchor.y;
+  
   UpdateState();
-  // TODO: Collision
 }
+
+
 
 void Player::OnRender(GameContext* ctx, Camera* camera) {
   auto rr = ctx->render_resource_manager->renderer.get();
@@ -65,18 +80,16 @@ void Player::OnRender(GameContext* ctx, Camera* camera) {
 
   // DEBUG: draw collider
 #if defined(DEBUG) || defined(_DEBUG)
-  RectCollider shape = std::get<RectCollider>(collider_.shape);
+  Collider<Player> collider = GetCollider();
+  RectCollider shape = std::get<RectCollider>(collider.shape);
   rr->DrawBox(Rect{
                 {
-                  collider_.position.x + transform_.position_anchor.x + COLLIDER_PADDING,
-                  collider_.position.y + transform_.position_anchor.x + COLLIDER_PADDING, 0
+                  collider.position.x + shape.x,
+                  collider.position.y + shape.y, 0
                 },
                 {
-                  collider_.position.x + transform_.position_anchor.x
-                  + transform_.scale.x * shape.width - COLLIDER_PADDING,
-                  collider_.position.y + transform_.position_anchor.x
-                  + transform_.scale.y * shape.height - COLLIDER_PADDING,
-                  0
+                  collider.position.x + shape.x + shape.width,
+                  collider.position.y + shape.y + shape.height, 0
                 },
                 color::red
               }, props, true);

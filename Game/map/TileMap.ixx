@@ -28,7 +28,7 @@ struct MapLayer {
 };
 
 // placeholder struct
-struct Wall {};
+export struct Wall {};
 
 export class TileMap {
 private:
@@ -51,16 +51,24 @@ public:
 
   void OnUpdate(GameContext* ctx, float delta_time);
   void OnRender(GameContext* ctx, Camera* camera);
-  
+
   void SetTransform(const Transform& t) {
-    transform_ = t;
     wall_collider_.EditAll([&](Collider<Wall>& c) {
       std::visit([&]<typename Shape>(Shape& shape) {
         if constexpr (std::is_same_v<Shape, RectCollider> || std::is_same_v<Shape, CircleCollider>) {
-          c.position = {
-            transform_.position.x + shape.x,
-            transform_.position.y + shape.y
-          };
+          c.position.x -= transform_.position.x;
+          c.position.y -= transform_.position.y;
+        }
+      }, c.shape);
+    });
+
+    transform_ = t;
+    
+    wall_collider_.EditAll([&](Collider<Wall>& c) {
+      std::visit([&]<typename Shape>(Shape& shape) {
+        if constexpr (std::is_same_v<Shape, RectCollider> || std::is_same_v<Shape, CircleCollider>) {
+          c.position.x += t.position.x;
+          c.position.y += t.position.y;
         }
       }, c.shape);
     });
@@ -68,5 +76,7 @@ public:
 
   Transform GetTransform() const { return transform_; }
 
-  std::span<Collider<Wall>> GetWallColliders() { return wall_collider_.GetAll(); }
+  std::span<Collider<Wall>> GetWallColliders() {
+    return wall_collider_.GetAll();
+  }
 };

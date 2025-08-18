@@ -8,6 +8,7 @@ import graphic.utils.types;
 import game.map.tile_repository;
 import game.scene_object;
 import game.types;
+import game.collision_handler;
 
 void GameScene::OnEnter(GameContext* ctx) {
   std::cout << "GameScene> OnEnter" << std::endl;
@@ -47,6 +48,23 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
 
 void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   player_->OnFixedUpdate(ctx, delta_time);
+
+  // Collision
+  collision::HandleDetection(player_->GetCollider(), map_->GetWallColliders(),
+                             [&](Player* player_, Wall*, collision::CollisionResult result) {
+                               player_->SetTransform([result](Transform& t) {
+                                 t.position.y += result.mtv.y;
+                               });
+                             });
+
+  collision::HandleDetection(player_->GetCollider(), map_->GetWallColliders(),
+                             [&](Player* player_, Wall*, collision::CollisionResult result) {
+                               player_->SetTransform([result](Transform& t) {
+                                 t.position.x += result.mtv.x;
+                               });
+                             });
+
+
   camera_->UpdatePosition(player_->GetPositionVector(), delta_time);
 }
 

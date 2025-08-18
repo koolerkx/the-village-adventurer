@@ -19,8 +19,8 @@ export using ColliderShape = std::variant<RectCollider, CircleCollider>;
 export template <typename Owner>
 struct Collider {
   bool is_trigger = false;
-  Vector2 position;
+  Vector2 position; // item world position
   float rotation;
   Owner* owner;
-  ColliderShape shape;
+  ColliderShape shape;  // offset
 };

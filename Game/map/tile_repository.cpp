@@ -120,11 +120,11 @@ TileRepository::TileRepository(std::string_view metadata_filepath) {
       for (auto* object = objectgroup->FirstChildElement("object"); object; object = object->
            NextSiblingElement("object")) {
         CollisionData data;
-        if (object->QueryUnsignedAttribute("x", &data.x) != tinyxml2::XML_SUCCESS) {
+        if (object->QueryIntAttribute("x", &data.x) != tinyxml2::XML_SUCCESS) {
           std::cerr << "Missing or invalid 'x' attribute in object" << std::endl;
           assert(false);
         }
-        if (object->QueryUnsignedAttribute("y", &data.y) != tinyxml2::XML_SUCCESS) {
+        if (object->QueryIntAttribute("y", &data.y) != tinyxml2::XML_SUCCESS) {
           std::cerr << "Missing or invalid 'y' attribute in object" << std::endl;
           assert(false);
         }

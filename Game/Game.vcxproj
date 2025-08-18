@@ -12,6 +12,7 @@
     </ItemGroup>
     <ItemGroup>
         <ClCompile Include="collision\collider.ixx" />
+        <ClCompile Include="collision\collision_handler.ixx" />
         <ClCompile Include="collision\object_pool.ixx" />
         <ClCompile Include="game_context.ixx" />
         <ClCompile Include="map\TileMap.cpp" />
