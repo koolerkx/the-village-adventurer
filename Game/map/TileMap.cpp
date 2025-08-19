@@ -37,7 +37,7 @@ void TileMap::OnUpdate(GameContext*, float delta_time) {
     }
   }
 
-  field_object_pool_.EditAll([delta_time](FieldObject& field_object) {
+  field_object_pool_.ForEach([delta_time](FieldObject& field_object) {
       auto& state = field_object.animation_state;
       if (!state.is_playing || state.frames.empty()) return;
       state.current_frame_time += delta_time;
@@ -105,28 +105,30 @@ void TileMap::OnRender(GameContext* ctx, Camera* camera) {
   }
 
   // Field Object
-  for (const auto& field_object : field_object_pool_.GetAll()) {
-    render_items.emplace_back(RenderInstanceItem{
-      .transform = {
-        .position = {
-          field_object.position.x,
-          field_object.position.y,
-          transform_.position.z
+  field_object_pool_.ForEach(
+    [&render_items, transform = transform_, tile_width = tile_width_, tile_height = tile_height_](
+    FieldObject& field_object) {
+      render_items.emplace_back(RenderInstanceItem{
+        .transform = {
+          .position = {
+            field_object.position.x,
+            field_object.position.y,
+            transform.position.z
+          },
+          .size = {
+            static_cast<float>(tile_width),
+            static_cast<float>(tile_height)
+          },
+          .scale = transform.scale,
+          .position_anchor = transform.position_anchor,
         },
-        .size = {
-          static_cast<float>(tile_width_),
-          static_cast<float>(tile_height_)
+        .uv = {
+          {static_cast<float>(field_object.tile.uv.u), static_cast<float>(field_object.tile.uv.v)},
+          {static_cast<float>(field_object.tile.uv.w), static_cast<float>(field_object.tile.uv.h)},
         },
-        .scale = transform_.scale,
-        .position_anchor = transform_.position_anchor,
-      },
-      .uv = {
-        {static_cast<float>(field_object.tile.uv.u), static_cast<float>(field_object.tile.uv.v)},
-        {static_cast<float>(field_object.tile.uv.w), static_cast<float>(field_object.tile.uv.h)},
-      },
-      .color = color::white
+        .color = color::white
+      });
     });
-  }
 
   ctx->render_resource_manager->renderer->DrawSpritesInstanced(
     std::span<RenderInstanceItem>(render_items.data(), render_items.size()),
@@ -138,9 +140,9 @@ void TileMap::OnRender(GameContext* ctx, Camera* camera) {
 #if defined(DEBUG) || defined(_DEBUG)
   // DEBUG render collider
   std::vector<Rect> rect_view;
-  rect_view.reserve(field_object_pool_.GetAll().size());
+  rect_view.reserve(field_object_pool_.Size());
 
-  for (const auto& field_object : field_object_pool_.GetAll()) {
+  field_object_pool_.ForEach([&](FieldObject& field_object) {
     auto& collider = field_object.collider;
     if (std::holds_alternative<RectCollider>(collider.shape)) {
       const auto& shape = std::get<RectCollider>(collider.shape);
@@ -150,7 +152,7 @@ void TileMap::OnRender(GameContext* ctx, Camera* camera) {
         color::red
       });
     }
-  }
+  });
 
   ctx->render_resource_manager->renderer->DrawBoxes(rect_view,
                                                     camera->GetCameraProps(),
@@ -346,7 +348,11 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
           .shape = shape,
         };
 
-        field_object_pool_.Add(std::move(obj));
+        auto result = field_object_pool_.Insert(obj);
+
+        if (!result.has_value()) {
+          assert(false);
+        }
       }
     }
     layers_.push_back(layer);

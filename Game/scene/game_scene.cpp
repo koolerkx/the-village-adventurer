@@ -73,7 +73,7 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
   const Vector2 velocity = player_->GetVelocity();
 
   // movement
-  std::span<Collider<FieldObject>> field_objects = map_->GetColliders();
+  std::span<Collider<FieldObject>> field_objects = map_->GetFiledObjectColliders();
 
   player_->SetTransform([=](Transform& t) {
     t.position.x += velocity.x * delta_time;

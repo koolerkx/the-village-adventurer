@@ -9,10 +9,10 @@ import game.types;
 import game.map.tile_repository;
 import game.scene_object.camera;
 import game.collision.collider;
-import game.collision.object_pool;
 import game.map.field_object;
+import game.object_pool;
 
-static constexpr std::size_t MAX_WALL_COUNT = 1024; // TODO: extract
+static constexpr std::size_t MAX_WALL_COUNT = 2048; // TODO: extract
 
 struct MapTile {
   std::vector<unsigned int> x{}; // 0 ~ map_width * tile_width
@@ -41,7 +41,7 @@ private:
   FixedPoolIndexType texture_id_{0};
 
   // Note: Collider not support scaling
-  FieldObjectPool<MAX_WALL_COUNT> field_object_pool_;
+  ObjectPool<FieldObject> field_object_pool_{};
 
 public:
   TileMap();
@@ -51,7 +51,7 @@ public:
   void OnRender(GameContext* ctx, Camera* camera);
 
   void SetTransform(const Transform& t) {
-    field_object_pool_.EditAll([&](FieldObject& field_object) {
+    field_object_pool_.ForEach([&](FieldObject& field_object) {
       std::visit([&]<typename Shape>(Shape&) {
         if constexpr (std::is_same_v<Shape, RectCollider> || std::is_same_v<Shape, CircleCollider>) {
           field_object.position.x -= transform_.position.x;
@@ -64,7 +64,7 @@ public:
 
     transform_ = t;
 
-    field_object_pool_.EditAll([&](FieldObject& field_object) {
+    field_object_pool_.ForEach([&](FieldObject& field_object) {
       std::visit([&]<typename Shape>(Shape&) {
         if constexpr (std::is_same_v<Shape, RectCollider> || std::is_same_v<Shape, CircleCollider>) {
           field_object.position.x += transform_.position.x;
@@ -78,7 +78,14 @@ public:
 
   Transform GetTransform() const { return transform_; }
 
-  std::span<Collider<FieldObject>> GetColliders() {
-    return field_object_pool_.GetAllCollider();
+  std::span<Collider<FieldObject>> GetFiledObjectColliders() {
+    static std::vector<Collider<FieldObject>> colliders;
+    colliders.clear();
+    colliders.reserve(MAX_WALL_COUNT);
+
+    field_object_pool_.ForEach([&](FieldObject& it) {
+      colliders.push_back(it.collider);
+    });
+    return colliders;
   }
 };
