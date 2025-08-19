@@ -11,33 +11,37 @@
         </ProjectConfiguration>
     </ItemGroup>
     <ItemGroup>
-        <ClCompile Include="game_context.ixx"/>
-        <ClCompile Include="map\TileMap.cpp"/>
-        <ClCompile Include="map\TileMap.ixx"/>
-        <ClCompile Include="scene\game_scene.cpp"/>
-        <ClCompile Include="scene\game_scene.ixx"/>
-        <ClCompile Include="scene\title_scene.cpp"/>
-        <ClCompile Include="scene\title_scene.ixx"/>
-        <ClCompile Include="scene.ixx"/>
-        <ClCompile Include="scene_manager.cpp"/>
-        <ClCompile Include="scene_manager.ixx"/>
-        <ClCompile Include="map\tile_repository.cpp"/>
-        <ClCompile Include="map\tile_repository.ixx"/>
-        <ClCompile Include="map\tinyxml\tinyxml2.cpp"/>
-        <ClCompile Include="map\tinyxml\tinyxml2.h"/>
+        <ClCompile Include="collision\collider.ixx" />
+        <ClCompile Include="collision\collision_handler.ixx" />
+        <ClCompile Include="collision\object_pool.ixx" />
+        <ClCompile Include="game_context.ixx" />
+        <ClCompile Include="map\TileMap.cpp" />
+        <ClCompile Include="map\TileMap.ixx" />
+        <ClCompile Include="scene\game_scene.cpp" />
+        <ClCompile Include="scene\game_scene.ixx" />
+        <ClCompile Include="scene\game_scene_context.ixx" />
+        <ClCompile Include="scene\title_scene.cpp" />
+        <ClCompile Include="scene\title_scene.ixx" />
+        <ClCompile Include="scene.ixx" />
+        <ClCompile Include="scene_manager.cpp" />
+        <ClCompile Include="scene_manager.ixx" />
+        <ClCompile Include="map\tile_repository.cpp" />
+        <ClCompile Include="map\tile_repository.ixx" />
+        <ClCompile Include="map\tinyxml\tinyxml2.cpp" />
+        <ClCompile Include="map\tinyxml\tinyxml2.h" />
         <ClCompile Include="scene_object\camera.ixx" />
         <ClCompile Include="scene_object\player.cpp" />
-        <ClCompile Include="scene_object\player.ixx"/>
-        <ClCompile Include="scene_object\scene_object.ixx"/>
-        <ClCompile Include="types.ixx"/>
-        <ClCompile Include="input\input_handler.cpp"/>
-        <ClCompile Include="input\input_handler.ixx"/>
-        <ClCompile Include="input\keyboard.cpp"/>
-        <ClCompile Include="input\key_logger.cpp"/>
+        <ClCompile Include="scene_object\player.ixx" />
+        <ClCompile Include="scene_object\scene_object.ixx" />
+        <ClCompile Include="types.ixx" />
+        <ClCompile Include="input\input_handler.cpp" />
+        <ClCompile Include="input\input_handler.ixx" />
+        <ClCompile Include="input\keyboard.cpp" />
+        <ClCompile Include="input\key_logger.cpp" />
     </ItemGroup>
     <ItemGroup>
-        <ClInclude Include="input\keyboard.h"/>
-        <ClInclude Include="input\key_logger.h"/>
+        <ClInclude Include="input\keyboard.h" />
+        <ClInclude Include="input\key_logger.h" />
     </ItemGroup>
     <PropertyGroup Label="Globals">
         <VCProjectVersion>15.0</VCProjectVersion>
@@ -46,7 +50,7 @@
         <RootNamespace>Graphic</RootNamespace>
         <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     </PropertyGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
     <PropertyGroup>
         <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     </PropertyGroup>
@@ -63,16 +67,16 @@
         <WholeProgramOptimization>true</WholeProgramOptimization>
         <CharacterSet>MultiByte</CharacterSet>
     </PropertyGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
     <ImportGroup Label="ExtensionSettings">
     </ImportGroup>
     <ImportGroup Label="Shared">
     </ImportGroup>
     <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     </ImportGroup>
     <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     </ImportGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
         <LinkIncremental>true</LinkIncremental>
@@ -120,11 +124,11 @@
             <GenerateDebugInformation>true</GenerateDebugInformation>
         </Link>
     </ItemDefinitionGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
     <ImportGroup Label="ExtensionTargets">
     </ImportGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Graphic\Graphic.vcxproj"/>
+        <ProjectReference Include="..\Graphic\Graphic.vcxproj" />
     </ItemGroup>
     <!-- Warning MSB8028 -->
     <PropertyGroup>

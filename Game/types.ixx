@@ -36,8 +36,8 @@ export struct TileAnimationState {
 };
 
 export struct CollisionData {
-  unsigned int x;
-  unsigned int y;
+  int x;
+  int y;
   unsigned int width;
   unsigned int height;
   bool is_circle = false;

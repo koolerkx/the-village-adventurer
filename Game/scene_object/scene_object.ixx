@@ -56,8 +56,8 @@ export namespace scene_object {
       }
     }
 
-    uv.position.x = state.frames[state.current_frame].u;
-    uv.position.y = state.frames[state.current_frame].v;
+    uv.position.x = static_cast<float>(state.frames[state.current_frame].u);
+    uv.position.y = static_cast<float>(state.frames[state.current_frame].v);
   }
 
   constexpr std::vector<TileUV> MakeFramesVector(
@@ -83,7 +83,7 @@ export namespace scene_object {
   constexpr std::vector<float> MakeFramesConstantDuration(
     float duration_per_frame, int frame_count) {
     return std::views::iota(0, frame_count)
-      | std::views::transform([=](int i) -> float {
+      | std::views::transform([=](int) -> float {
         return duration_per_frame;
       }) | std::ranges::to<std::vector>();
   }

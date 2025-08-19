@@ -8,6 +8,7 @@ import game.map;
 
 import game.scene_object.player;
 import game.scene_object.camera;
+import game.scene_game.context;
 
 export class GameScene : public IScene {
 private:
@@ -15,6 +16,8 @@ private:
 
   std::unique_ptr<Player> player_ = nullptr;
   std::unique_ptr<Camera> camera_ = nullptr;
+
+  std::unique_ptr<SceneContext> scene_context = nullptr;
 
 public:
   void OnEnter(GameContext* ctx) override;

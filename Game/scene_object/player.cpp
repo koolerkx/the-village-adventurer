@@ -4,20 +4,36 @@ module game.scene_object.player;
 
 import std;
 import game.scene_object.camera;
+import game.scene_game.context;
+import game.collision_handler;
 
 // Texture data
 static constexpr std::wstring_view texture_path = L"assets/character_01.png"; // TODO: extract
 static constexpr PlayerState default_state = PlayerState::IDLE_UP;
 
-Player::Player(GameContext* ctx) {
+Player::Player(GameContext* ctx, SceneContext*) {
   const auto tm = ctx->render_resource_manager->texture_manager.get();
 
   texture_id_ = tm->Load(texture_path.data());
 
   SetState(default_state);
+
+  collider_ = {
+    .position = {
+      transform_.position.x + transform_.position_anchor.x, transform_.position.y + transform_.position_anchor.y
+    },
+    .rotation = 0,
+    .owner = this,
+    .shape = RectCollider{
+      .x = COLLIDER_PADDING,
+      .y = COLLIDER_PADDING,
+      .width = COLLISION_DATA.width - COLLIDER_PADDING * 2,
+      .height = COLLISION_DATA.height - COLLIDER_PADDING * 2,
+    }
+  };
 }
 
-void Player::OnUpdate(GameContext* ctx, float delta_time) {
+void Player::OnUpdate(GameContext* ctx, SceneContext*, float delta_time) {
   // Handle Input
   direction_ = {0, 0};
   if (ctx->input_handler->GetKey(KeyCode::KK_W)) direction_.y -= 1.0f;
@@ -28,7 +44,7 @@ void Player::OnUpdate(GameContext* ctx, float delta_time) {
   UpdateAnimation(delta_time);
 }
 
-void Player::OnFixedUpdate(GameContext* ctx, float delta_time) {
+void Player::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delta_time) {
   // apply input to velocity
   if (direction_.x == 0 && direction_.y == 0) {
     velocity_ = {0, 0};
@@ -42,24 +58,58 @@ void Player::OnFixedUpdate(GameContext* ctx, float delta_time) {
   }
 
   // movement
-  transform_.position.x += velocity_.x * delta_time;
-  transform_.position.y += velocity_.y * delta_time;
-
+  SetTransform([=](Transform& t) {
+    t.position.x += velocity_.x * delta_time;
+    // t.position.y += velocity_.y * delta_time;
+  });
+  collision::HandleDetection(GetCollider(), scene_ctx->map->GetWallColliders(),
+                             [&](Player* player_, Wall*, collision::CollisionResult result) {
+                               player_->SetTransform([result](Transform& t) {
+                                 t.position.x += result.mtv.x;
+                               });
+                             });
+  
+  SetTransform([=](Transform& t) {
+    t.position.y += velocity_.y * delta_time;
+  });
+  collision::HandleDetection(GetCollider(), scene_ctx->map->GetWallColliders(),
+                             [&](Player* player_, Wall*, collision::CollisionResult result) {
+                               player_->SetTransform([result](Transform& t) {
+                                 t.position.y += result.mtv.y;
+                               });
+                             });
   UpdateState();
-  // TODO: Collision
 }
 
-void Player::OnRender(GameContext* ctx, Camera* camera) {
+
+void Player::OnRender(GameContext* ctx, SceneContext*, Camera* camera) {
   auto rr = ctx->render_resource_manager->renderer.get();
 
   CameraProps props = camera->GetCameraProps();
-  props.algin_pivot = AlginPivot::CENTER_CENTER;
+  // props.algin_pivot = AlginPivot::CENTER_CENTER;
   rr->DrawSprite(RenderItem{
                    texture_id_,
                    transform_,
                    uv_,
                    color_
                  }, props);
+
+  // DEBUG: draw collider
+#if defined(DEBUG) || defined(_DEBUG)
+  Collider<Player> collider = GetCollider();
+  RectCollider shape = std::get<RectCollider>(collider.shape);
+  rr->DrawBox(Rect{
+                {
+                  collider.position.x + shape.x,
+                  collider.position.y + shape.y, 0
+                },
+                {
+                  collider.position.x + shape.x + shape.width,
+                  collider.position.y + shape.y + shape.height, 0
+                },
+                color::red
+              }, props, true);
+#endif
 }
 
 void Player::SetState(PlayerState state) {
@@ -115,6 +165,6 @@ void Player::UpdateAnimation(float delta_time) {
     }
   }
 
-  uv_.position.x = animation_state_.frames[animation_state_.current_frame].u;
-  uv_.position.y = animation_state_.frames[animation_state_.current_frame].v;
+  uv_.position.x = static_cast<float>((animation_state_.frames[animation_state_.current_frame].u));
+  uv_.position.y = static_cast<float>(animation_state_.frames[animation_state_.current_frame].v);
 }

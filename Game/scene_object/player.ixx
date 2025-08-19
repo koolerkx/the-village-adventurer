@@ -11,6 +11,9 @@ import game.scene_manager;
 import game.types;
 import game.scene_object;
 import game.scene_object.camera;
+import game.collision.collider;
+import game.map;
+import game.scene_game.context;
 
 export enum class PlayerState: unsigned char {
   IDLE_LEFT,
@@ -86,15 +89,26 @@ private:
     .scale = {1, 1},
     .position_anchor = {-8, -8, 0}
   };
+  Transform transform_before_ = transform_;
+  
   UV uv_{
     {0, 0},
     {32, 32}
   };
 
+  static constexpr CollisionData COLLISION_DATA{
+    .x = 0,
+    .y = 0,
+    .width = 16,
+    .height = 16,
+    .is_circle = false, // rect
+  };
+  static constexpr float COLLIDER_PADDING = 2.0f;
+  Collider<Player> collider_{};
+
   PlayerState state_;
 
   COLOR color_ = color::white;
-  CollisionData collision_{};
 
   Vector2 direction_;
   Vector2 velocity_;
@@ -105,13 +119,37 @@ private:
   void UpdateAnimation(float delta_time);
 
 public:
-  Player(GameContext* ctx);
 
   void SetState(PlayerState state);
 
   Vector2 GetPositionVector() const { return {transform_.position.x, transform_.position.y}; }
 
-  void OnUpdate(GameContext* ctx, float delta_time);
-  void OnFixedUpdate(GameContext* ctx, float delta_time);
-  void OnRender(GameContext* ctx, Camera* camera);
+  Collider<Player> GetCollider() const {
+    return collider_;
+  }
+
+  void SetTransform(std::function<void(Transform&)> func) {
+    transform_before_ = transform_;
+    
+    collider_.position.x -= (transform_.position.x + transform_.position_anchor.x);
+    collider_.position.y -= (transform_.position.y + transform_.position_anchor.y);
+
+    func(transform_);
+
+    collider_.position.x = transform_.position.x + transform_.position_anchor.x;
+    collider_.position.y = transform_.position.y + transform_.position_anchor.y;
+  }
+
+  void ResetTransform() {
+    transform_ = transform_before_;
+  }
+
+  void SetCollider(std::function<void(Collider<Player>&)> func) {
+    func(collider_);
+  }
+  
+  Player(GameContext* ctx, SceneContext* scene_ctx);
+  void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
+  void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
+  void OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
 };

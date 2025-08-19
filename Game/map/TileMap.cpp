@@ -9,7 +9,7 @@ import game.scene_object.camera;
 
 TileMap::TileMap() {}
 
-void TileMap::OnUpdate(GameContext* ctx, float delta_time) {
+void TileMap::OnUpdate(GameContext*, float delta_time) {
   for (auto& layer : layers_) {
     for (auto& [index, state] : layer.tile_animation_states_) {
       if (!state.is_playing || state.frames.empty()) continue;
@@ -76,6 +76,26 @@ void TileMap::OnRender(GameContext* ctx, Camera* camera) {
       true);
     render_items.clear();
   }
+
+#if defined(DEBUG) || defined(_DEBUG)
+  // DEBUG render collider
+  std::vector<Rect> rect_view;
+  rect_view.reserve(wall_collider_.GetAll().size());
+  for (const auto& collider : GetWallColliders()) {
+    if (std::holds_alternative<RectCollider>(collider.shape)) {
+      const auto& shape = std::get<RectCollider>(collider.shape);
+      rect_view.push_back({
+        {collider.position.x + shape.x, collider.position.y + shape.y, 0},
+        {collider.position.x + shape.x + shape.width, collider.position.y + shape.y + shape.height, 0},
+        color::red
+      });
+    }
+  }
+
+  ctx->render_resource_manager->renderer->DrawBoxes(rect_view,
+                                                    camera->GetCameraProps(),
+                                                    true);
+#endif
 }
 
 void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, TileRepository* tr) {
@@ -149,7 +169,7 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
           unsigned int tile_id = std::stoul(item);
           tile_ids.push_back((tile_id - 1));
         }
-        catch (const std::exception& e) {
+        catch (const std::exception&) {
           std::cerr << "Invalid tile id: " + item << std::endl;
           assert(false);
         }
@@ -164,10 +184,10 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
 
     for (unsigned int i = 0; i < tile_ids.size(); ++i) {
       if (tile_ids[i] < 0) {
-        layer.tiles.x.push_back(-1);
-        layer.tiles.y.push_back(-1);
-        layer.tiles.u.push_back(-1);
-        layer.tiles.v.push_back(-1);
+        layer.tiles.x.push_back(0);
+        layer.tiles.y.push_back(0);
+        layer.tiles.u.push_back(0);
+        layer.tiles.v.push_back(0);
         layer.tiles.tile_id.push_back(-1);
         continue;
       }
@@ -198,6 +218,40 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
       }
 
       // handle collision
+      std::string layer_class = layerElement->Attribute("class") ? layerElement->Attribute("class") : "";
+
+      if (layer_class == "Wall") {
+        auto result = tr->GetTileCollisionData(tile_ids[i]);
+        if (result.has_value()) {
+          auto collision_data = result.value();
+
+          for (int k = 0; k < collision_data.size(); k++) {
+            ColliderShape shape;
+            if (collision_data[k].is_circle) {
+              shape = CircleCollider{
+                .x = static_cast<float>(collision_data[k].x),
+                .y = static_cast<float>(collision_data[k].y),
+                .radius = static_cast<float>(collision_data[k].width) // 通常 width 為 radius
+              };
+            }
+            else {
+              shape = RectCollider{
+                .x = static_cast<float>(collision_data[k].x),
+                .y = static_cast<float>(collision_data[k].y),
+                .width = static_cast<float>(collision_data[k].width),
+                .height = static_cast<float>(collision_data[k].height)
+              };
+            }
+
+            wall_collider_.Add(Collider<Wall>{
+              .position = {static_cast<float>(x), static_cast<float>(y)},
+              .rotation = 0,
+              .owner = nullptr, // placeholder, wall not own logic
+              .shape = shape,
+            });
+          }
+        }
+      }
     }
     layers_.push_back(layer);
   }

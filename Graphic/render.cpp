@@ -10,7 +10,7 @@ import graphic.texture;
 import graphic.utils.font;
 import graphic.utils.color;
 
-constexpr int LINE_VERTEX_NUM = 6000;
+constexpr int LINE_VERTEX_NUM = 65535;
 
 Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
                    ShaderManager* shader_manager,
@@ -52,7 +52,9 @@ Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
   window_size_ = window_size;
 
   mat_ortho_ =
-    DirectX::XMMatrixOrthographicOffCenterLH(0.0f, window_size_.cx, window_size_.cy, 0.0f, 0.0f, 1.0f);
+    DirectX::XMMatrixOrthographicOffCenterLH(0.0f,
+                                             static_cast<float>(window_size_.cx), static_cast<float>(window_size_.cy),
+                                             0.0f, 0.0f, 1.0f);
 }
 
 void Renderer::CreateRectBuffer(const size_t max_rect_num) {
@@ -371,7 +373,9 @@ void Renderer::DrawLine(const POSITION& start, const POSITION& end, const COLOR&
   device_context_->Draw(vertex_num_, 0);
 }
 
-void Renderer::DrawLines(const std::span<Line> lines) {
+void Renderer::DrawLines(const std::span<Line> lines,
+                         CameraProps camera_props,
+                         bool is_half_pixel_offset_correction) {
   if (lines.empty()) return;
 
   const std::wstring texture_filename = L"assets/block_white.png";
@@ -381,7 +385,7 @@ void Renderer::DrawLines(const std::span<Line> lines) {
 
   shader_manager_->Begin();
 
-  shader_manager_->SetProjectionMatrix(MakeProjectMatrix(window_size_));
+  shader_manager_->SetProjectionMatrix(MakeProjectMatrix(window_size_, camera_props, is_half_pixel_offset_correction));
   shader_manager_->SetWorldMatrix(DirectX::XMMatrixIdentity());
 
   D3D11_MAPPED_SUBRESOURCE msr{};
@@ -412,7 +416,8 @@ void Renderer::DrawLines(const std::span<Line> lines) {
   device_context_->Draw(static_cast<UINT>(lines.size() * 2), 0);
 }
 
-void Renderer::DrawRects(const std::span<Rect> rects) {
+void Renderer::DrawRects(const std::span<Rect> rects,
+                         CameraProps camera_props, bool is_half_pixel_offset_correction) {
   if (rects.empty()) return;
 
   if (rects.size() > rects_buffer_can_store_) {
@@ -426,7 +431,7 @@ void Renderer::DrawRects(const std::span<Rect> rects) {
 
   shader_manager_->Begin();
 
-  shader_manager_->SetProjectionMatrix(MakeProjectMatrix(window_size_));
+  shader_manager_->SetProjectionMatrix(MakeProjectMatrix(window_size_, camera_props, is_half_pixel_offset_correction));
   shader_manager_->SetWorldMatrix(DirectX::XMMatrixIdentity());
 
   // Vertex Buffer
@@ -492,7 +497,7 @@ void Renderer::DrawRects(const std::span<Rect> rects) {
   device_context_->DrawIndexed(static_cast<UINT>(index_count), 0, 0);
 }
 
-void Renderer::DrawBox(Rect rect) {
+void Renderer::DrawBox(Rect rect, CameraProps camera_props, bool is_half_pixel_offset_correction) {
   POSITION left_top = rect.left_top;
   POSITION right_top = {rect.right_bottom.x, rect.left_top.y, 0};
   POSITION left_bottom = {rect.left_top.x, rect.right_bottom.y, 0};
@@ -505,7 +510,23 @@ void Renderer::DrawBox(Rect rect) {
     Line{left_top, left_bottom, rect.color},
   };
 
-  DrawLines(lines);
+  DrawLines(lines, camera_props, is_half_pixel_offset_correction);
+}
+
+void Renderer::DrawBoxes(const std::span<const Rect> boxes,
+                         CameraProps camera_props,
+                         bool is_half_pixel_offset_correction) {
+  std::vector<Line> lines;
+  lines.reserve(boxes.size() * 4);
+
+  for (auto& box : boxes) {
+    lines.push_back({box.left_top, {box.right_bottom.x, box.left_top.y, 0}, box.color});
+    lines.push_back({{box.right_bottom.x, box.left_top.y, 0}, box.right_bottom, box.color});
+    lines.push_back({{box.left_top.x, box.right_bottom.y, 0}, box.right_bottom, box.color});
+    lines.push_back({box.left_top, {box.left_top.x, box.right_bottom.y, 0}, box.color});
+  }
+
+  DrawLines(lines, camera_props, is_half_pixel_offset_correction);
 }
 
 void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props) {
