@@ -156,20 +156,7 @@ void Dx11Wrapper::CreateBlendState() {
 }
 
 void Dx11Wrapper::CreateDepthStencilState() {
-  // 深度ステンシルステート設定
-  D3D11_DEPTH_STENCIL_DESC dsd = {};
-  dsd.DepthFunc = D3D11_COMPARISON_LESS;
-  dsd.StencilEnable = FALSE;
-  dsd.DepthEnable = FALSE; // 無効にする
-  dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-
-  device_->CreateDepthStencilState(&dsd, depth_stencil_state_depth_disable_.GetAddressOf());
-
-  // dsd.DepthEnable = TRUE;
-  // dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-  // g_pDevice->CreateDepthStencilState(&dsd, &g_pDepthStencilStateDepthEnable);
-
-  device_context_->OMSetDepthStencilState(depth_stencil_state_depth_disable_.Get(), NULL);
+  SetEnableDepth(false);
 }
 
 void Dx11Wrapper::CreateViewport() {
@@ -264,4 +251,21 @@ void Dx11Wrapper::SetBlendMultiply(ID3D11DeviceContext* ctx, ID3D11BlendState* s
 
 ResourceManager* Dx11Wrapper::GetResourceManager() const {
   return resource_manager_.get();
+}
+
+void Dx11Wrapper::SetEnableDepth(bool enable) {
+  D3D11_DEPTH_STENCIL_DESC dsd = {};
+  dsd.DepthFunc = D3D11_COMPARISON_LESS;
+  dsd.StencilEnable = FALSE;
+
+  if (enable) {
+    dsd.DepthEnable = TRUE;
+    dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+  }
+  else {
+    dsd.DepthEnable = FALSE; // 無効にする
+    dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+  }
+  device_->CreateDepthStencilState(&dsd, depth_stencil_state_depth_disable_.GetAddressOf());
+  device_context_->OMSetDepthStencilState(depth_stencil_state_depth_disable_.Get(), NULL);
 }

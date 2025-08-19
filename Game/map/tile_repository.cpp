@@ -73,6 +73,11 @@ TileRepository::TileRepository(std::string_view metadata_filepath) {
       assert(false);
     }
 
+    std::string item_class = tile->Attribute("type") ? tile->Attribute("type") : "";
+    if (item_class.size() > 0) {
+      tile_metadata_[tileId].tile_class = item_class;
+    }
+
     // Animation data
     auto* animation = tile->FirstChildElement("animation");
     if (animation) {

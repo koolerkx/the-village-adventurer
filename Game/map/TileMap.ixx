@@ -10,6 +10,7 @@ import game.map.tile_repository;
 import game.scene_object.camera;
 import game.collision.collider;
 import game.collision.object_pool;
+import game.map.field_object;
 
 static constexpr std::size_t MAX_WALL_COUNT = 1024; // TODO: extract
 
@@ -22,13 +23,10 @@ struct MapTile {
 };
 
 struct MapLayer {
-  MapTile tiles;
+  MapTile tiles; ///< Display only tile
   // index -> animation state
   std::unordered_map<unsigned int, TileAnimationState> tile_animation_states_;
 };
-
-// placeholder struct
-export struct Wall {};
 
 export class TileMap {
 private:
@@ -43,7 +41,7 @@ private:
   FixedPoolIndexType texture_id_{0};
 
   // Note: Collider not support scaling
-  ObjectPool<Collider<Wall>, MAX_WALL_COUNT> wall_collider_;
+  FieldObjectPool<MAX_WALL_COUNT> field_object_pool_;
 
 public:
   TileMap();
@@ -53,30 +51,34 @@ public:
   void OnRender(GameContext* ctx, Camera* camera);
 
   void SetTransform(const Transform& t) {
-    wall_collider_.EditAll([&](Collider<Wall>& c) {
+    field_object_pool_.EditAll([&](FieldObject& field_object) {
       std::visit([&]<typename Shape>(Shape&) {
         if constexpr (std::is_same_v<Shape, RectCollider> || std::is_same_v<Shape, CircleCollider>) {
-          c.position.x -= transform_.position.x;
-          c.position.y -= transform_.position.y;
+          field_object.position.x -= transform_.position.x;
+          field_object.position.y -= transform_.position.y;
+          field_object.collider.position.x -= transform_.position.x;
+          field_object.collider.position.y -= transform_.position.y;
         }
-      }, c.shape);
+      }, field_object.collider.shape);
     });
 
     transform_ = t;
-    
-    wall_collider_.EditAll([&](Collider<Wall>& c) {
+
+    field_object_pool_.EditAll([&](FieldObject& field_object) {
       std::visit([&]<typename Shape>(Shape&) {
         if constexpr (std::is_same_v<Shape, RectCollider> || std::is_same_v<Shape, CircleCollider>) {
-          c.position.x += t.position.x;
-          c.position.y += t.position.y;
+          field_object.position.x += transform_.position.x;
+          field_object.position.y += transform_.position.y;
+          field_object.collider.position.x += transform_.position.x;
+          field_object.collider.position.y += transform_.position.y;
         }
-      }, c.shape);
+      }, field_object.collider.shape);
     });
   }
 
   Transform GetTransform() const { return transform_; }
 
-  std::span<Collider<Wall>> GetWallColliders() {
-    return wall_collider_.GetAll();
+  std::span<Collider<FieldObject>> GetColliders() {
+    return field_object_pool_.GetAllCollider();
   }
 };

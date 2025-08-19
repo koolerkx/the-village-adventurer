@@ -118,6 +118,8 @@ private:
   void UpdateState();
   void UpdateAnimation(float delta_time);
 
+  void HandleMovementWithCollision(TileMap* map, float delta_time);
+
 public:
 
   void SetState(PlayerState state);

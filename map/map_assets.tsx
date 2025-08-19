@@ -192,7 +192,7 @@
    <object id="1" x="0" y="2" width="14" height="12"/>
   </objectgroup>
  </tile>
- <tile id="20384">
+ <tile id="20384" type="Chest">
   <properties>
    <property name="loop" type="bool" value="false"/>
    <property name="onstart" type="bool" value="false"/>
@@ -207,7 +207,7 @@
    <frame tileid="20552" duration="250"/>
   </animation>
  </tile>
- <tile id="20385">
+ <tile id="20385" type="Chest">
   <properties>
    <property name="loop" type="bool" value="false"/>
    <property name="onstart" type="bool" value="false"/>
@@ -222,7 +222,7 @@
    <frame tileid="20553" duration="250"/>
   </animation>
  </tile>
- <tile id="20386">
+ <tile id="20386" type="Chest">
   <properties>
    <property name="loop" type="bool" value="false"/>
    <property name="onstart" type="bool" value="false"/>

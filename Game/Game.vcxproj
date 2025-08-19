@@ -33,6 +33,7 @@
         <ClCompile Include="scene_object\player.cpp" />
         <ClCompile Include="scene_object\player.ixx" />
         <ClCompile Include="scene_object\scene_object.ixx" />
+        <ClCompile Include="scene_object\field_object.ixx" />
         <ClCompile Include="types.ixx" />
         <ClCompile Include="input\input_handler.cpp" />
         <ClCompile Include="input\input_handler.ixx" />

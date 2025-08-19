@@ -35,6 +35,10 @@ export struct TileAnimationState {
   float current_frame_time = 0.f;
 };
 
+export struct TileMetaData {
+  std::string tile_class;
+};
+
 export struct CollisionData {
   int x;
   int y;

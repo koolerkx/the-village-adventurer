@@ -12,6 +12,7 @@ private:
   unsigned int tileCount{};
 
   std::unordered_map<unsigned int, TileAnimationData> tile_animated_data_;
+  std::unordered_map<unsigned int, TileMetaData> tile_metadata_;
   std::unordered_map<unsigned int, std::vector<CollisionData>> tile_collision_data_;
 
 public:
@@ -35,6 +36,13 @@ public:
 
   inline std::optional<std::vector<CollisionData>> GetTileCollisionData(unsigned int tileId) const {
     if (auto it = tile_collision_data_.find(tileId); it != tile_collision_data_.end()) {
+      return it->second;
+    }
+    return std::nullopt;
+  }
+
+  inline std::optional<TileMetaData> GetTileMetadata(unsigned int tileId) const {
+    if (auto it = tile_metadata_.find(tileId); it != tile_metadata_.end()) {
       return it->second;
     }
     return std::nullopt;

@@ -6,6 +6,7 @@ import std;
 import game.scene_object.camera;
 import game.scene_game.context;
 import game.collision_handler;
+import game.map.field_object;
 
 // Texture data
 static constexpr std::wstring_view texture_path = L"assets/character_01.png"; // TODO: extract
@@ -57,27 +58,7 @@ void Player::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delta_ti
     };
   }
 
-  // movement
-  SetTransform([=](Transform& t) {
-    t.position.x += velocity_.x * delta_time;
-    // t.position.y += velocity_.y * delta_time;
-  });
-  collision::HandleDetection(GetCollider(), scene_ctx->map->GetWallColliders(),
-                             [&](Player* player_, Wall*, collision::CollisionResult result) {
-                               player_->SetTransform([result](Transform& t) {
-                                 t.position.x += result.mtv.x;
-                               });
-                             });
-  
-  SetTransform([=](Transform& t) {
-    t.position.y += velocity_.y * delta_time;
-  });
-  collision::HandleDetection(GetCollider(), scene_ctx->map->GetWallColliders(),
-                             [&](Player* player_, Wall*, collision::CollisionResult result) {
-                               player_->SetTransform([result](Transform& t) {
-                                 t.position.y += result.mtv.y;
-                               });
-                             });
+  HandleMovementWithCollision(scene_ctx->map, delta_time);
   UpdateState();
 }
 
@@ -167,4 +148,33 @@ void Player::UpdateAnimation(float delta_time) {
 
   uv_.position.x = static_cast<float>((animation_state_.frames[animation_state_.current_frame].u));
   uv_.position.y = static_cast<float>(animation_state_.frames[animation_state_.current_frame].v);
+}
+
+void Player::HandleMovementWithCollision(TileMap* map, float delta_time) {
+  // movement
+  std::span<Collider<FieldObject>> field_objects = map->GetColliders();
+
+  SetTransform([=](Transform& t) {
+    t.position.x += velocity_.x * delta_time;
+  });
+  collision::HandleDetection(GetCollider(), field_objects,
+                             [&](Player* player_, FieldObject* fo, collision::CollisionResult result) {
+                               player_->SetTransform([result](Transform& t) {
+                                 t.position.x += result.mtv.x;
+                               });
+
+                               OnPlayerEnterFieldObject(fo);
+                             });
+
+  SetTransform([=](Transform& t) {
+    t.position.y += velocity_.y * delta_time;
+  });
+  collision::HandleDetection(GetCollider(), field_objects,
+                             [&](Player* player_, FieldObject* fo, collision::CollisionResult result) {
+                               player_->SetTransform([result](Transform& t) {
+                                 t.position.y += result.mtv.y;
+                               });
+
+                               OnPlayerEnterFieldObject(fo);
+                             });
 }
