@@ -9,6 +9,8 @@ import game.map.tile_repository;
 import game.scene_object;
 import game.types;
 import game.collision_handler;
+import game.map.field_object;
+import game.collision.collider;
 
 void GameScene::OnEnter(GameContext* ctx) {
   std::cout << "GameScene> OnEnter" << std::endl;
@@ -52,6 +54,7 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
 
 void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   player_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
+  HandlePlayerMovementAndCollisions(delta_time);
   camera_->UpdatePosition(player_->GetPositionVector(), delta_time);
 }
 
@@ -64,4 +67,35 @@ void GameScene::OnRender(GameContext* ctx) {
 
 void GameScene::OnExit(GameContext*) {
   std::cout << "GameScene> OnExit" << std::endl;
+}
+
+void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
+  const Vector2 velocity = player_->GetVelocity();
+
+  // movement
+  std::span<Collider<FieldObject>> field_objects = map_->GetColliders();
+
+  player_->SetTransform([=](Transform& t) {
+    t.position.x += velocity.x * delta_time;
+  });
+  collision::HandleDetection(player_->GetCollider(), field_objects,
+                             [&](Player* player, FieldObject* fo, collision::CollisionResult result) {
+                               player->SetTransform([result](Transform& t) {
+                                 t.position.x += result.mtv.x;
+                               });
+
+                               OnPlayerEnterFieldObject(fo);
+                             });
+
+  player_->SetTransform([=](Transform& t) {
+    t.position.y += velocity.y * delta_time;
+  });
+  collision::HandleDetection(player_->GetCollider(), field_objects,
+                             [&](Player* player, FieldObject* fo, collision::CollisionResult result) {
+                               player->SetTransform([result](Transform& t) {
+                                 t.position.y += result.mtv.y;
+                               });
+
+                               OnPlayerEnterFieldObject(fo);
+                             });
 }

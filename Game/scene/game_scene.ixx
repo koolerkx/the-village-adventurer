@@ -19,6 +19,8 @@ private:
 
   std::unique_ptr<SceneContext> scene_context = nullptr;
 
+  void HandlePlayerMovementAndCollisions(float delta_time);
+
 public:
   void OnEnter(GameContext* ctx) override;
   void OnUpdate(GameContext* ctx, float delta_time) override;

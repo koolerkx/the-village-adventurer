@@ -58,7 +58,6 @@ void Player::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delta_ti
     };
   }
 
-  HandleMovementWithCollision(scene_ctx->map, delta_time);
   UpdateState();
 }
 
@@ -150,31 +149,6 @@ void Player::UpdateAnimation(float delta_time) {
   uv_.position.y = static_cast<float>(animation_state_.frames[animation_state_.current_frame].v);
 }
 
-void Player::HandleMovementWithCollision(TileMap* map, float delta_time) {
-  // movement
-  std::span<Collider<FieldObject>> field_objects = map->GetColliders();
-
-  SetTransform([=](Transform& t) {
-    t.position.x += velocity_.x * delta_time;
-  });
-  collision::HandleDetection(GetCollider(), field_objects,
-                             [&](Player* player_, FieldObject* fo, collision::CollisionResult result) {
-                               player_->SetTransform([result](Transform& t) {
-                                 t.position.x += result.mtv.x;
-                               });
-
-                               OnPlayerEnterFieldObject(fo);
-                             });
-
-  SetTransform([=](Transform& t) {
-    t.position.y += velocity_.y * delta_time;
-  });
-  collision::HandleDetection(GetCollider(), field_objects,
-                             [&](Player* player_, FieldObject* fo, collision::CollisionResult result) {
-                               player_->SetTransform([result](Transform& t) {
-                                 t.position.y += result.mtv.y;
-                               });
-
-                               OnPlayerEnterFieldObject(fo);
-                             });
+Vector2 Player::GetVelocity() const {
+  return velocity_;
 }
