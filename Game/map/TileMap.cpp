@@ -344,15 +344,17 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
         obj.collider = Collider<FieldObject>{
           .position = {static_cast<float>(x), static_cast<float>(y)},
           .rotation = 0,
-          .owner = &obj,
+          .owner = nullptr,
           .shape = shape,
         };
 
-        auto result = field_object_pool_.Insert(obj);
+        auto result = field_object_pool_.Insert(std::move(obj));
 
         if (!result.has_value()) {
           assert(false);
         }
+        auto inserted = field_object_pool_.Get(result.value());
+        inserted->collider.owner = inserted; // HACK: workaround handle the object lifecycle
       }
     }
     layers_.push_back(layer);
