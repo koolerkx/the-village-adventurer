@@ -30,18 +30,34 @@ export struct SkillHitbox {
   size_t current_frame = 0;
   float current_frame_time = 0.f;
 
-  SkillData* data = nullptr;
+  const SkillData* data = nullptr;
+};
+
+enum class SKILL_TYPE {
+  NORMAL_ATTACK,
+};
+
+const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
+  {
+    SKILL_TYPE::NORMAL_ATTACK, {
+      .name = "Normal Attack",
+      .cooldown = 1.0f,
+      .frames = scene_object::MakeFramesVector(9, 120, 160, 9, 2688, 0),
+      .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 1),
+    }
+  }
 };
 
 export class SkillManager {
 private:
   FixedPoolIndexType texture_id;
-  std::vector<SkillData> skill_data_;
   ObjectPool<SkillHitbox> skill_pool_;
   
 public:
   SkillManager(GameContext* ctx);
   void OnUpdate(GameContext* ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, float delta_time);
-  void OnRender(GameContext* ctx, Camera* camera);  
+  void OnRender(GameContext* ctx, Camera* camera);
+
+  void PlaySkill(SKILL_TYPE type, Vector2 position, float rotation = 0);
 };
