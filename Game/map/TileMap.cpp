@@ -36,6 +36,33 @@ void TileMap::OnUpdate(GameContext*, float delta_time) {
       layer.tiles.v[index] = state.frames[state.current_frame].v;
     }
   }
+
+  field_object_pool_.EditAll([delta_time](FieldObject& field_object) {
+      auto& state = field_object.animation_state;
+      if (!state.is_playing || state.frames.empty()) return;
+      state.current_frame_time += delta_time;
+
+      if (state.current_frame_time < state.frame_durations[state.current_frame]) return;
+
+      // next frame
+      state.current_frame_time -= state.frame_durations[state.current_frame];
+      state.current_frame++;
+
+      // end frame handle
+      if (state.current_frame >= state.frames.size()) {
+        if (state.is_loop) {
+          state.current_frame = 0;
+        }
+        else {
+          state.current_frame = state.frames.size() - 1;
+          state.is_playing = false;
+        }
+      }
+
+      field_object.tile.uv.u = state.frames[state.current_frame].u;
+      field_object.tile.uv.v = state.frames[state.current_frame].v;
+    }
+  );
 }
 
 void TileMap::OnRender(GameContext* ctx, Camera* camera) {
@@ -111,17 +138,8 @@ void TileMap::OnRender(GameContext* ctx, Camera* camera) {
 #if defined(DEBUG) || defined(_DEBUG)
   // DEBUG render collider
   std::vector<Rect> rect_view;
-  rect_view.reserve(wall_collider_.GetAll().size() + field_object_pool_.GetAll().size());
-  for (const auto& collider : GetWallColliders()) {
-    if (std::holds_alternative<RectCollider>(collider.shape)) {
-      const auto& shape = std::get<RectCollider>(collider.shape);
-      rect_view.push_back({
-        {collider.position.x + shape.x, collider.position.y + shape.y, 0},
-        {collider.position.x + shape.x + shape.width, collider.position.y + shape.y + shape.height, 0},
-        color::red
-      });
-    }
-  }
+  rect_view.reserve(field_object_pool_.GetAll().size());
+
   for (const auto& field_object : field_object_pool_.GetAll()) {
     auto& collider = field_object.collider;
     if (std::holds_alternative<RectCollider>(collider.shape)) {
@@ -240,109 +258,111 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
 
       TileUV uv = tr->GetUvById(tile_ids[i]);
 
-      if (layer_class == "Object") {
-        if (!tr->GetTileMetadata(tile_ids[i]).has_value()) return;
+      if (layer_class != "Object" && layer_class != "Wall") {
+        layer.tiles.x.push_back(x);
+        layer.tiles.y.push_back(y);
+        layer.tiles.u.push_back(uv.u);
+        layer.tiles.v.push_back(uv.v);
+        layer.tiles.tile_id.push_back(tile_ids[i]);
 
-        TileMetaData data = tr->GetTileMetadata(tile_ids[i]).value();
+        // animation data and make tile anim state
+        if (std::optional<TileAnimationData> tile_animation_data = tr->GetTileAnimatedData(tile_ids[i]);
+          tile_animation_data.has_value()) {
+          TileAnimationData data = tile_animation_data.value();
 
-        if (data.tile_class == "Chest") {
-          std::optional<TileAnimationData> tile_animation_data = tr->GetTileAnimatedData(tile_ids[i]);
-          std::optional<std::vector<CollisionData>> tile_collision_data = tr->GetTileCollisionData(tile_ids[i]);
-          if (!tile_animation_data.has_value()) continue;
-          auto anim_data = tile_animation_data.value();
-
-          if (!tile_collision_data.has_value()) continue;
-          auto collision_data = tile_collision_data.value()[0];
-
-          auto shape = RectCollider{
-            .x = static_cast<float>(collision_data.x),
-            .y = static_cast<float>(collision_data.y),
-            .width = static_cast<float>(collision_data.width),
-            .height = static_cast<float>(collision_data.height)
+          layer.tile_animation_states_[i] = {
+            .is_loop = data.is_loop,
+            .play_on_start = data.play_on_start,
+            .is_playing = data.play_on_start,
+            .frames = data.frames,
+            .frame_durations = data.frame_durations
           };
-
-          field_object_pool_.Add(FieldObject{
-            {static_cast<float>(x), static_cast<float>(y)},
-            uv,
-            TileAnimationState{
-              .is_loop = anim_data.is_loop,
-              .is_playing = anim_data.play_on_start,
-              .frames = anim_data.frames,
-              .frame_durations = anim_data.frame_durations
-            },
-            Collider<FieldObject>{
-              .position = {static_cast<float>(x), static_cast<float>(y)},
-              .rotation = 0,
-              .owner = nullptr, // placeholder, wall not own logic
-              .shape = shape,
-            },
-            Chest{}
-          });
         }
 
         continue;
       }
 
-      layer.tiles.x.push_back(x);
-      layer.tiles.y.push_back(y);
-      layer.tiles.u.push_back(uv.u);
-      layer.tiles.v.push_back(uv.v);
-      layer.tiles.tile_id.push_back(tile_ids[i]);
+      // handle field object
 
-      // animation data and make tile anim state
-      if (std::optional<TileAnimationData> tile_animation_data = tr->GetTileAnimatedData(tile_ids[i]);
-        tile_animation_data.has_value()) {
-        TileAnimationData data = tile_animation_data.value();
+      FieldObject obj;
 
-        layer.tile_animation_states_[i] = {
-          .is_loop = data.is_loop,
-          .play_on_start = data.play_on_start,
-          .is_playing = data.play_on_start,
-          .frames = data.frames,
-          .frame_durations = data.frame_durations
+      obj.position = {static_cast<float>(x), static_cast<float>(y)};
+      obj.tile = {uv};
+
+      if (layer_class == "Wall") {
+        obj.type = FieldObjectType::WALL;
+      }
+      else if (layer_class == "Object") {
+        std::optional<TileMetaData> tile_metadata = tr->GetTileMetadata(tile_ids[i]);
+        if (tile_metadata.has_value()) {
+          obj.metadata = tile_metadata.value();
+        }
+
+        if (obj.metadata.tile_class == "Chest") {
+          obj.type = FieldObjectType::CHEST;
+        }
+      }
+      else {
+        continue;
+      }
+
+      std::optional<TileAnimationData> tile_animation_data = tr->GetTileAnimatedData(tile_ids[i]);
+      if (tile_animation_data.has_value()) {
+        auto anim_data = tile_animation_data.value();
+        obj.animation_state = TileAnimationState{
+          .is_loop = anim_data.is_loop,
+          .is_playing = anim_data.play_on_start,
+          .frames = anim_data.frames,
+          .frame_durations = anim_data.frame_durations
         };
       }
 
-      // handle collision
-      if (layer_class == "Wall") {
-        auto result = tr->GetTileCollisionData(tile_ids[i]);
-        if (result.has_value()) {
-          auto collision_data = result.value();
+      std::optional<std::vector<CollisionData>> tile_collision_data = tr->GetTileCollisionData(tile_ids[i]);
+      if (!tile_collision_data.has_value()) continue;
+      auto collision_data = tile_collision_data.value();
 
-          for (int k = 0; k < collision_data.size(); k++) {
-            ColliderShape shape;
-            if (collision_data[k].is_circle) {
-              shape = CircleCollider{
-                .x = static_cast<float>(collision_data[k].x),
-                .y = static_cast<float>(collision_data[k].y),
-                .radius = static_cast<float>(collision_data[k].width) // 通常 width 為 radius
-              };
-            }
-            else {
-              shape = RectCollider{
-                .x = static_cast<float>(collision_data[k].x),
-                .y = static_cast<float>(collision_data[k].y),
-                .width = static_cast<float>(collision_data[k].width),
-                .height = static_cast<float>(collision_data[k].height)
-              };
-            }
-
-            wall_collider_.Add(Collider<Wall>{
-              .position = {static_cast<float>(x), static_cast<float>(y)},
-              .rotation = 0,
-              .owner = nullptr, // placeholder, wall not own logic
-              .shape = shape,
-            });
-          }
+      for (int k = 0; k < collision_data.size(); k++) {
+        ColliderShape shape;
+        if (collision_data[k].is_circle) {
+          shape = CircleCollider{
+            .x = static_cast<float>(collision_data[k].x),
+            .y = static_cast<float>(collision_data[k].y),
+            .radius = static_cast<float>(collision_data[k].width) // 通常 width 為 radius
+          };
         }
+        else {
+          shape = RectCollider{
+            .x = static_cast<float>(collision_data[k].x),
+            .y = static_cast<float>(collision_data[k].y),
+            .width = static_cast<float>(collision_data[k].width),
+            .height = static_cast<float>(collision_data[k].height)
+          };
+        }
+
+        obj.collider = Collider<FieldObject>{
+          .position = {static_cast<float>(x), static_cast<float>(y)},
+          .rotation = 0,
+          .owner = &obj,
+          .shape = shape,
+        };
+
+        field_object_pool_.Add(std::move(obj));
       }
     }
     layers_.push_back(layer);
   }
 
   // TODO: Handle layer
-  for (auto* objectGroup = mapElement->FirstChildElement("objectgroup"); objectGroup; objectGroup = objectGroup->
-       NextSiblingElement("objectgroup")) {
+  for
+  (
+    auto* objectGroup = mapElement->FirstChildElement("objectgroup");
+    objectGroup;
+    objectGroup = objectGroup
+    ->
+    NextSiblingElement(
+      "objectgroup"
+    )
+  ) {
     for (auto* object = objectGroup->FirstChildElement("object"); object; object = object->
          NextSiblingElement("object")) {
       // unsigned int id = object->UnsignedAttribute("id", 0);
