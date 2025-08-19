@@ -27,7 +27,9 @@ export void OnPlayerEnterFieldObject(FieldObject* field_object) {
     std::cout << "WALL HIT" << std::endl;
   }
   else if (field_object->type == FieldObjectType::CHEST) {
-    field_object->animation_state.is_playing = true;
-    field_object->animation_state.current_frame_time += field_object->animation_state.frame_durations[0];
+    if (!field_object->animation_state.is_playing) {
+      field_object->animation_state.is_playing = true;
+      field_object->animation_state.current_frame_time += field_object->animation_state.frame_durations[0];
+    }
   }
 };
