@@ -41,11 +41,13 @@ void Player::OnUpdate(GameContext* ctx, SceneContext*, float delta_time) {
   if (ctx->input_handler->GetKey(KeyCode::KK_S)) direction_.y += 1.0f;
   if (ctx->input_handler->GetKey(KeyCode::KK_A)) direction_.x -= 1.0f;
   if (ctx->input_handler->GetKey(KeyCode::KK_D)) direction_.x += 1.0f;
+  
+  // if (ctx->input_handler->GetKey(KeyCode::KK_SPACE)) handle_new_attack(ATTACK_TYPE::NORMAL);
 
   UpdateAnimation(delta_time);
 }
 
-void Player::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delta_time) {
+void Player::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
   // apply input to velocity
   if (direction_.x == 0 && direction_.y == 0) {
     velocity_ = {0, 0};

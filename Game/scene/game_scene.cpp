@@ -11,6 +11,7 @@ import game.types;
 import game.collision_handler;
 import game.map.field_object;
 import game.collision.collider;
+import game.scene_object.skill;
 
 void GameScene::OnEnter(GameContext* ctx) {
   std::cout << "GameScene> OnEnter" << std::endl;
@@ -43,6 +44,10 @@ void GameScene::OnEnter(GameContext* ctx) {
   // Scene
   scene_context.reset(new SceneContext());
   scene_context->map = map_.get();
+
+  // Skill
+  skill_manager_ = std::make_unique<SkillManager>(ctx);
+  scene_context->skill_manager = skill_manager_.get();
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {

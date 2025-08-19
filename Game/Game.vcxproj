@@ -29,6 +29,8 @@
         <ClCompile Include="map\tile_repository.ixx" />
         <ClCompile Include="map\tinyxml\tinyxml2.cpp" />
         <ClCompile Include="map\tinyxml\tinyxml2.h" />
+        <ClCompile Include="scene_object\skill_manager.cpp" />
+        <ClCompile Include="scene_object\skill_manager.ixx" />
         <ClCompile Include="scene_object\camera.ixx" />
         <ClCompile Include="scene_object\player.cpp" />
         <ClCompile Include="scene_object\player.ixx" />
