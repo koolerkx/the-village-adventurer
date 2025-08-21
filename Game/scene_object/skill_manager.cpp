@@ -9,12 +9,12 @@ SkillManager::SkillManager(GameContext* ctx) {
   scene_object::LoadTexture(texture_id, texture_path, ctx->render_resource_manager->texture_manager.get());\
 }
 
-void SkillManager::OnUpdate(GameContext* ctx, float delta_time) {
+void SkillManager::OnUpdate(GameContext*, float delta_time) {
   // hitbox_pool_.RemoveIf([](SkillHitbox& hitbox) {
   //   return !hitbox.is_playing;
   // });
 
-  hitbox_pool_.ForEach([delta_time](SkillHitbox& hitbox, ObjectPoolIndexType idx) {
+  hitbox_pool_.ForEach([delta_time](SkillHitbox& hitbox, ObjectPoolIndexType) {
     scene_object::AnimationState state{
       .is_loop = false,
       .play_on_start = false,
@@ -33,7 +33,7 @@ void SkillManager::OnUpdate(GameContext* ctx, float delta_time) {
   });
 }
 
-void SkillManager::OnFixedUpdate(GameContext* ctx, float delta_time) {}
+void SkillManager::OnFixedUpdate(GameContext*, float) {}
 
 void SkillManager::OnRender(GameContext* ctx, Camera* camera, Transform player_transform) {
   auto rr = ctx->render_resource_manager->renderer.get();

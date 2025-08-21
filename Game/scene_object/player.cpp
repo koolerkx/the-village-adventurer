@@ -60,7 +60,7 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
   UpdateAnimation(delta_time);
 }
 
-void Player::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
+void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {
   // apply input to velocity
   if (direction_.x == 0 && direction_.y == 0) {
     velocity_ = {0, 0};

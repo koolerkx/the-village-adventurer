@@ -51,7 +51,7 @@ const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
       .base_transform = Transform{
         .size = {36, 36},
         .scale = {1, 1},
-        .rotation_radian = 90.0f * std::numbers::pi / 180.0f,
+        .rotation_radian = 90.0f * static_cast<float>(std::numbers::pi) / 180.0f,
         .rotation_pivot = {0, 2, 0},
         .position_anchor = {-18, -20, 0},
       },
