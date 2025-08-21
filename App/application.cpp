@@ -150,6 +150,8 @@ bool Application::Init() {
   std::unique_ptr<GameContext> initial_context = std::make_unique<GameContext>();
   initial_context->render_resource_manager = direct3d_->GetResourceManager();
   initial_context->input_handler = input_handler_.get();
+  initial_context->window_width = win_size_.cx;
+  initial_context->window_height = win_size_.cy;
 
   SceneManager::Init(std::move(
                        std::make_unique<TitleScene>()
