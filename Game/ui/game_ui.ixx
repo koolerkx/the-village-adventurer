@@ -20,6 +20,7 @@ std::unordered_map<std::string, UV> texture_map = {
 
   // Event Log
   {"Block", UV{{96, 297}, {8, 8}}},
+  {"TimerBackground", UV{{215, 272}, {119, 17}}},
 };
 export class GameUI {
 private:
@@ -33,6 +34,7 @@ private:
     L"プレイヤーが200HP回復した",
     L"プレイヤーが200ゴールドもらった",
   };
+  std::wstring timer_text_ = L"12:34";
   Font* default_font_;
 public:
   GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_path);

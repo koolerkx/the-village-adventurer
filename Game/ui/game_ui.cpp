@@ -67,6 +67,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     },
     texture_map["HPBarFrame"], color::white
   });
+
   // Session: Left Bottom
   // Event log: Background
   render_items.emplace_back(RenderInstanceItem{
@@ -76,6 +77,17 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .position_anchor = {0, static_cast<float>(ctx->window_height), 0}
     },
     texture_map["Block"], color::setOpacity(color::black, 0.25f)
+  });
+
+  // Session: Center Upper
+  // Timer: Background
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {-315 / 2, 24, 0},
+      .size = {315, 45},
+      .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
+    },
+    texture_map["TimerBackground"], color::white
   });
   // On Top of instanced Draw
   // Session: Left Upper
@@ -104,5 +116,19 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .pixel_size = 12.0f,
                  .letter_spacing = 0.0f,
                  .line_height = 22.0f
+               });
+
+  // Session: Center Upper
+  // Timer: text
+  StringSpriteSize timer_size = default_font_->GetStringSize(timer_text_, {}, {32.0f});
+  rr->DrawFont(timer_text_, font_key_,
+               Transform{
+                 .position = {-timer_size.width / 2, 37, 0},
+                 .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
+               }, StringSpriteProps{
+                 .pixel_size = 32.0f,
+                 .letter_spacing = 0.0f,
+                 .line_height = 0.0f,
+                 .color = color::white
                });
 }
