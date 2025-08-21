@@ -18,12 +18,21 @@ std::unordered_map<std::string, UV> texture_map = {
   {"HPBar", UV{{224, 128}, {120, 8}}},
   {"HPBarFrame", UV{{224, 112}, {128, 16}}},
 
+  // Event Log
+  {"Block", UV{{96, 297}, {8, 8}}},
 };
 export class GameUI {
 private:
   FixedPoolIndexType texture_id_;
   std::wstring font_key_;
 
+  std::vector<std::wstring> text_list_ = {
+    L"プレイヤーが200ダメージ受けた",
+    L"プレイヤーが斬撃を出した",
+    L"スライムが200ダメージ受けた",
+    L"プレイヤーが200HP回復した",
+    L"プレイヤーが200ゴールドもらった",
+  };
   Font* default_font_;
 public:
   GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_path);

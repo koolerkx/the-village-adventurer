@@ -67,6 +67,16 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     },
     texture_map["HPBarFrame"], color::white
   });
+  // Session: Left Bottom
+  // Event log: Background
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {24, -204, 0},
+      .size = {320, 180},
+      .position_anchor = {0, static_cast<float>(ctx->window_height), 0}
+    },
+    texture_map["Block"], color::setOpacity(color::black, 0.25f)
+  });
   // On Top of instanced Draw
   // Session: Left Upper
   // HP Bar: Player Name
@@ -76,5 +86,23 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .pixel_size = 14.0f,
                  .letter_spacing = 0.0f,
                  .line_height = 0.0f
+               });
+
+  // Session: Left Bottom
+  // Event log: log text
+  // TODO: Assign color to different event
+  wss.str(L"");
+  wss.clear();
+  for (auto text : text_list_) {
+    wss << text << "\n";
+  }
+  rr->DrawFont(wss.str(), font_key_,
+               Transform{
+                 .position = {34, -194, 0},
+                 .position_anchor = {0, static_cast<float>(ctx->window_height), 0}
+               }, StringSpriteProps{
+                 .pixel_size = 12.0f,
+                 .letter_spacing = 0.0f,
+                 .line_height = 22.0f
                });
 }
