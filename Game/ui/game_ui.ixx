@@ -34,6 +34,17 @@ std::unordered_map<std::string, UV> texture_map = {
   // Coin
   {"CoinWithoutStroke", UV{{476, 41}, {16, 18}}},
   {"Coin", UV{{492, 41}, {16, 18}}},
+
+  // Input Hint
+  {"Corner", UV{{129, 242}, {33, 15}}},
+  {"KeyboardWDown", UV{{96, 499}, {16, 16}}},
+  {"KeyboardADown", UV{{0, 467}, {16, 16}}},
+  {"KeyboardSDown", UV{{32, 499}, {16, 16}}},
+  {"KeyboardDDown", UV{{48, 467}, {16, 16}}},
+  {"KeyboardWUp", UV{{96, 387}, {16, 16}}},
+  {"KeyboardAUp", UV{{0, 355}, {16, 16}}},
+  {"KeyboardSUp", UV{{32, 387}, {16, 16}}},
+  {"KeyboardDUp", UV{{48, 355}, {16, 16}}},
 };
 
 export class GameUI {

@@ -155,6 +155,66 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     texture_map["Coin"], color::white
   });
 
+  // Session: Right Bottom
+  // Input Hint: Background
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {-24 - 224, -24 - 98, 0},
+      .size = {224, 98},
+      .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
+    },
+    texture_map["Block"], color::setOpacity(color::black, 0.25f)
+  });
+  // Input Hint: Corner
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {-24 - 224 + 8, -24 - 98 + 8, 0},
+      .size = {49, 22},
+      .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
+    },
+    texture_map["Corner"], color::white
+  });
+  // Input Hint: Key
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {-24 - 224 + 106, -24 - 98 + 50, 0},
+      .size = {20, 20},
+      .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
+    },
+    texture_map["KeyboardWUp"], color::white
+  });
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {-24 - 224 + 126, -24 - 98 + 50, 0},
+      .size = {20, 20},
+      .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
+    },
+    texture_map["KeyboardAUp"], color::white
+  });
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {-24 - 224 + 146, -24 - 98 + 50, 0},
+      .size = {20, 20},
+      .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
+    },
+    texture_map["KeyboardSUp"], color::white
+  });
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {-24 - 224 + 166, -24 - 98 + 50, 0},
+      .size = {20, 20},
+      .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
+    },
+    texture_map["KeyboardDUp"], color::white
+  });
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {-24 - 224 + 106, -24 - 98 + 74, 0},
+      .size = {40, 20},
+      .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
+    },
+    texture_map["KeyboardSpaceUp"], color::white
+  });
 
   rr->DrawSpritesInstanced(render_items, texture_id_, {}, true);
 
@@ -226,6 +286,37 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .position_anchor = {static_cast<float>(ctx->window_width), 0, 0}
                }, StringSpriteProps{
                  .pixel_size = 22.0f,
+                 .letter_spacing = 0.0f,
+                 .line_height = 0.0f,
+                 .color = color::white
+               });
+
+  rr->DrawFont(L"操作説明", font_key_,
+               Transform{
+                 .position = {-24 - 224 + 32, -24 - 98 + 26, 0},
+                 .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
+               }, StringSpriteProps{
+                 .pixel_size = 16.0f,
+                 .letter_spacing = 0.0f,
+                 .line_height = 0.0f,
+                 .color = color::white
+               });
+  rr->DrawFont(L"移動する", font_key_,
+               Transform{
+                 .position = {-24 - 224 + 32, -24 - 98 + 50, 0},
+                 .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
+               }, StringSpriteProps{
+                 .pixel_size = 16.0f,
+                 .letter_spacing = 0.0f,
+                 .line_height = 0.0f,
+                 .color = color::white
+               });
+  rr->DrawFont(L"攻撃する", font_key_,
+               Transform{
+                 .position = {-24 - 224 + 32, -24 - 98 + 74, 0},
+                 .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
+               }, StringSpriteProps{
+                 .pixel_size = 16.0f,
                  .letter_spacing = 0.0f,
                  .line_height = 0.0f,
                  .color = color::white
