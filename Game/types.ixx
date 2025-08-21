@@ -51,3 +51,10 @@ export struct Vector2 {
   float x = .0f;
   float y = .0f;
 };
+
+export struct Padding {
+  float top = .0f;
+  float right = .0f;
+  float bottom = .0f;
+  float left = .0f;
+};

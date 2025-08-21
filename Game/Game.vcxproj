@@ -41,6 +41,7 @@
         <ClCompile Include="input\input_handler.ixx" />
         <ClCompile Include="input\keyboard.cpp" />
         <ClCompile Include="input\key_logger.cpp" />
+        <ClCompile Include="utils\throttle.ixx" />
     </ItemGroup>
     <ItemGroup>
         <ClInclude Include="input\keyboard.h" />

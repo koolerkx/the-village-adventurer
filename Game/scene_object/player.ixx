@@ -15,6 +15,7 @@ import game.collision.collider;
 import game.map;
 import game.scene_game.context;
 import game.map.field_object;
+import game.utils.throttle;
 
 export enum class PlayerState: unsigned char {
   IDLE_LEFT,
@@ -112,12 +113,15 @@ private:
   COLOR color_ = color::white;
 
   Vector2 direction_;
+  Vector2 direction_facing_ = {0, 1}; // default facing down
   Vector2 velocity_;
 
   float move_speed_ = 125.0f; // px per second
 
   void UpdateState();
   void UpdateAnimation(float delta_time);
+
+  Throttle attack_throttle_{0.3f};
 
 public:
   void SetState(PlayerState state);
@@ -127,6 +131,8 @@ public:
   Collider<Player> GetCollider() const {
     return collider_;
   }
+
+  Transform GetTransform() const { return transform_; }
 
   void SetTransform(std::function<void(Transform&)> func) {
     transform_before_ = transform_;

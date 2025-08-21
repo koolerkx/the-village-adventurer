@@ -529,6 +529,27 @@ void Renderer::DrawBoxes(const std::span<const Rect> boxes,
   DrawLines(lines, camera_props, is_half_pixel_offset_correction);
 }
 
+
+void Renderer::DrawPolygon(const std::array<POSITION, 4>& points,
+                           COLOR color,
+                           CameraProps camera_props,
+                           bool is_half_pixel_offset_correction) {
+  std::vector<Line> lines;
+  lines.reserve(4);
+
+  POSITION left_top = points[0];
+  POSITION right_top = points[1];
+  POSITION right_bottom = points[2];
+  POSITION left_bottom = points[3];
+
+  lines.push_back({left_top, right_top, color});
+  lines.push_back({right_top, right_bottom, color});
+  lines.push_back({right_bottom, left_bottom, color});
+  lines.push_back({left_bottom, left_top, color});
+
+  DrawLines(lines, camera_props, is_half_pixel_offset_correction);
+}
+
 void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props) {
   Font* font = Font::GetFont(font_key);
 

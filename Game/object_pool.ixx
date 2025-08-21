@@ -72,6 +72,27 @@ public:
     }
   }
 
+  template <typename Func>
+  void RemoveIf(Func&& fn) {
+    for (int i = static_cast<int>(alive_indices_.size()) - 1; i >= 0; --i) {
+      Index idx = alive_indices_[i];
+      T& item = data_[idx];
+
+      if constexpr (std::is_invocable_v<Func, T&>) {
+        if (fn(item)) {
+          alive_indices_.erase(alive_indices_.begin() + i);
+          free_list_.push_back(idx);
+        }
+      }
+      else if constexpr (std::is_invocable_v<Func, T&, Index>) {
+        if (fn(item, idx)) {
+          alive_indices_.erase(alive_indices_.begin() + i);
+          free_list_.push_back(idx);
+        }
+      }
+    }
+  }
+
   T* Get(Index idx) {
     return idx < Max && alive_[idx] ? &data_[idx] : nullptr;
   }
@@ -90,14 +111,19 @@ public:
     func(data_[idx]);
   }
 
-  std::size_t Size() {
+  std::size_t Size() const {
     return alive_indices_.size();
   }
 
   template <typename Func>
   void ForEach(Func&& fn) {
     for (Index idx : alive_indices_) {
-      fn(data_[idx]);
+      if constexpr (std::is_invocable_v<Func, T&>) {
+        fn(data_[idx]);
+      }
+      else if constexpr (std::is_invocable_v<Func, T&, Index>) {
+        fn(data_[idx], idx);
+      }
     }
   }
 

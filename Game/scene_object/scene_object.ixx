@@ -6,6 +6,7 @@ import std;
 import graphic.direct3D;
 import game.types;
 import graphic.utils.types;
+import game.collision.collider;
 
 export namespace scene_object {
   void LoadTexture(FixedPoolIndexType& id, const std::wstring_view texture_path, TextureManager* tm) {
@@ -86,5 +87,43 @@ export namespace scene_object {
       | std::views::transform([=](int) -> float {
         return duration_per_frame;
       }) | std::ranges::to<std::vector>();
+  }
+
+  float GetPlayerRotationByDirection(Vector2 direction) {
+    if (direction.x == 0.0f && direction.y == 0.0f)
+      return 0.0f;
+
+    return std::atan2(direction.y, direction.x);
+  }
+
+  Vector2 RotateAroundPivot(Vector2 p, Vector2 pivot, float rad) {
+    float s = std::sin(rad), c = std::cos(rad);
+    float ux = p.x - pivot.x, uy = p.y - pivot.y;
+    return {ux * c - uy * s + pivot.x, ux * s + uy * c + pivot.y};
+  }
+
+  std::array<Vector2, 4> GetRotatedPoints(const RectCollider shape, Vector2 pivot, float rotation) {
+    const std::array<Vector2, 4> corners = {
+      Vector2{shape.x, shape.y},                              // left-top
+      Vector2{shape.x + shape.width, shape.y},                // right-top
+      Vector2{shape.x + shape.width, shape.y + shape.height}, // right-bottom
+      Vector2{shape.x, shape.y + shape.height}                // left-bottom
+    };
+
+    // const float angleRad = rotationDeg * static_cast<float>(std::numbers::pi) / 180.0f;
+    const float cosA = std::cos(rotation);
+    const float sinA = std::sin(rotation);
+
+    std::array<Vector2, 4> out{};
+    for (size_t i = 0; i < corners.size(); ++i) {
+      const float tx = corners[i].x - pivot.x;
+      const float ty = corners[i].y - pivot.y;
+
+      const float rx = tx * cosA - ty * sinA;
+      const float ry = tx * sinA + ty * cosA;
+
+      out[i] = {rx + pivot.x, ry + pivot.y};
+    }
+    return out;
   }
 }

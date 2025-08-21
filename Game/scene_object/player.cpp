@@ -7,6 +7,8 @@ import game.scene_object.camera;
 import game.scene_game.context;
 import game.collision_handler;
 import game.map.field_object;
+import game.scene_object.skill;
+import game.utils.throttle;
 
 // Texture data
 static constexpr std::wstring_view texture_path = L"assets/character_01.png"; // TODO: extract
@@ -34,15 +36,26 @@ Player::Player(GameContext* ctx, SceneContext*) {
   };
 }
 
-void Player::OnUpdate(GameContext* ctx, SceneContext*, float delta_time) {
+void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
   // Handle Input
   direction_ = {0, 0};
   if (ctx->input_handler->GetKey(KeyCode::KK_W)) direction_.y -= 1.0f;
   if (ctx->input_handler->GetKey(KeyCode::KK_S)) direction_.y += 1.0f;
   if (ctx->input_handler->GetKey(KeyCode::KK_A)) direction_.x -= 1.0f;
   if (ctx->input_handler->GetKey(KeyCode::KK_D)) direction_.x += 1.0f;
-  
-  // if (ctx->input_handler->GetKey(KeyCode::KK_SPACE)) handle_new_attack(ATTACK_TYPE::NORMAL);
+
+  if (direction_.x != 0 || direction_.y != 0) {
+    direction_facing_ = direction_;
+  }
+
+  const float player_rotation = scene_object::GetPlayerRotationByDirection(direction_facing_); // Right = 0
+
+  if (ctx->input_handler->GetKey(KeyCode::KK_SPACE) && attack_throttle_.CanCall())
+    scene_ctx->skill_manager->PlaySkill(
+      SKILL_TYPE::NORMAL_ATTACK,
+      {transform_.position.x, transform_.position.y},
+      player_rotation
+    );
 
   UpdateAnimation(delta_time);
 }
