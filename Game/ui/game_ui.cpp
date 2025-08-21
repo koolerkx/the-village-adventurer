@@ -98,7 +98,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .size = {122, 32},
       .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
     },
-    texture_map["AttackHintBackground"], color::white
+    texture_map["RoundBackground"], color::white
   });
   // Attack Hint: Space bar
   render_items.emplace_back(RenderInstanceItem{
@@ -134,6 +134,27 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       texture_map["SkillSelected"], color::white
     });
   }
+
+  // Session: Right Upper
+  // Coin: Background
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {-24 - 182, 24, 0},
+      .size = {182, 46},
+      .position_anchor = {static_cast<float>(ctx->window_width), 0, 0}
+    },
+    texture_map["RoundBackground"], color::white
+  });
+  // Coin: Icon
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {-24 - 182 + 18, 32, 0},
+      .size = {24, 28},
+      .position_anchor = {static_cast<float>(ctx->window_width), 0, 0}
+    },
+    texture_map["Coin"], color::white
+  });
+
 
   rr->DrawSpritesInstanced(render_items, texture_id_, {}, true);
 
@@ -192,5 +213,21 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .pixel_size = 12.0f,
                  .letter_spacing = 0.0f,
                  .line_height = 22.0f
+               });
+
+  // Session: Right Upper
+  // Coin: Text
+  wss.str(L"");
+  wss << L"コイン " << coin_text_;
+
+  rr->DrawFont(wss.str(), font_key_,
+               Transform{
+                 .position = {-24 - 182 + 45, 35, 0},
+                 .position_anchor = {static_cast<float>(ctx->window_width), 0, 0}
+               }, StringSpriteProps{
+                 .pixel_size = 22.0f,
+                 .letter_spacing = 0.0f,
+                 .line_height = 0.0f,
+                 .color = color::white
                });
 }

@@ -23,14 +23,17 @@ std::unordered_map<std::string, UV> texture_map = {
   {"TimerBackground", UV{{215, 272}, {119, 17}}},
 
   // Attack Hint
-  {"AttackHintBackground", UV{{223, 146}, {64, 16}}},
+  {"RoundBackground", UV{{223, 146}, {64, 16}}},
   {"KeyboardSpaceUp", UV{{96, 563}, {32, 16}}},
   {"KeyboardSpaceDown", UV{{96, 627}, {32, 16}}},
 
   // Skill
   {"SkillSlot", UV{{384, 82}, {34, 34}}},
   {"SkillSelected", UV{{384, 140}, {26, 26}}},
-  
+
+  // Coin
+  {"CoinWithoutStroke", UV{{476, 41}, {16, 18}}},
+  {"Coin", UV{{492, 41}, {16, 18}}},
 };
 
 export class GameUI {
@@ -51,6 +54,7 @@ private:
   int skill_count_ = 3;
   int skill_selected_ = 0;
 
+  int coin_text_ = 987;
 
 public:
   GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_path);
