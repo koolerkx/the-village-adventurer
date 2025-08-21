@@ -109,6 +109,34 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     },
     texture_map["KeyboardSpaceUp"], color::white
   });
+
+  // Skill Slot
+  // Center
+  float skill_slot_width = 48 * skill_count_ + (skill_count_ - 1) * 10;
+  for (int i = 0; i < skill_count_; ++i) {
+    render_items.emplace_back(RenderInstanceItem{
+      Transform{
+        .position = {-skill_slot_width / 2 + i * (48 + 10), -24 - 48, 0},
+        .size = {48, 48},
+        .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
+      },
+      texture_map["SkillSlot"], color::white
+    });
+
+    if (skill_selected_ != i) continue;
+
+    render_items.emplace_back(RenderInstanceItem{
+      Transform{
+        .position = {-skill_slot_width / 2 + i * (48 + 10), -24 - 48, 0},
+        .size = {48, 48},
+        .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
+      },
+      texture_map["SkillSelected"], color::white
+    });
+  }
+
+  rr->DrawSpritesInstanced(render_items, texture_id_, {}, true);
+
   // On Top of instanced Draw
   // Session: Left Upper
   // HP Bar: Player Name

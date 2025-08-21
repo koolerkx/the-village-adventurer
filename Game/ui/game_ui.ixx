@@ -26,7 +26,13 @@ std::unordered_map<std::string, UV> texture_map = {
   {"AttackHintBackground", UV{{223, 146}, {64, 16}}},
   {"KeyboardSpaceUp", UV{{96, 563}, {32, 16}}},
   {"KeyboardSpaceDown", UV{{96, 627}, {32, 16}}},
+
+  // Skill
+  {"SkillSlot", UV{{384, 82}, {34, 34}}},
+  {"SkillSelected", UV{{384, 140}, {26, 26}}},
+  
 };
+
 export class GameUI {
 private:
   FixedPoolIndexType texture_id_;
@@ -41,6 +47,11 @@ private:
   };
   std::wstring timer_text_ = L"12:34";
   Font* default_font_;
+
+  int skill_count_ = 3;
+  int skill_selected_ = 0;
+
+
 public:
   GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_path);
   void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
