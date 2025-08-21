@@ -66,6 +66,7 @@ export struct StringSpriteProps {
   float line_height = -1.0f;
   float line_spacing = 0;
   COLOR color = color::white;
+  bool is_draw_rect = false;
 };
 
 export enum class AlginPivot: unsigned char {

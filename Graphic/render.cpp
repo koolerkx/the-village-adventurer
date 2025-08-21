@@ -553,16 +553,19 @@ void Renderer::DrawPolygon(const std::array<POSITION, 4>& points,
 void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props) {
   Font* font = Font::GetFont(font_key);
 
-  StringSpriteSize size = font->GetStringSize(str, transform, props);
-  std::array<Rect, 1> ary({
-    Rect{
-      transform.position,
-      {transform.position.x + size.width, transform.position.y + size.height, 0.0f},
-      color::setOpacity(color::grey600, 0.2f)
-    }
-  });
+  if (props.is_draw_rect) {
+    StringSpriteSize size = font->GetStringSize(str, transform, props);
+    std::array<Rect, 1> ary({
+      Rect{
+        transform.position,
+        {transform.position.x + size.width, transform.position.y + size.height, 0.0f},
+        color::setOpacity(color::grey600, 0.2f)
+      }
+    });
 
-  DrawRects(ary);
+    DrawRects(ary);
+  }
+
   std::vector<RenderInstanceItem> items = font->MakeStringRenderInstanceItems(str, transform, props);
   std::span<RenderInstanceItem> items_span = std::span(items.data(), items.size());
   DrawSpritesInstanced(items_span, font->GetTextureId());
