@@ -21,6 +21,11 @@ std::unordered_map<std::string, UV> texture_map = {
   // Event Log
   {"Block", UV{{96, 297}, {8, 8}}},
   {"TimerBackground", UV{{215, 272}, {119, 17}}},
+
+  // Attack Hint
+  {"AttackHintBackground", UV{{223, 146}, {64, 16}}},
+  {"KeyboardSpaceUp", UV{{96, 563}, {32, 16}}},
+  {"KeyboardSpaceDown", UV{{96, 627}, {32, 16}}},
 };
 export class GameUI {
 private:

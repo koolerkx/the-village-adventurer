@@ -89,6 +89,26 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     },
     texture_map["TimerBackground"], color::white
   });
+
+  // Session: Center Bottom
+  // Attack Hint: Background
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {-122 / 2, -82 - 32, 0},
+      .size = {122, 32},
+      .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
+    },
+    texture_map["AttackHintBackground"], color::white
+  });
+  // Attack Hint: Space bar
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {-122 / 2 + 73, -82 - 24, 0},
+      .size = {32, 16},
+      .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
+    },
+    texture_map["KeyboardSpaceUp"], color::white
+  });
   // On Top of instanced Draw
   // Session: Left Upper
   // HP Bar: Player Name
@@ -130,5 +150,19 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .letter_spacing = 0.0f,
                  .line_height = 0.0f,
                  .color = color::white
+               });
+
+  // Session: Center Bottom
+  // Attack Hint: text
+  rr->DrawFont(L"攻撃する", font_key_,
+               Transform{
+                 .position = {-122 / 2 + 17, -82 - 22, 0},
+                 .position_anchor = {
+                   static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0
+                 }
+               }, StringSpriteProps{
+                 .pixel_size = 12.0f,
+                 .letter_spacing = 0.0f,
+                 .line_height = 22.0f
                });
 }
