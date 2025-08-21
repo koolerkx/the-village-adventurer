@@ -12,6 +12,7 @@ import game.collision_handler;
 import game.map.field_object;
 import game.collision.collider;
 import game.scene_object.skill;
+import game.ui.game_ui;
 
 void GameScene::OnEnter(GameContext* ctx) {
   std::cout << "GameScene> OnEnter" << std::endl;
@@ -48,6 +49,9 @@ void GameScene::OnEnter(GameContext* ctx) {
   // Skill
   skill_manager_ = std::make_unique<SkillManager>(ctx);
   scene_context->skill_manager = skill_manager_.get();
+
+  // UI
+  ui_ = std::make_unique<GameUI>(ctx, scene_context.get(), L"assets/ui.png"); // extract path
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
@@ -56,14 +60,17 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   map_->OnUpdate(ctx, delta_time);
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnUpdate(ctx, delta_time);
+  ui_->OnUpdate(ctx, scene_context.get(), delta_time);
 }
 
 void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   player_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
   HandlePlayerMovementAndCollisions(delta_time);
   camera_->UpdatePosition(player_->GetPositionVector(), delta_time);
-  
+
   skill_manager_->OnFixedUpdate(ctx, delta_time);
+
+  ui_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
 }
 
 void GameScene::OnRender(GameContext* ctx) {
@@ -72,6 +79,8 @@ void GameScene::OnRender(GameContext* ctx) {
   map_->OnRender(ctx, camera_.get());
   player_->OnRender(ctx, scene_context.get(), camera_.get());
   skill_manager_->OnRender(ctx, camera_.get(), player_->GetTransform());
+
+  ui_->OnRender(ctx, scene_context.get(), camera_.get());
 }
 
 void GameScene::OnExit(GameContext*) {
