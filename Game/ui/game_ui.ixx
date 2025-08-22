@@ -69,8 +69,14 @@ private:
 
   int coin_text_ = 987;
 
+  bool is_get_damage_frame_ = false;
+  bool is_hp_flashing_ = false;
+
 public:
   void SetHpPercentage(float percentage) {
+    if (std::abs(hp_percentage_target_ - percentage) > 0.00001f) {
+      is_get_damage_frame_ = true;
+    };
     hp_percentage_target_ = percentage;
   }
 

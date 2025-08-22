@@ -16,20 +16,25 @@ GameUI::GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_p
   default_font_ = Font::GetFont(font_key_);
 }
 
-void GameUI::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {  
+void GameUI::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
   hp_percentage_current_ = interpolation::UpdateSmoothValue(
     hp_percentage_current_,
     hp_percentage_target_,
     delta_time,
     hp_percentage_current_ > hp_percentage_target_
-      ? interpolation::SmoothType::EaseIn  // HP loss
-      : interpolation::SmoothType::EaseOut, // HP gain
-      25.0f
+      ? interpolation::SmoothType::EaseIn     // HP loss
+      : interpolation::SmoothType::EaseInOut, // HP gain
+    25.0f
   );
-  std::cout << hp_percentage_current_ << std::endl;
 }
 
-void GameUI::OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {}
+void GameUI::OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
+  // workaround: fixed flash rate in one tick, TODO: use setTimeout instead
+  if (is_get_damage_frame_ && is_hp_flashing_) {  
+    is_hp_flashing_ = false;
+    is_get_damage_frame_ = false;
+  }
+}
 
 void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera) {
   auto& rr = ctx->render_resource_manager->renderer;
@@ -70,6 +75,16 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     },
     texture_map["HPBar"], color::white
   });
+  if (is_get_damage_frame_) {
+    render_items.emplace_back(RenderInstanceItem{
+      Transform{
+        .position = {110, 59, 0},
+        .size = {200 * hp_percentage_current_, 14},
+      },
+      texture_map["Block"], color::white
+    });
+    is_hp_flashing_ = true;
+  }
   // HP Bar: HB Bar Frame
   render_items.emplace_back(RenderInstanceItem{
     Transform{
