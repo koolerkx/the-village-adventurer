@@ -10,9 +10,9 @@ SkillManager::SkillManager(GameContext* ctx) {
 }
 
 void SkillManager::OnUpdate(GameContext*, float delta_time) {
-  // hitbox_pool_.RemoveIf([](SkillHitbox& hitbox) {
-  //   return !hitbox.is_playing;
-  // });
+  hitbox_pool_.RemoveIf([](SkillHitbox& hitbox) {
+    return !hitbox.is_playing;
+  });
 
   hitbox_pool_.ForEach([delta_time](SkillHitbox& hitbox, ObjectPoolIndexType) {
     scene_object::AnimationState state{
