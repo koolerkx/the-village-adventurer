@@ -7,7 +7,7 @@ import graphic.utils.types;
 import graphic.utils.font;
 import game.ui.interpolation;
 
-GameUI::GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_path) {
+GameUI::GameUI(GameContext* ctx, SceneContext*, std::wstring texture_path) {
   texture_id_ = ctx->render_resource_manager->texture_manager->Load(texture_path);
 
   auto [font_spritemap_filename, font_metadata_filename] = defined_font_map[DefinedFont::FUSION_PIXEL_FONT_DEBUG];
@@ -16,7 +16,7 @@ GameUI::GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_p
   default_font_ = Font::GetFont(font_key_);
 }
 
-void GameUI::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
+void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
   hp_percentage_current_ = interpolation::UpdateSmoothValue(
     hp_percentage_current_,
     hp_percentage_target_,
@@ -44,7 +44,7 @@ void GameUI::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
   );
 }
 
-void GameUI::OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
+void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float) {
   // workaround: fixed flash rate in one tick, TODO: use setTimeout instead
   if (is_get_damage_frame_ && is_hp_flashing_) {
     is_hp_flashing_ = false;
@@ -54,7 +54,9 @@ void GameUI::OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delt
   }
 }
 
-void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera) {
+void GameUI::OnRender(GameContext* ctx, SceneContext*, Camera*) {
+  if (!is_show_ui_) return;
+
   auto& rr = ctx->render_resource_manager->renderer;
   std::wstringstream wss;
 
@@ -130,14 +132,16 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
 
   // Session: Left Bottom
   // Event log: Background
-  render_items.emplace_back(RenderInstanceItem{
-    Transform{
-      .position = {24, -204, 0},
-      .size = {320, 180},
-      .position_anchor = {0, static_cast<float>(ctx->window_height), 0}
-    },
-    texture_map["Block"], color::setOpacity(color::black, 0.25f)
-  });
+  if (is_show_event_log_) {
+    render_items.emplace_back(RenderInstanceItem{
+      Transform{
+        .position = {24, -204, 0},
+        .size = {320, 180},
+        .position_anchor = {0, static_cast<float>(ctx->window_height), 0}
+      },
+      texture_map["Block"], color::setOpacity(color::black, 0.25f)
+    });
+  }
 
   // Session: Center Upper
   // Timer: Background
@@ -172,48 +176,52 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
 
   // Skill Slot
   // Center
-  float skill_slot_width = 48 * skill_count_ + (skill_count_ - 1) * 10;
-  for (int i = 0; i < skill_count_; ++i) {
-    render_items.emplace_back(RenderInstanceItem{
-      Transform{
-        .position = {-skill_slot_width / 2 + i * (48 + 10), -24 - 48, 0},
-        .size = {48, 48},
-        .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
-      },
-      texture_map["SkillSlot"], color::white
-    });
+  if (is_show_skill_) {
+    float skill_slot_width = static_cast<float>(48 * skill_count_ + (skill_count_ - 1) * 10);
+    for (int i = 0; i < skill_count_; ++i) {
+      render_items.emplace_back(RenderInstanceItem{
+        Transform{
+          .position = {-skill_slot_width / 2 + i * (48 + 10), -24 - 48, 0},
+          .size = {48, 48},
+          .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
+        },
+        texture_map["SkillSlot"], color::white
+      });
 
-    if (skill_selected_ != i) continue;
+      if (skill_selected_ != i) continue;
 
-    render_items.emplace_back(RenderInstanceItem{
-      Transform{
-        .position = {-skill_slot_width / 2 + i * (48 + 10), -24 - 48, 0},
-        .size = {48, 48},
-        .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
-      },
-      texture_map["SkillSelected"], color::white
-    });
+      render_items.emplace_back(RenderInstanceItem{
+        Transform{
+          .position = {-skill_slot_width / 2 + i * (48 + 10), -24 - 48, 0},
+          .size = {48, 48},
+          .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
+        },
+        texture_map["SkillSelected"], color::white
+      });
+    }
   }
 
   // Session: Right Upper
   // Coin: Background
-  render_items.emplace_back(RenderInstanceItem{
-    Transform{
-      .position = {-24 - 182, 24, 0},
-      .size = {182, 46},
-      .position_anchor = {static_cast<float>(ctx->window_width), 0, 0}
-    },
-    texture_map["RoundBackground"], color::white
-  });
-  // Coin: Icon
-  render_items.emplace_back(RenderInstanceItem{
-    Transform{
-      .position = {-24 - 182 + 18, 32, 0},
-      .size = {24, 28},
-      .position_anchor = {static_cast<float>(ctx->window_width), 0, 0}
-    },
-    texture_map["Coin"], color::white
-  });
+  if (is_show_coin_) {
+    render_items.emplace_back(RenderInstanceItem{
+      Transform{
+        .position = {-24 - 182, 24, 0},
+        .size = {182, 46},
+        .position_anchor = {static_cast<float>(ctx->window_width), 0, 0}
+      },
+      texture_map["RoundBackground"], color::white
+    });
+    // Coin: Icon
+    render_items.emplace_back(RenderInstanceItem{
+      Transform{
+        .position = {-24 - 182 + 18, 32, 0},
+        .size = {24, 28},
+        .position_anchor = {static_cast<float>(ctx->window_width), 0, 0}
+      },
+      texture_map["Coin"], color::white
+    });
+  }
 
   // Session: Right Bottom
   // Input Hint: Background
@@ -292,20 +300,22 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   // Session: Left Bottom
   // Event log: log text
   // TODO: Assign color to different event
-  wss.str(L"");
-  wss.clear();
-  for (auto text : text_list_) {
-    wss << text << "\n";
+  if (is_show_event_log_) {
+    wss.str(L"");
+    wss.clear();
+    for (auto text : text_list_) {
+      wss << text << "\n";
+    }
+    rr->DrawFont(wss.str(), font_key_,
+                 Transform{
+                   .position = {34, -194, 0},
+                   .position_anchor = {0, static_cast<float>(ctx->window_height), 0}
+                 }, StringSpriteProps{
+                   .pixel_size = 12.0f,
+                   .letter_spacing = 0.0f,
+                   .line_height = 22.0f
+                 });
   }
-  rr->DrawFont(wss.str(), font_key_,
-               Transform{
-                 .position = {34, -194, 0},
-                 .position_anchor = {0, static_cast<float>(ctx->window_height), 0}
-               }, StringSpriteProps{
-                 .pixel_size = 12.0f,
-                 .letter_spacing = 0.0f,
-                 .line_height = 22.0f
-               });
 
   // Session: Center Upper
   // Timer: text
@@ -337,20 +347,24 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
 
   // Session: Right Upper
   // Coin: Text
-  wss.str(L"");
-  wss << L"コイン " << coin_text_;
+  if (is_show_coin_) {
+    wss.str(L"");
+    wss << L"コイン " << coin_text_;
 
-  rr->DrawFont(wss.str(), font_key_,
-               Transform{
-                 .position = {-24 - 182 + 45, 35, 0},
-                 .position_anchor = {static_cast<float>(ctx->window_width), 0, 0}
-               }, StringSpriteProps{
-                 .pixel_size = 22.0f,
-                 .letter_spacing = 0.0f,
-                 .line_height = 0.0f,
-                 .color = color::white
-               });
+    rr->DrawFont(wss.str(), font_key_,
+                 Transform{
+                   .position = {-24 - 182 + 45, 35, 0},
+                   .position_anchor = {static_cast<float>(ctx->window_width), 0, 0}
+                 }, StringSpriteProps{
+                   .pixel_size = 22.0f,
+                   .letter_spacing = 0.0f,
+                   .line_height = 0.0f,
+                   .color = color::white
+                 });
+  }
 
+  // Session: Right Bottom
+  // Hint: text
   rr->DrawFont(L"操作説明", font_key_,
                Transform{
                  .position = {-24 - 224 + 32, -24 - 98 + 26, 0},

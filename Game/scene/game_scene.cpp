@@ -69,8 +69,8 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   auto now = std::chrono::high_resolution_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - time_at_start_);
 
-  auto minutes = elapsed.count() / 60;
-  auto seconds = elapsed.count() % 60;
+  auto minutes = static_cast<int>(elapsed.count() / 60);
+  auto seconds = static_cast<int>(elapsed.count() % 60);
 
   ui_->SetTimerText(minutes, seconds);
 }

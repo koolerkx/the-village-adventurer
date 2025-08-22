@@ -35,7 +35,7 @@ export namespace interpolation {
       float t = std::clamp(delta_time * speed, 0.0f, 1.0f);
       float eased = (t < 0.5f)
                       ? 2 * t * t
-                      : 1 - std::pow(-2 * t + 2, 2) / 2;
+                      : 1 - static_cast<float>(std::pow(-2 * t + 2, 2)) / 2;
       return std::lerp(current, target, eased);
     }
     }

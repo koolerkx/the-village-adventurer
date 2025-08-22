@@ -80,6 +80,13 @@ private:
   float damage_flash_opacity_target_ = 0.0f;
   float damage_flash_opacity_current_ = 0.0f;
 
+  bool is_show_ui_ = true;
+
+  // constant flags
+  const bool is_show_skill_ = false;
+  const bool is_show_coin_ = false;
+  const bool is_show_event_log_ = false;
+  
 public:
   void SetHpPercentage(float percentage) {
     if (std::abs(hp_percentage_target_ - percentage) > 0.00001f) {
@@ -106,6 +113,10 @@ public:
 
   void SetSkillSelected(int i) {
     skill_selected_ = i % skill_count_;
+  }
+
+  void SetIsShowUI(bool is_show_ui) {
+    is_show_ui_ = is_show_ui;
   }
 
   GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_path);
