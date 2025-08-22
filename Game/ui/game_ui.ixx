@@ -45,6 +45,10 @@ std::unordered_map<std::string, UV> texture_map = {
   {"KeyboardAUp", UV{{0, 355}, {16, 16}}},
   {"KeyboardSUp", UV{{32, 387}, {16, 16}}},
   {"KeyboardDUp", UV{{48, 355}, {16, 16}}},
+
+  // full screen overlay
+  {"DamageOverlay", UV{{128, 323}, {320, 180}}},
+  {"HealOverlay", UV{{128, 503}, {320, 180}}},
 };
 
 export class GameUI {
@@ -71,11 +75,19 @@ private:
 
   bool is_get_damage_frame_ = false;
   bool is_hp_flashing_ = false;
+  float heal_flash_opacity_target_ = 0.0f;
+  float heal_flash_opacity_current_ = 0.0f;
+  float damage_flash_opacity_target_ = 0.0f;
+  float damage_flash_opacity_current_ = 0.0f;
 
 public:
   void SetHpPercentage(float percentage) {
     if (std::abs(hp_percentage_target_ - percentage) > 0.00001f) {
       is_get_damage_frame_ = true;
+
+      if (hp_percentage_target_ > percentage)
+        damage_flash_opacity_current_ = 1;
+      else heal_flash_opacity_current_ = 1;
     };
     hp_percentage_target_ = percentage;
   }

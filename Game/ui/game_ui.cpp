@@ -26,13 +26,31 @@ void GameUI::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
       : interpolation::SmoothType::EaseInOut, // HP gain
     25.0f
   );
+
+  heal_flash_opacity_current_ = interpolation::UpdateSmoothValue(
+    heal_flash_opacity_current_,
+    heal_flash_opacity_target_,
+    delta_time,
+    interpolation::SmoothType::EaseInOut,
+    25.0f
+  );
+
+  damage_flash_opacity_current_ = interpolation::UpdateSmoothValue(
+    damage_flash_opacity_current_,
+    damage_flash_opacity_target_,
+    delta_time,
+    interpolation::SmoothType::EaseInOut,
+    25.0f
+  );
 }
 
 void GameUI::OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
   // workaround: fixed flash rate in one tick, TODO: use setTimeout instead
-  if (is_get_damage_frame_ && is_hp_flashing_) {  
+  if (is_get_damage_frame_ && is_hp_flashing_) {
     is_hp_flashing_ = false;
     is_get_damage_frame_ = false;
+    heal_flash_opacity_target_ = 0;
+    damage_flash_opacity_target_ = 0;
   }
 }
 
@@ -41,6 +59,22 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   std::wstringstream wss;
 
   std::vector<RenderInstanceItem> render_items;
+
+  // Overlay at back
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {0, 0, 0},
+      .size = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height)},
+    },
+    texture_map["DamageOverlay"], color::setOpacity(color::white, damage_flash_opacity_current_)
+  });
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {0, 0, 0},
+      .size = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height)},
+    },
+    texture_map["HealOverlay"], color::setOpacity(color::white, heal_flash_opacity_current_)
+  });
 
   // Session: Left Upper
   // HP Bar: Background
