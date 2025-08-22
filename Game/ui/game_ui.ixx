@@ -64,11 +64,29 @@ private:
 
   int skill_count_ = 3;
   int skill_selected_ = 0;
+  float hp_percentage_ = 1.0f;
 
   int coin_text_ = 987;
 
 public:
+  void SetHpPercentage(float percentage) {
+    hp_percentage_ = percentage;
+  }
+
+  void SetTimerText(int minute, int second) {
+    timer_text_ = std::to_wstring(minute) + L":" + std::to_wstring(second);
+  }
+
+  void SetLogText(std::wstring text) {
+    text_list_ = {text};
+  }
+
+  void SetSkillSelected(int i) {
+    skill_selected_ = i % skill_count_;
+  }
+
   GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_path);
+
   void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);

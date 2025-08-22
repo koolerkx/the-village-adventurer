@@ -51,11 +51,10 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     texture_map["Heart"], color::white
   });
   // HP Bar: HB Bar
-  float hp_percent = 1.0f;
   render_items.emplace_back(RenderInstanceItem{
     Transform{
       .position = {110, 59, 0},
-      .size = {200 / hp_percent, 14},
+      .size = {200 / hp_percentage_, 14},
     },
     texture_map["HPBar"], color::white
   });
