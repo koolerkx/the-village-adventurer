@@ -5,6 +5,7 @@ module game.ui.game_ui;
 import std;
 import graphic.utils.types;
 import graphic.utils.font;
+import game.ui.interpolation;
 
 GameUI::GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_path) {
   texture_id_ = ctx->render_resource_manager->texture_manager->Load(texture_path);
@@ -15,7 +16,18 @@ GameUI::GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_p
   default_font_ = Font::GetFont(font_key_);
 }
 
-void GameUI::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {}
+void GameUI::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {  
+  hp_percentage_current_ = interpolation::UpdateSmoothValue(
+    hp_percentage_current_,
+    hp_percentage_target_,
+    delta_time,
+    hp_percentage_current_ > hp_percentage_target_
+      ? interpolation::SmoothType::EaseIn  // HP loss
+      : interpolation::SmoothType::EaseOut, // HP gain
+      25.0f
+  );
+  std::cout << hp_percentage_current_ << std::endl;
+}
 
 void GameUI::OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {}
 
@@ -54,7 +66,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   render_items.emplace_back(RenderInstanceItem{
     Transform{
       .position = {110, 59, 0},
-      .size = {200 / hp_percentage_, 14},
+      .size = {200 * hp_percentage_current_, 14},
     },
     texture_map["HPBar"], color::white
   });

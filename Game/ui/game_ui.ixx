@@ -64,13 +64,14 @@ private:
 
   int skill_count_ = 3;
   int skill_selected_ = 0;
-  float hp_percentage_ = 1.0f;
+  float hp_percentage_target_ = 1.0f;
+  float hp_percentage_current_ = 1.0f;
 
   int coin_text_ = 987;
 
 public:
   void SetHpPercentage(float percentage) {
-    hp_percentage_ = percentage;
+    hp_percentage_target_ = percentage;
   }
 
   void SetTimerText(int minute, int second) {

@@ -56,6 +56,7 @@ void GameScene::OnEnter(GameContext* ctx) {
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   // std::cout << "GameScene> OnUpdate: " << delta_time << std::endl;
+  ui_->SetHpPercentage(player_->GetHPPercentage());
 
   map_->OnUpdate(ctx, delta_time);
   player_->OnUpdate(ctx, scene_context.get(), delta_time);

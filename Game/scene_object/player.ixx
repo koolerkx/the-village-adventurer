@@ -122,6 +122,11 @@ private:
   void UpdateAnimation(float delta_time);
 
   Throttle attack_throttle_{0.3f};
+  Throttle function_key_throttle_{0.3f};
+
+  // Gmae data
+  float health_ = 100.0f;
+  float max_health_ = 100.0f;
 
 public:
   void SetState(PlayerState state);
@@ -155,6 +160,10 @@ public:
   }
 
   Vector2 GetVelocity() const;
+
+  void Damage(float amount) { health_ = std::max(health_ - amount, 0.0f); }
+  void Heal(float amount) { health_ = std::min(health_ + amount, max_health_); }
+  float GetHPPercentage() const { return health_ / max_health_; }
 
   Player(GameContext* ctx, SceneContext* scene_ctx);
   void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
