@@ -14,6 +14,8 @@ import game.scene_object.camera;
 import game.collision.collider;
 import game.map;
 import game.scene_game.context;
+import game.map.field_object;
+import game.utils.throttle;
 
 export enum class PlayerState: unsigned char {
   IDLE_LEFT,
@@ -90,7 +92,7 @@ private:
     .position_anchor = {-8, -8, 0}
   };
   Transform transform_before_ = transform_;
-  
+
   UV uv_{
     {0, 0},
     {32, 32}
@@ -111,6 +113,7 @@ private:
   COLOR color_ = color::white;
 
   Vector2 direction_;
+  Vector2 direction_facing_ = {0, 1}; // default facing down
   Vector2 velocity_;
 
   float move_speed_ = 125.0f; // px per second
@@ -118,10 +121,9 @@ private:
   void UpdateState();
   void UpdateAnimation(float delta_time);
 
-  void HandleMovementWithCollision(TileMap* map, float delta_time);
+  Throttle attack_throttle_{0.3f};
 
 public:
-
   void SetState(PlayerState state);
 
   Vector2 GetPositionVector() const { return {transform_.position.x, transform_.position.y}; }
@@ -130,9 +132,11 @@ public:
     return collider_;
   }
 
+  Transform GetTransform() const { return transform_; }
+
   void SetTransform(std::function<void(Transform&)> func) {
     transform_before_ = transform_;
-    
+
     collider_.position.x -= (transform_.position.x + transform_.position_anchor.x);
     collider_.position.y -= (transform_.position.y + transform_.position_anchor.y);
 
@@ -149,7 +153,9 @@ public:
   void SetCollider(std::function<void(Collider<Player>&)> func) {
     func(collider_);
   }
-  
+
+  Vector2 GetVelocity() const;
+
   Player(GameContext* ctx, SceneContext* scene_ctx);
   void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);

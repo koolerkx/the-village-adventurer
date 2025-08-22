@@ -7,6 +7,8 @@ import game.scene_object.camera;
 import game.scene_game.context;
 import game.collision_handler;
 import game.map.field_object;
+import game.scene_object.skill;
+import game.utils.throttle;
 
 // Texture data
 static constexpr std::wstring_view texture_path = L"assets/character_01.png"; // TODO: extract
@@ -34,7 +36,7 @@ Player::Player(GameContext* ctx, SceneContext*) {
   };
 }
 
-void Player::OnUpdate(GameContext* ctx, SceneContext*, float delta_time) {
+void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
   // Handle Input
   direction_ = {0, 0};
   if (ctx->input_handler->GetKey(KeyCode::KK_W)) direction_.y -= 1.0f;
@@ -42,10 +44,23 @@ void Player::OnUpdate(GameContext* ctx, SceneContext*, float delta_time) {
   if (ctx->input_handler->GetKey(KeyCode::KK_A)) direction_.x -= 1.0f;
   if (ctx->input_handler->GetKey(KeyCode::KK_D)) direction_.x += 1.0f;
 
+  if (direction_.x != 0 || direction_.y != 0) {
+    direction_facing_ = direction_;
+  }
+
+  const float player_rotation = scene_object::GetPlayerRotationByDirection(direction_facing_); // Right = 0
+
+  if (ctx->input_handler->GetKey(KeyCode::KK_SPACE) && attack_throttle_.CanCall())
+    scene_ctx->skill_manager->PlaySkill(
+      SKILL_TYPE::NORMAL_ATTACK,
+      {transform_.position.x, transform_.position.y},
+      player_rotation
+    );
+
   UpdateAnimation(delta_time);
 }
 
-void Player::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delta_time) {
+void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {
   // apply input to velocity
   if (direction_.x == 0 && direction_.y == 0) {
     velocity_ = {0, 0};
@@ -58,7 +73,6 @@ void Player::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delta_ti
     };
   }
 
-  HandleMovementWithCollision(scene_ctx->map, delta_time);
   UpdateState();
 }
 
@@ -150,31 +164,6 @@ void Player::UpdateAnimation(float delta_time) {
   uv_.position.y = static_cast<float>(animation_state_.frames[animation_state_.current_frame].v);
 }
 
-void Player::HandleMovementWithCollision(TileMap* map, float delta_time) {
-  // movement
-  std::span<Collider<FieldObject>> field_objects = map->GetColliders();
-
-  SetTransform([=](Transform& t) {
-    t.position.x += velocity_.x * delta_time;
-  });
-  collision::HandleDetection(GetCollider(), field_objects,
-                             [&](Player* player_, FieldObject* fo, collision::CollisionResult result) {
-                               player_->SetTransform([result](Transform& t) {
-                                 t.position.x += result.mtv.x;
-                               });
-
-                               OnPlayerEnterFieldObject(fo);
-                             });
-
-  SetTransform([=](Transform& t) {
-    t.position.y += velocity_.y * delta_time;
-  });
-  collision::HandleDetection(GetCollider(), field_objects,
-                             [&](Player* player_, FieldObject* fo, collision::CollisionResult result) {
-                               player_->SetTransform([result](Transform& t) {
-                                 t.position.y += result.mtv.y;
-                               });
-
-                               OnPlayerEnterFieldObject(fo);
-                             });
+Vector2 Player::GetVelocity() const {
+  return velocity_;
 }

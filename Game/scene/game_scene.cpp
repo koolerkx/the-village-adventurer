@@ -9,6 +9,9 @@ import game.map.tile_repository;
 import game.scene_object;
 import game.types;
 import game.collision_handler;
+import game.map.field_object;
+import game.collision.collider;
+import game.scene_object.skill;
 
 void GameScene::OnEnter(GameContext* ctx) {
   std::cout << "GameScene> OnEnter" << std::endl;
@@ -41,6 +44,10 @@ void GameScene::OnEnter(GameContext* ctx) {
   // Scene
   scene_context.reset(new SceneContext());
   scene_context->map = map_.get();
+
+  // Skill
+  skill_manager_ = std::make_unique<SkillManager>(ctx);
+  scene_context->skill_manager = skill_manager_.get();
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
@@ -48,11 +55,15 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
 
   map_->OnUpdate(ctx, delta_time);
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
+  skill_manager_->OnUpdate(ctx, delta_time);
 }
 
 void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   player_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
+  HandlePlayerMovementAndCollisions(delta_time);
   camera_->UpdatePosition(player_->GetPositionVector(), delta_time);
+  
+  skill_manager_->OnFixedUpdate(ctx, delta_time);
 }
 
 void GameScene::OnRender(GameContext* ctx) {
@@ -60,8 +71,40 @@ void GameScene::OnRender(GameContext* ctx) {
 
   map_->OnRender(ctx, camera_.get());
   player_->OnRender(ctx, scene_context.get(), camera_.get());
+  skill_manager_->OnRender(ctx, camera_.get(), player_->GetTransform());
 }
 
 void GameScene::OnExit(GameContext*) {
   std::cout << "GameScene> OnExit" << std::endl;
+}
+
+void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
+  const Vector2 velocity = player_->GetVelocity();
+
+  // movement
+  std::span<Collider<FieldObject>> field_objects = map_->GetFiledObjectColliders();
+
+  player_->SetTransform([=](Transform& t) {
+    t.position.x += velocity.x * delta_time;
+  });
+  collision::HandleDetection(player_->GetCollider(), field_objects,
+                             [&](Player* player, FieldObject* fo, collision::CollisionResult result) {
+                               player->SetTransform([result](Transform& t) {
+                                 t.position.x += result.mtv.x;
+                               });
+
+                               OnPlayerEnterFieldObject(fo);
+                             });
+
+  player_->SetTransform([=](Transform& t) {
+    t.position.y += velocity.y * delta_time;
+  });
+  collision::HandleDetection(player_->GetCollider(), field_objects,
+                             [&](Player* player, FieldObject* fo, collision::CollisionResult result) {
+                               player->SetTransform([result](Transform& t) {
+                                 t.position.y += result.mtv.y;
+                               });
+
+                               OnPlayerEnterFieldObject(fo);
+                             });
 }

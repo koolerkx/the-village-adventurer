@@ -95,6 +95,10 @@ public:
   void DrawBoxes(const std::span<const Rect> boxes,
                  CameraProps camera_props = {},
                  bool is_half_pixel_offset_correction = false);
+  void DrawPolygon(const std::array<POSITION, 4>& points,
+                   COLOR color,
+                   CameraProps camera_props,
+                   bool is_half_pixel_offset_correction);
 
   // Instanced Indexed Draw
   void DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props);

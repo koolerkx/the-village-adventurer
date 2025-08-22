@@ -9,15 +9,20 @@ import game.map;
 import game.scene_object.player;
 import game.scene_object.camera;
 import game.scene_game.context;
+import game.scene_object.skill;
 
 export class GameScene : public IScene {
 private:
   std::unique_ptr<TileMap> map_{nullptr};
+  
+  std::unique_ptr<SkillManager> skill_manager_ = nullptr;
 
   std::unique_ptr<Player> player_ = nullptr;
   std::unique_ptr<Camera> camera_ = nullptr;
 
   std::unique_ptr<SceneContext> scene_context = nullptr;
+
+  void HandlePlayerMovementAndCollisions(float delta_time);
 
 public:
   void OnEnter(GameContext* ctx) override;
