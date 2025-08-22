@@ -41,6 +41,9 @@
         <ClCompile Include="input\input_handler.ixx" />
         <ClCompile Include="input\keyboard.cpp" />
         <ClCompile Include="input\key_logger.cpp" />
+        <ClCompile Include="ui\game_ui.cpp" />
+        <ClCompile Include="ui\game_ui.ixx" />
+        <ClCompile Include="ui\interpolation.ixx" />
         <ClCompile Include="utils\throttle.ixx" />
     </ItemGroup>
     <ItemGroup>

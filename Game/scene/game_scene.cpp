@@ -12,6 +12,7 @@ import game.collision_handler;
 import game.map.field_object;
 import game.collision.collider;
 import game.scene_object.skill;
+import game.ui.game_ui;
 
 void GameScene::OnEnter(GameContext* ctx) {
   std::cout << "GameScene> OnEnter" << std::endl;
@@ -48,22 +49,40 @@ void GameScene::OnEnter(GameContext* ctx) {
   // Skill
   skill_manager_ = std::make_unique<SkillManager>(ctx);
   scene_context->skill_manager = skill_manager_.get();
+
+  // UI
+  ui_ = std::make_unique<GameUI>(ctx, scene_context.get(), L"assets/ui.png"); // extract path
+
+  time_at_start_ = std::chrono::high_resolution_clock::now();
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   // std::cout << "GameScene> OnUpdate: " << delta_time << std::endl;
+  ui_->SetHpPercentage(player_->GetHPPercentage());
 
   map_->OnUpdate(ctx, delta_time);
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnUpdate(ctx, delta_time);
+  
+  ui_->OnUpdate(ctx, scene_context.get(), delta_time);
+
+  auto now = std::chrono::high_resolution_clock::now();
+  auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - time_at_start_);
+
+  auto minutes = static_cast<int>(elapsed.count() / 60);
+  auto seconds = static_cast<int>(elapsed.count() % 60);
+
+  ui_->SetTimerText(minutes, seconds);
 }
 
 void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   player_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
   HandlePlayerMovementAndCollisions(delta_time);
   camera_->UpdatePosition(player_->GetPositionVector(), delta_time);
-  
+
   skill_manager_->OnFixedUpdate(ctx, delta_time);
+
+  ui_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
 }
 
 void GameScene::OnRender(GameContext* ctx) {
@@ -72,6 +91,8 @@ void GameScene::OnRender(GameContext* ctx) {
   map_->OnRender(ctx, camera_.get());
   player_->OnRender(ctx, scene_context.get(), camera_.get());
   skill_manager_->OnRender(ctx, camera_.get(), player_->GetTransform());
+
+  ui_->OnRender(ctx, scene_context.get(), camera_.get());
 }
 
 void GameScene::OnExit(GameContext*) {
@@ -107,4 +128,8 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
 
                                OnPlayerEnterFieldObject(fo);
                              });
+}
+
+void GameScene::ResetTimer() {
+  time_at_start_ = std::chrono::high_resolution_clock::now();
 }

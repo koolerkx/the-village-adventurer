@@ -48,6 +48,9 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
     direction_facing_ = direction_;
   }
 
+  if (ctx->input_handler->GetKey(KeyCode::KK_F1) && function_key_throttle_.CanCall()) Damage(10.0f);
+  if (ctx->input_handler->GetKey(KeyCode::KK_F2) && function_key_throttle_.CanCall()) Heal(10.0f);
+
   const float player_rotation = scene_object::GetPlayerRotationByDirection(direction_facing_); // Right = 0
 
   if (ctx->input_handler->GetKey(KeyCode::KK_SPACE) && attack_throttle_.CanCall())

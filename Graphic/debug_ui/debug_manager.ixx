@@ -12,8 +12,8 @@ import graphic.utils.font;
 import graphic.utils.types;
 
 struct DebugSetting {
-  bool is_show_fps = true;
-  bool is_show_frame_delta = true;
+  bool is_show_fps = false;
+  bool is_show_frame_delta = false;
 
   bool is_show_ui_gridline = true;
   bool is_show_ui_column = false;
@@ -50,7 +50,8 @@ export struct UiGuidelineProps {
     .font_props = {
       .pixel_size = 24.0f,
       .letter_spacing = 0.0f,
-      .line_height = 0.0f
+      .line_height = 0.0f,
+      .is_draw_rect = true
     },
   };
 };
