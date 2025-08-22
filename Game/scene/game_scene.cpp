@@ -52,6 +52,8 @@ void GameScene::OnEnter(GameContext* ctx) {
 
   // UI
   ui_ = std::make_unique<GameUI>(ctx, scene_context.get(), L"assets/ui.png"); // extract path
+
+  time_at_start_ = std::chrono::high_resolution_clock::now();
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
@@ -61,7 +63,16 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   map_->OnUpdate(ctx, delta_time);
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnUpdate(ctx, delta_time);
+  
   ui_->OnUpdate(ctx, scene_context.get(), delta_time);
+
+  auto now = std::chrono::high_resolution_clock::now();
+  auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - time_at_start_);
+
+  auto minutes = elapsed.count() / 60;
+  auto seconds = elapsed.count() % 60;
+
+  ui_->SetTimerText(minutes, seconds);
 }
 
 void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
@@ -117,4 +128,8 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
 
                                OnPlayerEnterFieldObject(fo);
                              });
+}
+
+void GameScene::ResetTimer() {
+  time_at_start_ = std::chrono::high_resolution_clock::now();
 }

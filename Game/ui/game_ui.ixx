@@ -63,7 +63,7 @@ private:
     L"プレイヤーが200HP回復した",
     L"プレイヤーが200ゴールドもらった",
   };
-  std::wstring timer_text_ = L"12:34";
+  std::wstring timer_text_ = L"99:99";
   Font* default_font_;
 
   int skill_count_ = 3;
@@ -93,7 +93,11 @@ public:
   }
 
   void SetTimerText(int minute, int second) {
-    timer_text_ = std::to_wstring(minute) + L":" + std::to_wstring(second);
+    std::wstringstream wss;
+    wss << std::setw(2) << std::setfill(L'0') << minute
+      << L":"
+      << std::setw(2) << std::setfill(L'0') << second;
+    timer_text_ = wss.str();
   }
 
   void SetLogText(std::wstring text) {

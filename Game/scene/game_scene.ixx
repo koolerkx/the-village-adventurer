@@ -15,7 +15,7 @@ import game.ui.game_ui;
 export class GameScene : public IScene {
 private:
   std::unique_ptr<TileMap> map_{nullptr};
-  
+
   std::unique_ptr<SkillManager> skill_manager_ = nullptr;
 
   std::unique_ptr<Player> player_ = nullptr;
@@ -24,7 +24,11 @@ private:
 
   std::unique_ptr<SceneContext> scene_context = nullptr;
 
+  std::chrono::time_point<std::chrono::steady_clock> time_at_start_;
+
   void HandlePlayerMovementAndCollisions(float delta_time);
+
+  void ResetTimer();
 
 public:
   void OnEnter(GameContext* ctx) override;
