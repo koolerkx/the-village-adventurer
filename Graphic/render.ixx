@@ -102,7 +102,8 @@ public:
                    bool is_half_pixel_offset_correction);
 
   // Instanced Indexed Draw
-  void DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props);
+  void DrawFont(const std::wstring& str, std::wstring font_key, Transform transform,
+                StringSpriteProps props, CameraProps camera_props = {});
 
   // Instanced Indexed Draw
   void DrawSpritesInstanced(std::span<RenderInstanceItem> render_items,

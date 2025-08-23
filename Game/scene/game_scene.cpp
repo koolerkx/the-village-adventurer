@@ -131,12 +131,17 @@ void GameScene::HandleSkillHitEnemyCollision(float delta_time) {
   (MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult result) -> void {
     if (!skill_hitbox->hit_mobs.contains(mob_state->id)) {
       skill_hitbox->hit_mobs.insert(mob_state->id);
-      mob_manager->MakeDamage(*mob_state, skill_hitbox->data->damage, [&mob_state, &ui = ui__]() {
+      mob_manager->MakeDamage(*mob_state, skill_hitbox->data->damage, [&mob_state, &skill_hitbox, &ui = ui__]() {
         // make damage text
-          if (mob::is_hurt_state(mob_state->state)) {
-            
-          }
-       });
+        ui->AddDamageText(
+          {
+            mob_state->transform.position.x + mob_state->transform.size.x / 2,
+            mob_state->transform.position.y + mob_state->transform.size.y / 2
+          },
+          skill_hitbox->data->name,
+          skill_hitbox->data->damage
+        );
+      });
     }
   };
 

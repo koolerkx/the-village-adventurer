@@ -14,7 +14,7 @@ import game.scene_object.camera;
 import std;
 
 struct SkillData {
-  std::string name;
+  std::wstring name;
   float cooldown;
   short damage;
   bool is_stick_to_player = false;
@@ -47,7 +47,7 @@ export enum class SKILL_TYPE {
 const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
   {
     SKILL_TYPE::NORMAL_ATTACK, {
-      .name = "Slash 1",
+      .name = L"Slash 1",
       .cooldown = 1.0f,
       .damage = 3,
       .is_stick_to_player = true,

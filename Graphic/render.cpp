@@ -565,7 +565,7 @@ void Renderer::DrawPolygon(const std::array<POSITION, 4>& points,
   DrawLines(lines, camera_props, is_half_pixel_offset_correction);
 }
 
-void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props) {
+void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props, CameraProps camera_props) {
   Font* font = Font::GetFont(font_key);
 
   if (props.is_draw_rect) {
@@ -578,12 +578,12 @@ void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transfor
       }
     });
 
-    DrawRects(ary);
+    DrawRects(ary, camera_props);
   }
 
   std::vector<RenderInstanceItem> items = font->MakeStringRenderInstanceItems(str, transform, props);
   std::span<RenderInstanceItem> items_span = std::span(items.data(), items.size());
-  DrawSpritesInstanced(items_span, font->GetTextureId());
+  DrawSpritesInstanced(items_span, font->GetTextureId(), camera_props);
 }
 
 void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_items,
