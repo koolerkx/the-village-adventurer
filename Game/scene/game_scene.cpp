@@ -54,7 +54,7 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnUpdate(ctx, delta_time);
   mob_manager_->OnUpdate(ctx, delta_time);
-  
+
   UpdateUI(ctx, delta_time);
 }
 
@@ -62,6 +62,8 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   player_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
   HandlePlayerMovementAndCollisions(delta_time);
   camera_->UpdatePosition(player_->GetPositionVector(), delta_time);
+
+  HandleSkillHitEnemyCollision(delta_time);
 
   skill_manager_->OnFixedUpdate(ctx, delta_time);
   mob_manager_->OnFixedUpdate(ctx, delta_time);
@@ -116,6 +118,21 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
                      [&](FieldObject* fo) { OnPlayerEnterFieldObject(fo); });
   MoveAndCollideAxis(*player_, delta_time, y, colliders, Axis::Y,
                      [&](FieldObject* fo) { OnPlayerEnterFieldObject(fo); });
+}
+
+void GameScene::HandleSkillHitEnemyCollision(float delta_time) {
+  auto mob_colliders = mob_manager_->GetColliders();
+  auto skill_colliders = skill_manager_->GetColliders();
+
+  std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
+  std::span skill_colliders_span{skill_colliders.data(), skill_colliders.size()};
+
+  auto cb =
+    [](MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult result) -> void {
+    std::cout << "Hit" << std::endl;
+  };
+
+  collision::HandleDetection(mob_colliders_span, skill_colliders_span, cb);
 }
 
 void GameScene::ResetTimer() {

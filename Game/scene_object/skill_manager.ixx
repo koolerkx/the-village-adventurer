@@ -74,4 +74,6 @@ public:
   void OnRender(GameContext* ctx, Camera* camera, Transform player_transform);
 
   void PlaySkill(SKILL_TYPE type, Vector2 position, float rotation = 0);
+
+  std::vector<Collider<SkillHitbox>> GetColliders();
 };

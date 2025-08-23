@@ -3,6 +3,64 @@ export module game.collision_handler;
 import std;
 import game.collision.collider;
 import game.types;
+import game.scene_object;
+
+#pragma region VECTOR_HELPER_FUNCTION
+// Vector Calculation
+float dot(const Vector2& a, const Vector2& b) { return a.x * b.x + a.y * b.y; }
+
+float length(const Vector2& v) { return std::sqrt(dot(v, v)); }
+
+Vector2 normalize(const Vector2& v) {
+  float len = length(v);
+  return (len > 1e-7f) ? Vector2{v.x / len, v.y / len} : Vector2{0, 0};
+}
+
+struct RectOBB {
+  Vector2 p[4];   // world-space corners: 0=LT, 1=RT, 2=RB, 3=LB
+  Vector2 center; // center
+  Vector2 u;      // x-axis direction  : p1 - p0
+  Vector2 v;      // y-axis direction  : p3 - p0
+  float hx;       // half width  = 0.5 * |p1 - p0|
+  float hy;       // half height = 0.5 * |p3 - p0|
+};
+
+template <typename Owner>
+RectOBB MakeRectOBB(const Collider<Owner>& collider) {
+  const auto& shape = std::get<RectCollider>(collider.shape);
+
+  // Do Rotation
+  std::array<Vector2, 4> local = scene_object::GetRotatedPoints(
+    {shape.x, shape.y, shape.width, shape.height},
+    {
+      shape.base_width * 0.5f + collider.rotation_pivot.x,
+      shape.base_height * 0.5f + collider.rotation_pivot.y
+    },
+    collider.rotation);
+
+  RectOBB obb{};
+
+  // World Coordinate
+  for (int i = 0; i < 4; ++i) {
+    obb.p[i] = {
+      local[i].x + collider.position.x,
+      local[i].y + collider.position.y
+    };
+  }
+
+  Vector2 e0 = {obb.p[1].x - obb.p[0].x, obb.p[1].y - obb.p[0].y}; // LT->RT
+  Vector2 e3 = {obb.p[3].x - obb.p[0].x, obb.p[3].y - obb.p[0].y}; // LT->LB
+
+  obb.hx = 0.5f * length(e0);
+  obb.hy = 0.5f * length(e3);
+  obb.u = normalize(e0);
+  obb.v = normalize(e3);
+
+  obb.center = {(obb.p[0].x + obb.p[2].x) * 0.5f, (obb.p[0].y + obb.p[2].y) * 0.5f};
+
+  return obb;
+}
+#pragma endregion 
 
 export namespace collision {
   struct CollisionResult {
@@ -63,6 +121,64 @@ export namespace collision {
 
       if (result.is_colliding) {
         on_trigger(a.owner, b.owner, result);
+      }
+    }
+  }
+
+  // TODO: handle MTV
+  template <typename A, typename B>
+  bool CollideCircleRect(const Collider<A>& circleCol, const Collider<B>& rectCol) {
+    const RectOBB obb = MakeRectOBB(rectCol);
+
+    const auto& shape = std::get<CircleCollider>(circleCol.shape);
+    const Vector2 circleCenter{
+      circleCol.position.x + shape.x,
+      circleCol.position.y + shape.y
+    };
+    const float radius = shape.radius;
+
+    // vector of two center, projected to obb axis
+    const Vector2 d{circleCenter.x - obb.center.x, circleCenter.y - obb.center.y};
+    const float dxu = dot(d, obb.u);
+    const float dyv = dot(d, obb.v);
+
+    const float qx = std::clamp(dxu, -obb.hx, obb.hx);
+    const float qy = std::clamp(dyv, -obb.hy, obb.hy);
+
+    const Vector2 closest{
+      obb.center.x + obb.u.x * qx + obb.v.x * qy,
+      obb.center.y + obb.u.y * qx + obb.v.y * qy
+    };
+
+    // closest to circle center
+    Vector2 n{circleCenter.x - closest.x, circleCenter.y - closest.y};
+    const float dist2 = dot(n, n);
+    const float r2 = radius * radius;
+
+    return dist2 <= r2;
+  }
+
+  // TODO: handle MTV 
+  template <typename A, typename B>
+  void HandleDetection(
+    std::span<Collider<A>> a_pool,
+    std::span<Collider<B>> b_pool,
+    const std::invocable<A*, B*, CollisionResult> auto& on_trigger
+  ) {
+    for (auto& a : a_pool) {
+      for (auto& b : b_pool) {
+        bool is_collide = false;
+        if (std::holds_alternative<RectCollider>(a.shape) && std::holds_alternative<RectCollider>(b.shape)) {
+          // TODO SAT
+          is_collide = false;
+        }
+        else if (std::holds_alternative<CircleCollider>(a.shape) && std::holds_alternative<RectCollider>(b.shape)) {
+          is_collide = CollideCircleRect(a, b);
+        }
+
+        if (!is_collide) continue;
+
+        on_trigger(a.owner, b.owner, {true});
       }
     }
   }

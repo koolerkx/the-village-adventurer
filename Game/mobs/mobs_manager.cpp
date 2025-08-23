@@ -81,3 +81,14 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
   rr->DrawBoxes(rect_view, camera->GetCameraProps(), true);
 #endif
 }
+
+std::vector<Collider<MobState>> MobManager::GetColliders() {
+  std::vector<Collider<MobState>> colliders;
+  colliders.reserve(mobs_pool_.Size());
+
+  mobs_pool_.ForEach([&colliders](const MobState& it) -> void {
+    colliders.push_back(it.collider);
+  });
+
+  return colliders;
+}

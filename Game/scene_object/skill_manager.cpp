@@ -154,3 +154,14 @@ void SkillManager::PlaySkill(SKILL_TYPE type, Vector2 position, float rotation) 
   auto inserted = hitbox_pool_.Get(insert_result.value());
   inserted->collider.owner = inserted; // HACK: workaround handle the object lifecycle
 }
+
+std::vector<Collider<SkillHitbox>> SkillManager::GetColliders() {
+  std::vector<Collider<SkillHitbox>> colliders;
+  colliders.reserve(hitbox_pool_.Size());
+
+  hitbox_pool_.ForEach([&colliders](const SkillHitbox& it) -> void {
+    colliders.push_back(it.collider);
+  });
+
+  return colliders;
+}

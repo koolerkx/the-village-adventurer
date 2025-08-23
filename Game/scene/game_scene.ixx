@@ -29,6 +29,7 @@ private:
   double timer_elapsed_ = 0; // in seconds
 
   void HandlePlayerMovementAndCollisions(float delta_time);
+  void HandleSkillHitEnemyCollision(float delta_time);
 
   void ResetTimer();
 
