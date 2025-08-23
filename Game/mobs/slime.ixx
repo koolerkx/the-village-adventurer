@@ -136,6 +136,8 @@ export namespace mob {
     };
 
     MobState MakeMob(TileMapObjectProps props) {
+      constexpr int DEFAULT_HP = 10;
+
       const Transform t = {
         .position = {props.x, props.y, 0.0},
         .size = {32, 32},
@@ -144,7 +146,7 @@ export namespace mob {
         .rotation_pivot = {0, 0, 0},
         .position_anchor = {0, 0, 0},
       };
-      
+
       const UV uv = {
         {1152, 896},
         {64, 64}
@@ -167,6 +169,9 @@ export namespace mob {
         .type = MobType::SLIME,
         .state = MobActionState::IDLE_DOWN,
         .is_battle = false,
+        .is_loop = true,
+        .is_playing = true,
+        .hp = DEFAULT_HP
       };
     };
 
@@ -182,8 +187,20 @@ export namespace mob {
     }
 
     void UpdateMob(MobState& mob_state, float delta_time) {
+      // handle animation end
+      if (!mob_state.is_playing) {
+        if (is_hurt_state(mob_state.state)) {
+          mob_state.state = MobActionState::IDLE_DOWN;
+          mob_state.is_loop = true;
+          mob_state.is_playing = true;
+        }
+        if (is_death_state(mob_state.state)) {
+          mob_state.is_alive = false;
+        }
+      }
+
       scene_object::AnimationState anim_state{
-        .is_loop = true,
+        .is_loop = mob_state.is_loop,
         .play_on_start = true,
         .is_playing = mob_state.is_playing,
         .frames = animation_data[mob_state.state].frames,
@@ -197,6 +214,22 @@ export namespace mob {
       mob_state.current_frame = anim_state.current_frame;
       mob_state.current_frame_time = anim_state.current_frame_time;
       mob_state.is_playing = anim_state.is_playing;
+    }
+
+    void HandleDeath(MobState& state) {
+      state.state = MobActionState::DEATH_DOWN; // todo: handle facing direction
+      state.current_frame = 0;
+      state.is_loop = false;
+      state.is_playing = true;
+      state.current_frame_time = animation_data[MobActionState::DEATH_DOWN].frame_durations[0];
+    }
+
+    void HandleHurt(MobState& state) {
+      state.state = MobActionState::HURT_DOWN; // todo: handle facing direction
+      state.current_frame = 0;
+      state.is_loop = false;
+      state.is_playing = true;
+      state.current_frame_time = animation_data[MobActionState::HURT_DOWN].frame_durations[0];
     }
   }
 }

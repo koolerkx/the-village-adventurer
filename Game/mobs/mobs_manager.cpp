@@ -10,6 +10,7 @@ void MobManager::Spawn(TileMapObjectProps props) {
     const auto insert_result = mobs_pool_.Insert(mob::slime::MakeMob(props));
     const auto inserted = mobs_pool_.Get(insert_result.value());
     inserted->collider.owner = inserted; // HACK: workaround handle the object lifecycle
+    inserted->id = insert_result.value();
   }
 }
 
@@ -22,6 +23,10 @@ void MobManager::OnUpdate(GameContext* ctx, float delta_time) {
     default:
       break;
     }
+  });
+
+  mobs_pool_.RemoveIf([](MobState& it) {
+    return !it.is_alive;
   });
 }
 
@@ -38,6 +43,7 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
     switch (it.type) {
     case MobType::SLIME:
       item = mob::slime::GetRenderInstanceItem(it);
+      break;
     default:
       break;
     }
@@ -80,6 +86,29 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
 
   rr->DrawBoxes(rect_view, camera->GetCameraProps(), true);
 #endif
+}
+
+void MobManager::MakeDamage(MobState& mob_state, int damage,
+                            std::move_only_function<void()> post_action) {
+  mob_state.hp -= damage;
+  if (mob_state.hp <= 0) {
+    switch (mob_state.type) {
+    case MobType::SLIME:
+      mob::slime::HandleDeath(mob_state);
+    default:
+      break;
+    }
+    post_action();
+    return;
+  }
+
+  switch (mob_state.type) {
+  case MobType::SLIME:
+    mob::slime::HandleHurt(mob_state);
+  default:
+    break;
+  }
+  post_action();
 }
 
 std::vector<Collider<MobState>> MobManager::GetColliders() {

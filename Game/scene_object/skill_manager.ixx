@@ -16,10 +16,11 @@ import std;
 struct SkillData {
   std::string name;
   float cooldown;
+  short damage;
   bool is_stick_to_player = false;
 
   Transform base_transform;
-  Padding base_collider_padding;  // Top, Right, Bottom, Left
+  Padding base_collider_padding; // Top, Right, Bottom, Left
 
   std::vector<TileUV> frames;
   std::vector<float> frame_durations;
@@ -36,6 +37,7 @@ export struct SkillHitbox {
   bool is_playing = true;
 
   const SkillData* data = nullptr;
+  std::unordered_set<ObjectPoolIndexType> hit_mobs {}; // hit each mob only once
 };
 
 export enum class SKILL_TYPE {
@@ -47,6 +49,7 @@ const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
     SKILL_TYPE::NORMAL_ATTACK, {
       .name = "Slash 1",
       .cooldown = 1.0f,
+      .damage = 3,
       .is_stick_to_player = true,
       .base_transform = Transform{
         .size = {36, 36},

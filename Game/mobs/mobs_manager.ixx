@@ -45,6 +45,7 @@ export enum class MobType: char {
 };
 
 export struct MobState {
+  ObjectPoolIndexType id;
   Transform transform;
   UV uv;
   Collider<MobState> collider;
@@ -52,10 +53,31 @@ export struct MobState {
   MobActionState state = MobActionState::IDLE_DOWN;
   bool is_battle = false; // is in battle
 
+  bool is_alive = true;
+  bool is_loop = false;
   bool is_playing = true;
   size_t current_frame = 0;
   float current_frame_time = 0.f;
+
+  // mob data
+  int hp;
 };
+
+export namespace mob {
+  bool is_hurt_state(MobActionState state) {
+    return state == MobActionState::HURT_DOWN ||
+      state == MobActionState::HURT_UP ||
+      state == MobActionState::HURT_LEFT ||
+      state == MobActionState::HURT_RIGHT;
+  }
+
+  bool is_death_state(MobActionState state) {
+    return state == MobActionState::DEATH_DOWN ||
+      state == MobActionState::DEATH_UP ||
+      state == MobActionState::DEATH_LEFT ||
+      state == MobActionState::DEATH_RIGHT;
+  }
+}
 
 export class MobManager {
 private:
@@ -72,6 +94,8 @@ public:
   void OnUpdate(GameContext* ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, float delta_time);
   void OnRender(GameContext* ctx, Camera* camera);
+
+  void MakeDamage(MobState& mob_state, int damage, const std::move_only_function<void()> post_action);
 
   std::vector<Collider<MobState>> GetColliders();
 };

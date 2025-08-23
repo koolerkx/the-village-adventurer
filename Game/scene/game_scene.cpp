@@ -127,9 +127,17 @@ void GameScene::HandleSkillHitEnemyCollision(float delta_time) {
   std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
   std::span skill_colliders_span{skill_colliders.data(), skill_colliders.size()};
 
-  auto cb =
-    [](MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult result) -> void {
-    std::cout << "Hit" << std::endl;
+  auto cb = [&mob_manager = this->mob_manager_, &ui__ = this->ui_]
+  (MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult result) -> void {
+    if (!skill_hitbox->hit_mobs.contains(mob_state->id)) {
+      skill_hitbox->hit_mobs.insert(mob_state->id);
+      mob_manager->MakeDamage(*mob_state, skill_hitbox->data->damage, [&mob_state, &ui = ui__]() {
+        // make damage text
+          if (mob::is_hurt_state(mob_state->state)) {
+            
+          }
+       });
+    }
   };
 
   collision::HandleDetection(mob_colliders_span, skill_colliders_span, cb);

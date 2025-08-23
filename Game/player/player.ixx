@@ -71,7 +71,7 @@ private:
   Vector2 direction_facing_ = {0, 1}; // default facing down
   Vector2 velocity_;
 
-  float move_speed_ = 125.0f;
+  float move_speed_ = 100.0f;
 
   void UpdateState();
   void UpdateAnimation(float delta_time);
