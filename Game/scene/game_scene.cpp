@@ -127,11 +127,11 @@ void GameScene::HandleSkillHitEnemyCollision(float delta_time) {
   std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
   std::span skill_colliders_span{skill_colliders.data(), skill_colliders.size()};
 
-  auto cb = [&mob_manager = this->mob_manager_, &ui__ = this->ui_]
+  auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_]
   (MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult result) -> void {
-    if (!skill_hitbox->hit_mobs.contains(mob_state->id)) {
+    if (!skill_hitbox->hit_mobs.contains(mob_state->id) && !mob::is_death_state(mob_state->state)) {
       skill_hitbox->hit_mobs.insert(mob_state->id);
-      mob_manager->MakeDamage(*mob_state, skill_hitbox->data->damage, [&mob_state, &skill_hitbox, &ui = ui__]() {
+      mob_manager->MakeDamage(*mob_state, skill_hitbox->data->damage, [&]() {
         // make damage text
         ui->AddDamageText(
           {
@@ -141,6 +141,23 @@ void GameScene::HandleSkillHitEnemyCollision(float delta_time) {
           skill_hitbox->data->name,
           skill_hitbox->data->damage
         );
+
+        // attack push back
+        float dirX = mob_state->transform.position.x - skill_hitbox->transform.position.x;
+        float dirY = mob_state->transform.position.y - skill_hitbox->transform.position.y;
+
+        float magnitude = std::sqrt(dirX * dirX + dirY * dirY);
+
+        if (magnitude > 0.0f) {
+          dirX = dirX / magnitude;
+          dirY = dirY / magnitude;
+        }
+        else {
+          dirX = 0.0f;
+          dirY = 0.0f;
+        }
+
+        mob_manager->PushBack(*mob_state, {dirX, dirY});
       });
     }
   };

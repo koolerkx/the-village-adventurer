@@ -9,6 +9,7 @@ import game.collision.collider;
 import game.context;
 import game.scene_object.camera;
 import game.map.tilemap_object_handler;
+import game.types;
 
 export enum class MobActionState: char {
   IDLE_LEFT,
@@ -59,6 +60,7 @@ export struct MobState {
   size_t current_frame = 0;
   float current_frame_time = 0.f;
 
+  Vector2 velocity;
   // mob data
   int hp;
 };
@@ -76,6 +78,13 @@ export namespace mob {
       state == MobActionState::DEATH_UP ||
       state == MobActionState::DEATH_LEFT ||
       state == MobActionState::DEATH_RIGHT;
+  }
+
+  bool is_moving_state(MobActionState state) {
+    return state == MobActionState::MOVING_DOWN ||
+      state == MobActionState::MOVING_UP ||
+      state == MobActionState::MOVING_LEFT ||
+      state == MobActionState::MOVING_RIGHT;
   }
 }
 
@@ -96,6 +105,7 @@ public:
   void OnRender(GameContext* ctx, Camera* camera);
 
   void MakeDamage(MobState& mob_state, int damage, const std::move_only_function<void()> post_action);
+  void PushBack(MobState& mob_state, Vector2 direction);
 
   std::vector<Collider<MobState>> GetColliders();
 };

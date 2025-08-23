@@ -16,7 +16,6 @@ void MobManager::Spawn(TileMapObjectProps props) {
 
 void MobManager::OnUpdate(GameContext* ctx, float delta_time) {
   mobs_pool_.ForEach([delta_time](MobState& it) {
-    RenderInstanceItem item;
     switch (it.type) {
     case MobType::SLIME:
       mob::slime::UpdateMob(it, delta_time);
@@ -30,7 +29,31 @@ void MobManager::OnUpdate(GameContext* ctx, float delta_time) {
   });
 }
 
-void MobManager::OnFixedUpdate(GameContext*, float) {}
+void MobManager::OnFixedUpdate(GameContext*, float delta_time) {
+  // handle moving
+  mobs_pool_.ForEach([delta_time](MobState& it) {
+    if (mob::is_death_state(it.state)) return;
+    
+    if (it.velocity.x * it.velocity.x > 0.0001) {
+      it.transform.position.x += it.velocity.x * delta_time;
+    }
+    if (it.velocity.y * it.velocity.y > 0.0001) {
+      it.transform.position.y += it.velocity.y * delta_time;
+    }
+    if (!mob::is_moving_state(it.state)) {
+      it.velocity.x *= 0.90f;
+      it.velocity.y *= 0.90f;
+    }
+
+    switch (it.type) {
+    case MobType::SLIME:
+      mob::slime::SyncCollider(it);
+      break;
+    default:
+      break;
+    }
+  });
+}
 
 void MobManager::OnRender(GameContext* ctx, Camera* camera) {
   auto rr = ctx->render_resource_manager->renderer.get();
@@ -58,7 +81,7 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
   rect_view.reserve(mobs_pool_.Size());
 
   mobs_pool_.ForEach([&rect_view, rr, camera](MobState& it) {
-    if (auto collider = std::get_if<RectCollider>(&it.collider.shape)) {
+    if (std::get_if<RectCollider>(&it.collider.shape)) {
       const auto& shape = std::get<RectCollider>(it.collider.shape);
 
       rect_view.push_back(Rect{
@@ -109,6 +132,14 @@ void MobManager::MakeDamage(MobState& mob_state, int damage,
     break;
   }
   post_action();
+}
+
+void MobManager::PushBack(MobState& mob_state, Vector2 direction) {
+  constexpr float speed = 50;
+
+  // give impulse velocity
+  mob_state.velocity.x = direction.x * speed;
+  mob_state.velocity.y = direction.y * speed;
 }
 
 std::vector<Collider<MobState>> MobManager::GetColliders() {

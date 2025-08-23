@@ -231,5 +231,12 @@ export namespace mob {
       state.is_playing = true;
       state.current_frame_time = animation_data[MobActionState::HURT_DOWN].frame_durations[0];
     }
+
+    void SyncCollider(MobState& state) {
+      state.collider.position = {
+        state.transform.position.x + state.transform.size.x / 2,
+        state.transform.position.y + state.transform.size.y / 2,
+      };
+    }
   }
 }

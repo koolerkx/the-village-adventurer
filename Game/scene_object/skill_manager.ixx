@@ -47,7 +47,7 @@ export enum class SKILL_TYPE {
 const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
   {
     SKILL_TYPE::NORMAL_ATTACK, {
-      .name = L"Slash 1",
+      .name = L"ŽaŒ‚",
       .cooldown = 1.0f,
       .damage = 3,
       .is_stick_to_player = true,
