@@ -11,8 +11,6 @@ import game.scene_object.skill;
 import game.utils.throttle;
 import game.player.input;
 
-
-
 // Texture data
 static constexpr PlayerState default_state = PlayerState::IDLE_UP;
 

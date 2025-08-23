@@ -6,12 +6,26 @@ import game.mobs.slime;
 import graphic.utils.types;
 
 void MobManager::Spawn(TileMapObjectProps props) {
-  if (props.type == TileMapObjectType::MOB_SLIME) {    
+  if (props.type == TileMapObjectType::MOB_SLIME) {
     const auto insert_result = mobs_pool_.Insert(mob::slime::MakeMob(props));
     const auto inserted = mobs_pool_.Get(insert_result.value());
     inserted->collider.owner = inserted; // HACK: workaround handle the object lifecycle
   }
 }
+
+void MobManager::OnUpdate(GameContext* ctx, float delta_time) {
+  mobs_pool_.ForEach([delta_time](MobState& it) {
+    RenderInstanceItem item;
+    switch (it.type) {
+    case MobType::SLIME:
+      mob::slime::UpdateMob(it, delta_time);
+    default:
+      break;
+    }
+  });
+}
+
+void MobManager::OnFixedUpdate(GameContext*, float) {}
 
 void MobManager::OnRender(GameContext* ctx, Camera* camera) {
   auto rr = ctx->render_resource_manager->renderer.get();

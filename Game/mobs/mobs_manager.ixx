@@ -26,10 +26,15 @@ export enum class MobType: char {
 
 export struct MobState {
   Transform transform;
+  UV uv;
   Collider<MobState> collider;
   MobType type = MobType::NONE;
   MobActionState state = MobActionState::IDLE;
   bool is_battle = false; // is in battle
+  
+  bool is_playing = true;
+  size_t current_frame = 0;
+  float current_frame_time = 0.f;
 };
 
 export class MobManager {
@@ -44,7 +49,7 @@ public:
 
   void Spawn(TileMapObjectProps);
 
-  // void OnUpdate(GameContext* ctx, float delta_time);
-  // void OnFixedUpdate(GameContext* ctx, float delta_time);
+  void OnUpdate(GameContext* ctx, float delta_time);
+  void OnFixedUpdate(GameContext* ctx, float delta_time);
   void OnRender(GameContext* ctx, Camera* camera);
 };

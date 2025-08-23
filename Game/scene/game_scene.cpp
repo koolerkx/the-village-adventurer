@@ -53,7 +53,8 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   map_->OnUpdate(ctx, delta_time);
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnUpdate(ctx, delta_time);
-
+  mob_manager_->OnUpdate(ctx, delta_time);
+  
   UpdateUI(ctx, delta_time);
 }
 
@@ -63,6 +64,7 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   camera_->UpdatePosition(player_->GetPositionVector(), delta_time);
 
   skill_manager_->OnFixedUpdate(ctx, delta_time);
+  mob_manager_->OnFixedUpdate(ctx, delta_time);
 
   ui_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
 }
