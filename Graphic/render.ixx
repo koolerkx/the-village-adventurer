@@ -81,6 +81,7 @@ public:
   void DrawSprite(RenderItem render_item, CameraProps camera_props = {});
 
   void DrawLine(const POSITION& start, const POSITION& end, const COLOR& color);
+  void DrawLineCircle(POSITION center, float radius, const COLOR& color, CameraProps camera_props = {});
   // Indexed Draw
   void DrawLines(const std::span<Line> lines,
                  CameraProps camera_props = {},

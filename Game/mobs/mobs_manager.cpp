@@ -37,7 +37,7 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
     RenderInstanceItem item;
     switch (it.type) {
     case MobType::SLIME:
-      item = mob::slime::GetRenderInstanceItme(it);
+      item = mob::slime::GetRenderInstanceItem(it);
     default:
       break;
     }
@@ -46,4 +46,38 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
   });
 
   rr->DrawSpritesInstanced(render_items, texture_id_, camera->GetCameraProps(), true);
+
+#if defined(DEBUG) || defined(_DEBUG)
+  std::vector<Rect> rect_view;
+  rect_view.reserve(mobs_pool_.Size());
+
+  mobs_pool_.ForEach([&rect_view, rr, camera](MobState& it) {
+    if (auto collider = std::get_if<RectCollider>(&it.collider.shape)) {
+      const auto& shape = std::get<RectCollider>(it.collider.shape);
+
+      rect_view.push_back(Rect{
+        {
+          it.collider.position.x + shape.x,
+          it.collider.position.y + shape.y, 0
+        },
+        {
+          it.collider.position.x + shape.x + shape.width,
+          it.collider.position.y + shape.y + shape.height, 0
+        },
+        color::red
+      });
+    }
+    else {
+      const auto& shape = std::get<CircleCollider>(it.collider.shape);
+      rr->DrawLineCircle({
+                           it.collider.position.x + shape.x,
+                           it.collider.position.y + shape.y, 0
+                         },
+                         shape.radius,
+                         color::red, camera->GetCameraProps());
+    }
+  });
+
+  rr->DrawBoxes(rect_view, camera->GetCameraProps(), true);
+#endif
 }

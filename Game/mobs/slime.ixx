@@ -132,41 +132,45 @@ export namespace mob {
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 8),
         }
       },
-#pragma endregion 
+#pragma endregion
     };
 
     MobState MakeMob(TileMapObjectProps props) {
+      const Transform t = {
+        .position = {props.x, props.y, 0.0},
+        .size = {32, 32},
+        .scale = {1.0f, 1.0f},
+        .rotation_radian = 0,
+        .rotation_pivot = {0, 0, 0},
+        .position_anchor = {0, 0, 0},
+      };
+      
+      const UV uv = {
+        {1152, 896},
+        {64, 64}
+      };
+
+      constexpr float COLLIDER_PADDING = 6.0f;
+      const Collider<MobState> c = {
+        .is_trigger = true,
+        .position = {props.x + t.size.x / 2, props.y + t.size.x / 2},
+        .owner = nullptr, // handle outside
+        .shape = CircleCollider{
+          .x = 0, .y = 0, .radius = 16 - COLLIDER_PADDING * 2
+        }
+      };
+
       return {
-        .transform = {
-          .position = {props.x, props.y, 0.0},
-          .size = {32, 32},
-          .scale = {1.0f, 1.0f},
-          .rotation_radian = 0,
-          .rotation_pivot = {0, 0, 0},
-          .position_anchor = {0, 0, 0},
-        },
-        .uv = {
-          {1152, 896},
-          {64, 64}
-        },
-        .collider = { 
-          .is_trigger = true,
-          .position = {props.x, props.y},
-          .rotation = 0,
-          .rotation_pivot = {0, 0},
-          .shape = RectCollider{
-            .x = 0, .y = 0,
-            .width = 16,
-            .height = 16
-          }
-        },
+        .transform = t,
+        .uv = uv,
+        .collider = c,
         .type = MobType::SLIME,
         .state = MobActionState::IDLE_DOWN,
         .is_battle = false,
       };
     };
 
-    RenderInstanceItem GetRenderInstanceItme(MobState state) {
+    RenderInstanceItem GetRenderInstanceItem(MobState state) {
       return RenderInstanceItem{
         .transform = state.transform,
         .uv = {
