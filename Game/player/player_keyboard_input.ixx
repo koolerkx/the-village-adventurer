@@ -45,12 +45,15 @@ public:
 
     // button state
     intent.attack = step_button(props.attack, prev_attack_);
+    prev_attack_ = intent.attack.held;
+
+#if defined(DEBUG) || defined(_DEBUG)
     intent.damage_debug = step_button(props.damage_debug, prev_damage_);
     intent.heal_debug = step_button(props.heal_debug, prev_heal_);
 
-    prev_attack_ = intent.attack.held;
     prev_damage_ = intent.damage_debug.held;
     prev_heal_ = intent.heal_debug.held;
+#endif
 
     return intent;
   }
