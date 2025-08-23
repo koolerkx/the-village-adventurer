@@ -124,6 +124,26 @@
    <frame tileid="128" duration="250"/>
   </animation>
  </tile>
+ <tile id="3931">
+  <objectgroup draworder="index" id="3">
+   <object id="2" x="0" y="8" width="16" height="8"/>
+  </objectgroup>
+ </tile>
+ <tile id="3932">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="8" width="13" height="8"/>
+  </objectgroup>
+ </tile>
+ <tile id="3987">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="16" height="13"/>
+  </objectgroup>
+ </tile>
+ <tile id="3988">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="13" height="13"/>
+  </objectgroup>
+ </tile>
  <tile id="4145">
   <properties>
    <property name="loop" type="bool" value="true"/>

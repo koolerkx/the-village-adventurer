@@ -23,7 +23,8 @@ void GameScene::OnEnter(GameContext* ctx) {
   // Scene
   scene_context.reset(new SceneContext());
 
-  map_ = std::make_unique<TileMap>(ctx);
+  Vector2 default_map_position = {-256, -512};
+  map_ = std::make_unique<TileMap>(ctx, default_map_position);
   scene_context->map = map_.get();
 
   // Skill
@@ -40,7 +41,7 @@ void GameScene::OnEnter(GameContext* ctx) {
   ResetTimer();
 
   // Mob
-  mob_manager_ = std::make_unique<MobManager>();
+  mob_manager_ = std::make_unique<MobManager>(ctx);
   for (auto& mob_props : map_->GetMobProps()) {
     mob_manager_->Spawn(mob_props);
   }
@@ -70,6 +71,7 @@ void GameScene::OnRender(GameContext* ctx) {
   // std::cout << "GameScene> OnRender" << std::endl;
 
   map_->OnRender(ctx, camera_.get());
+  mob_manager_->OnRender(ctx, camera_.get());
   player_->OnRender(ctx, scene_context.get(), camera_.get());
   skill_manager_->OnRender(ctx, camera_.get(), player_->GetTransform());
 

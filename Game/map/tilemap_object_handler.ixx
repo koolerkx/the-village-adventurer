@@ -3,6 +3,7 @@ module;
 export module game.map.tilemap_object_handler;
 
 import std;
+import game.types;
 
 export enum class TileMapObjectType: char {
   MOB_SLIME,
@@ -31,9 +32,14 @@ export namespace tilemap_object_handler {
     return TileMapObjectType::NONE;
   }
 
-  std::vector<TileMapObjectProps> GetMobProps(std::vector<TileMapObjectProps> props) {
+  std::vector<TileMapObjectProps> GetMobProps(std::vector<TileMapObjectProps> props, Vector2 offset_position) {
     return props
       | std::views::filter([](const auto& it) { return it.type == TileMapObjectType::MOB_SLIME; })
+      | std::views::transform([offset_position](auto& it) {
+        it.x += offset_position.x;
+        it.y += offset_position.y;
+        return it;
+      })
       | std::ranges::to<std::vector>();
   }
 }

@@ -48,7 +48,7 @@ private:
   std::vector<TileMapObjectProps> ParseObjectGroup(tinyxml2::XMLElement* mapElement);
 
 public:
-  TileMap(GameContext* ctx);
+  TileMap(GameContext* ctx, Vector2 position);
   void Load(std::string_view filepath, FixedPoolIndexType texture_id, TileRepository* tr);
 
   void OnUpdate(GameContext* ctx, float delta_time);
@@ -94,6 +94,6 @@ public:
   }
 
   std::vector<TileMapObjectProps> GetMobProps() {
-    return tilemap_object_handler::GetMobProps(map_objects_props_);
+    return tilemap_object_handler::GetMobProps(map_objects_props_, {transform_.position.x, transform_.position.y});
   }
 };

@@ -10,7 +10,7 @@ import game.context;
 import game.scene_object.camera;
 import game.map.tilemap_object_handler;
 
-export enum class MobState: char {
+export enum class MobActionState: char {
   IDLE,
   ATTACK,
   HURT,
@@ -24,24 +24,27 @@ export enum class MobType: char {
   SLIME,
 };
 
-export struct MobData {
-  Transform transform_;
-  Collider<MobData> collider_;
+export struct MobState {
+  Transform transform;
+  Collider<MobState> collider;
   MobType type = MobType::NONE;
-  MobState state = MobState::IDLE;
+  MobActionState state = MobActionState::IDLE;
   bool is_battle = false; // is in battle
 };
 
 export class MobManager {
 private:
-  ObjectPool<MobData> object_pool_;
+  FixedPoolIndexType texture_id_;
+  ObjectPool<MobState> mobs_pool_;
 
 public:
-  MobManager() {}
+  MobManager(GameContext* ctx) {
+    texture_id_ = ctx->render_resource_manager->texture_manager->Load(L"assets/mobs.png"); // extract path
+  }
 
   void Spawn(TileMapObjectProps);
 
   // void OnUpdate(GameContext* ctx, float delta_time);
   // void OnFixedUpdate(GameContext* ctx, float delta_time);
-  // void OnRender(GameContext* ctx, Camera* camera, Transform player_transform);
+  void OnRender(GameContext* ctx, Camera* camera);
 };

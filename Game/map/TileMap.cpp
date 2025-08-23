@@ -9,7 +9,7 @@ import game.scene_object.camera;
 import game.map.tilemap_object_handler;
 import game.scene_manager;
 
-TileMap::TileMap(GameContext* ctx) {
+TileMap::TileMap(GameContext* ctx, Vector2 position) {
   std::string default_map = SceneManager::GetInstance().GetGameConfig()->default_map;
   TileRepository* tr = SceneManager::GetInstance().GetTileRepository();
 
@@ -23,13 +23,12 @@ TileMap::TileMap(GameContext* ctx) {
 
   // load map
   Load(default_map_path, id, tr);
-
   
   Transform t = GetTransform();
 
   // TODO: remove debug data
-  t.position.x = -128.0f;
-  t.position.y = -256.0f;
+  t.position.x = position.x;
+  t.position.y = position.y;
   t.scale.x = 1.0f;
   t.scale.y = 1.0f;
   t.position_anchor.x = 0.0f;
