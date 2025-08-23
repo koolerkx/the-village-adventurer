@@ -11,17 +11,15 @@ import game.scene_object.skill;
 import game.utils.throttle;
 import game.player.input;
 
+
+
 // Texture data
-static constexpr std::wstring_view texture_path = L"assets/character_01.png"; // TODO: extract
 static constexpr PlayerState default_state = PlayerState::IDLE_UP;
 
-Player::Player(GameContext* ctx, SceneContext*, std::unique_ptr<IPlayerInput> input) {
-  input_ = std::move(input);
-
-  const auto tm = ctx->render_resource_manager->texture_manager.get();
-
-  texture_id_ = tm->Load(texture_path.data());
-
+Player::Player(FixedPoolIndexType texture_id,
+               std::unique_ptr<IPlayerInput> input,
+               std::unordered_map<PlayerState, scene_object::AnimationFrameData> anim_data)
+  : texture_id_(texture_id), animation_data_(anim_data), input_(std::move(input)) {
   SetState(default_state);
 
   collider_ = {
@@ -59,7 +57,7 @@ void Player::OnUpdate(GameContext*, SceneContext* scene_ctx, float delta_time) {
   if (it.heal_debug.pressed)   Heal(10);
 #endif
 
-    UpdateAnimation(delta_time);
+  UpdateAnimation(delta_time);
 }
 
 void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {
@@ -114,7 +112,7 @@ void Player::SetState(PlayerState state) {
   state_ = state;
 
   // set animation by state
-  if (auto result = animation_data.find(state); result != animation_data.end()) {
+  if (auto result = animation_data_.find(state); result != animation_data_.end()) {
     auto data = result->second;
 
     animation_state_.is_loop = true;

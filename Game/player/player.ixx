@@ -29,74 +29,18 @@ export enum class PlayerState: unsigned char {
   MOVE_DOWN
 };
 
-std::unordered_map<PlayerState, scene_object::AnimationFrameData> animation_data{
-  {
-    PlayerState::IDLE_LEFT, {
-      .frames = scene_object::MakeFramesVector(1, 32, 32, 1, 32, 32),
-      .frame_durations = scene_object::MakeFramesConstantDuration(9999.0f, 1),
-    }
-  },
-  {
-    PlayerState::IDLE_RIGHT, {
-      .frames = scene_object::MakeFramesVector(1, 32, 32, 1, 32, 32 * 2),
-      .frame_durations = scene_object::MakeFramesConstantDuration(9999.0f, 1),
-    }
-  },
-  {
-    PlayerState::IDLE_UP, {
-      .frames = scene_object::MakeFramesVector(1, 32, 32, 1, 32, 0),
-      .frame_durations = scene_object::MakeFramesConstantDuration(9999.0f, 1),
-    }
-  },
-  {
-    PlayerState::IDLE_DOWN, {
-      .frames = scene_object::MakeFramesVector(1, 32, 32, 1, 32, 32 * 3),
-      .frame_durations = scene_object::MakeFramesConstantDuration(9999.0f, 1),
-    }
-  },
-  {
-    PlayerState::MOVE_LEFT, {
-      .frames = scene_object::MakeFramesVector(3, 32, 32, 3, 0, 32),
-      .frame_durations = scene_object::MakeFramesConstantDuration(0.15f, 3),
-    }
-  },
-  {
-    PlayerState::MOVE_RIGHT, {
-      .frames = scene_object::MakeFramesVector(3, 32, 32, 3, 0, 32 * 2),
-      .frame_durations = scene_object::MakeFramesConstantDuration(0.15f, 3),
-    }
-  },
-  {
-    PlayerState::MOVE_UP, {
-      .frames = scene_object::MakeFramesVector(3, 32, 32, 3),
-      .frame_durations = scene_object::MakeFramesConstantDuration(0.15f, 3),
-    }
-  },
-  {
-    PlayerState::MOVE_DOWN, {
-      .frames = scene_object::MakeFramesVector(3, 32, 32, 3, 0, 32 * 3),
-      .frame_durations = scene_object::MakeFramesConstantDuration(0.15f, 3),
-    }
-  }
-};
-
 export class Player {
 private:
   FixedPoolIndexType texture_id_ = 0;
 
   scene_object::AnimationState animation_state_{};
 
-  Transform transform_ = Transform{
+#pragma region PLAYER_DEFAULT_VALUE
+  static constexpr Transform DEFAULT_TRANSFORM{
     .position = {0, 0, 0},
     .size = {16, 16},
     .scale = {1, 1},
     .position_anchor = {-8, -8, 0}
-  };
-  Transform transform_before_ = transform_;
-
-  UV uv_{
-    {0, 0},
-    {32, 32}
   };
 
   static constexpr CollisionData COLLISION_DATA{
@@ -107,9 +51,19 @@ private:
     .is_circle = false, // rect
   };
   static constexpr float COLLIDER_PADDING = 2.0f;
+  static constexpr UV DEFAULT_UV {
+    {0, 0},
+    {32, 32}
+  };
+#pragma endregion
+  
+  Transform transform_ = DEFAULT_TRANSFORM;
+  Transform transform_before_ = transform_;
+  UV uv_ = DEFAULT_UV;
   Collider<Player> collider_{};
 
   PlayerState state_;
+  std::unordered_map<PlayerState, scene_object::AnimationFrameData> animation_data_;
 
   COLOR color_ = color::white;
 
@@ -117,7 +71,7 @@ private:
   Vector2 direction_facing_ = {0, 1}; // default facing down
   Vector2 velocity_;
 
-  float move_speed_ = 125.0f; // px per second
+  float move_speed_ = 125.0f;
 
   void UpdateState();
   void UpdateAnimation(float delta_time);
@@ -126,7 +80,7 @@ private:
   Throttle attack_throttle_{0.3f};
   Throttle function_key_throttle_{0.3f};
 
-  // Gmae data
+  // Game data
   float health_ = 100.0f;
   float max_health_ = 100.0f;
 
@@ -167,7 +121,7 @@ public:
   void Heal(float amount) { health_ = std::min(health_ + amount, max_health_); }
   float GetHPPercentage() const { return health_ / max_health_; }
 
-  Player(GameContext* ctx, SceneContext* scene_ctx, std::unique_ptr<IPlayerInput> input);
+  Player(FixedPoolIndexType texture_id, std::unique_ptr<IPlayerInput> input, std::unordered_map<PlayerState, scene_object::AnimationFrameData> anim_data);
   void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
