@@ -32,6 +32,14 @@ void MobManager::OnUpdate(GameContext* ctx, float delta_time) {
   mobs_pool_.RemoveIf([](MobState& it) {
     return !it.is_alive;
   });
+
+  mob_hitbox_pool_.ForEach([delta_time](MobHitBox& it) {
+    it.timeout -= delta_time;
+  });
+
+  mob_hitbox_pool_.RemoveIf([](MobHitBox& it) {
+    return !it.is_playing && it.timeout <= 0;
+  });
 }
 
 void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delta_time,
@@ -74,14 +82,25 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
     // Handle Attack
     if (!mob::is_attack_state(it.state) && it.attack_cooldown <= 0) {
       collision::HandleDetection(player_collider, std::span(&it.attack_range_collider, 1),
-                                 [](Player* p, MobState* m, collision::CollisionResult res) -> void {
-                                  m->attack_cooldown = 2.0f;
-                                   
+                                 [this](Player* p, MobState* m, collision::CollisionResult res) -> void {
+                                   m->attack_cooldown = 2.0f;
+
                                    m->state = MobActionState::ATTACK_DOWN;
                                    m->current_frame = 0;
                                    m->current_frame_time = 0;
                                    m->is_playing = true;
                                    m->is_loop = false;
+
+                                   switch (m->type) {
+                                   case MobType::SLIME: {
+                                     auto insert_result = mob_hitbox_pool_.Insert(mob::slime::GetHitBox(*m));
+                                     const auto inserted = mob_hitbox_pool_.Get(insert_result.value());
+                                     inserted->collider.owner = inserted;
+                                     break;
+                                   }
+                                   default:
+                                     break;
+                                   }
                                  });
     }
   });
@@ -145,6 +164,33 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
                        },
                        shape.radius,
                        color::blue, camera->GetCameraProps());
+  });
+
+  mob_hitbox_pool_.ForEach([&rect_view, rr, camera](MobHitBox it) -> void {
+    if (std::get_if<RectCollider>(&it.collider.shape)) {
+      const auto& shape = std::get<RectCollider>(it.collider.shape);
+
+      rect_view.push_back(Rect{
+        {
+          it.collider.position.x + shape.x,
+          it.collider.position.y + shape.y, 0
+        },
+        {
+          it.collider.position.x + shape.x + shape.width,
+          it.collider.position.y + shape.y + shape.height, 0
+        },
+        color::yellow
+      });
+    }
+    else {
+      const auto& shape = std::get<CircleCollider>(it.collider.shape);
+      rr->DrawLineCircle({
+                           it.collider.position.x + shape.x,
+                           it.collider.position.y + shape.y, 0
+                         },
+                         shape.radius,
+                         color::yellow, camera->GetCameraProps());
+    }
   });
 
   rr->DrawBoxes(rect_view, camera->GetCameraProps(), true);

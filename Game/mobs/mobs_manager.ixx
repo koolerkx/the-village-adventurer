@@ -104,12 +104,15 @@ export struct MobHitBox {
   Transform transform;
   UV uv;
   Collider<MobHitBox> collider;
+  float damage = 10;
   // animation
   size_t current_frame = 0;
   float current_frame_time = 0.f;
-  bool is_playing = true;
+  float timeout = 9999.0f;
+  bool is_playing = false;
+  bool is_animated = false;
 
-  std::unordered_set<ObjectPoolIndexType> hit_mobs {}; // hit each mob only once
+  bool hit_player; // hit player only once
 };
 
 export class MobManager {

@@ -245,14 +245,42 @@ export namespace mob {
       state.current_frame_time = animation_data[MobActionState::HURT_DOWN].frame_durations[0];
     }
 
-    void HandleTriggerAttackRange() {
-      
-    }
+    void HandleTriggerAttackRange() {}
 
     void SyncCollider(MobState& state) {
       state.collider.position = {
         state.transform.position.x + state.transform.size.x / 2,
         state.transform.position.y + state.transform.size.y / 2,
+      };
+      state.attack_range_collider.position = {
+        state.transform.position.x + state.transform.size.x / 2,
+        state.transform.position.y + state.transform.size.y / 2,
+      };
+    }
+
+    MobHitBox GetHitBox(MobState state) {
+      return MobHitBox{
+        .transform = {
+          {
+            state.transform.position.x + state.transform.size.x / 2,
+            state.transform.position.y + state.transform.size.y / 2, 0
+          }
+        },
+        .collider = Collider<MobHitBox>{
+          .is_trigger = true,
+          .position = {
+            state.transform.position.x + state.transform.size.x / 2,
+            state.transform.position.y + state.transform.size.y / 2
+          },
+          .owner = nullptr, // handle outside
+          .shape = CircleCollider{
+            .x = 0, .y = 0, .radius = 8
+          }
+        },
+        .damage = 10,
+        .timeout = 1.0f,
+        .is_animated = false,
+        .hit_player = false,
       };
     }
   }
