@@ -4,6 +4,8 @@ module game.mobs_manager;
 
 import game.mobs.slime;
 import graphic.utils.types;
+import game.collision_handler;
+import game.map.field_object;
 
 void MobManager::Spawn(TileMapObjectProps props) {
   if (props.type == TileMapObjectType::MOB_SLIME) {
@@ -29,11 +31,17 @@ void MobManager::OnUpdate(GameContext* ctx, float delta_time) {
   });
 }
 
-void MobManager::OnFixedUpdate(GameContext*, float delta_time) {
+void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delta_time) {
+  auto start = std::chrono::high_resolution_clock::now();
+  
+  auto map_colliders = scene_ctx->map->GetFiledObjectColliders();
+
   // handle moving
-  mobs_pool_.ForEach([delta_time](MobState& it) {
+  mobs_pool_.ForEach([delta_time, map_colliders, this](MobState& it) {
     if (mob::is_death_state(it.state)) return;
-    
+
+    POSITION position_before = it.transform.position;
+
     if (it.velocity.x * it.velocity.x > 0.0001) {
       it.transform.position.x += it.velocity.x * delta_time;
     }
@@ -45,14 +53,21 @@ void MobManager::OnFixedUpdate(GameContext*, float delta_time) {
       it.velocity.y *= 0.90f;
     }
 
-    switch (it.type) {
-    case MobType::SLIME:
-      mob::slime::SyncCollider(it);
-      break;
-    default:
-      break;
-    }
+    SyncCollider(it);
+
+    Collider<MobState> collider = it.collider;
+
+    collision::HandleDetection(collider,
+                               map_colliders,
+                               [&](MobState* m, FieldObject* fo, collision::CollisionResult res) -> void {
+                                 it.transform.position = position_before;
+                                 SyncCollider(it);
+                               });
   });
+  
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+  std::cout << "exe time: " << duration.count() / 1000.0 << " ms" << std::endl;
 }
 
 void MobManager::OnRender(GameContext* ctx, Camera* camera) {
@@ -151,4 +166,14 @@ std::vector<Collider<MobState>> MobManager::GetColliders() {
   });
 
   return colliders;
+}
+
+void MobManager::SyncCollider(MobState& mob_state) {
+  switch (mob_state.type) {
+  case MobType::SLIME:
+    mob::slime::SyncCollider(mob_state);
+    break;
+  default:
+    break;
+  }
 }

@@ -60,7 +60,7 @@ RectOBB MakeRectOBB(const Collider<Owner>& collider) {
 
   return obb;
 }
-#pragma endregion 
+#pragma endregion
 
 export namespace collision {
   struct CollisionResult {
@@ -106,25 +106,6 @@ export namespace collision {
     return {true, mtv, overlapX * dir_x, overlapY * dir_y};
   }
 
-  template <typename A, typename B>
-  void HandleDetection(
-    Collider<A> a,
-    std::span<Collider<B>> b_pool,
-    const std::invocable<A*, B*, CollisionResult> auto& on_trigger
-  ) {
-    if (!std::holds_alternative<RectCollider>(a.shape)) return;
-
-    for (auto& b : b_pool) {
-      if (!std::holds_alternative<RectCollider>(b.shape)) continue;
-
-      CollisionResult result = CollideAABB(a, b);
-
-      if (result.is_colliding) {
-        on_trigger(a.owner, b.owner, result);
-      }
-    }
-  }
-
   // TODO: handle MTV
   template <typename A, typename B>
   bool CollideCircleRect(const Collider<A>& circleCol, const Collider<B>& rectCol) {
@@ -156,6 +137,35 @@ export namespace collision {
     const float r2 = radius * radius;
 
     return dist2 <= r2;
+  }
+
+  template <typename A, typename B>
+  void HandleDetection(
+    Collider<A> a,
+    std::span<Collider<B>> b_pool,
+    const std::invocable<A*, B*, CollisionResult> auto& on_trigger
+  ) {
+    if (std::holds_alternative<CircleCollider>(a.shape)) {
+      for (auto& b : b_pool) {
+        if (!std::holds_alternative<RectCollider>(b.shape)) continue;
+
+        if (CollideCircleRect(a, b)) {
+          // TODO: handle MTV
+          on_trigger(a.owner, b.owner, {true});
+        }
+      }
+    }
+    if (std::holds_alternative<RectCollider>(a.shape)) {
+      for (auto& b : b_pool) {
+        if (!std::holds_alternative<RectCollider>(b.shape)) continue;
+
+        CollisionResult result = CollideAABB(a, b);
+
+        if (result.is_colliding) {
+          on_trigger(a.owner, b.owner, result);
+        }
+      }
+    }
   }
 
   // TODO: handle MTV 

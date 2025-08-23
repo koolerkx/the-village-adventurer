@@ -10,6 +10,7 @@ import game.context;
 import game.scene_object.camera;
 import game.map.tilemap_object_handler;
 import game.types;
+import game.scene_game.context;
 
 export enum class MobActionState: char {
   IDLE_LEFT,
@@ -93,6 +94,7 @@ private:
   FixedPoolIndexType texture_id_;
   ObjectPool<MobState> mobs_pool_;
 
+  void SyncCollider(MobState& mob_state);
 public:
   MobManager(GameContext* ctx) {
     texture_id_ = ctx->render_resource_manager->texture_manager->Load(L"assets/mobs.png"); // extract path
@@ -101,7 +103,7 @@ public:
   void Spawn(TileMapObjectProps);
 
   void OnUpdate(GameContext* ctx, float delta_time);
-  void OnFixedUpdate(GameContext* ctx, float delta_time);
+  void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnRender(GameContext* ctx, Camera* camera);
 
   void MakeDamage(MobState& mob_state, int damage, const std::move_only_function<void()> post_action);

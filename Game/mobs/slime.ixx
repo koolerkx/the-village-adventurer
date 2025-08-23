@@ -136,7 +136,7 @@ export namespace mob {
     };
 
     MobState MakeMob(TileMapObjectProps props) {
-      constexpr int DEFAULT_HP = 10;
+      constexpr int DEFAULT_HP = 20;
 
       const Transform t = {
         .position = {props.x, props.y, 0.0},

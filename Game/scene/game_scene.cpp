@@ -66,7 +66,7 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   HandleSkillHitEnemyCollision(delta_time);
 
   skill_manager_->OnFixedUpdate(ctx, delta_time);
-  mob_manager_->OnFixedUpdate(ctx, delta_time);
+  mob_manager_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
 
   ui_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
 }
