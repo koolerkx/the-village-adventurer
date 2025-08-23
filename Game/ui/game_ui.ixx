@@ -99,11 +99,16 @@ public:
     hp_percentage_target_ = percentage;
   }
 
-  void SetTimerText(int minute, int second) {
+  void SetTimerText(double elapsed_seconds) {
+    int total_seconds = static_cast<int>(elapsed_seconds);
+
+    int minutes = (total_seconds % 3600) / 60;
+    int seconds = total_seconds % 60;
+
     std::wstringstream wss;
-    wss << std::setw(2) << std::setfill(L'0') << minute
+    wss << std::setw(2) << std::setfill(L'0') << minutes
       << L":"
-      << std::setw(2) << std::setfill(L'0') << second;
+      << std::setw(2) << std::setfill(L'0') << seconds;
     timer_text_ = wss.str();
   }
 

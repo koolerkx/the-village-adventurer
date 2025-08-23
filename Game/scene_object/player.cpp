@@ -79,7 +79,6 @@ void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {
   UpdateState();
 }
 
-
 void Player::OnRender(GameContext* ctx, SceneContext*, Camera* camera) {
   auto rr = ctx->render_resource_manager->renderer.get();
 

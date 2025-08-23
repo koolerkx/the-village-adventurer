@@ -7,8 +7,35 @@ import game.map.tile_repository;
 import graphic.utils.types;
 import game.scene_object.camera;
 import game.map.tilemap_object_handler;
+import game.scene_manager;
 
-TileMap::TileMap() {}
+TileMap::TileMap(GameContext* ctx) {
+  std::string default_map = SceneManager::GetInstance().GetGameConfig()->default_map;
+  TileRepository* tr = SceneManager::GetInstance().GetTileRepository();
+
+  std::string default_map_path = "map/map_data/" + default_map + ".tmx";
+
+  std::string texture_path = SceneManager::GetInstance().GetGameConfig()->map_texture_filepath;
+  std::wstring w_texture_path = std::wstring(texture_path.begin(), texture_path.end());
+
+  // load texture
+  FixedPoolIndexType id = ctx->render_resource_manager->texture_manager->Load(w_texture_path);
+
+  // load map
+  Load(default_map_path, id, tr);
+
+  
+  Transform t = GetTransform();
+
+  // TODO: remove debug data
+  t.position.x = -128.0f;
+  t.position.y = -256.0f;
+  t.scale.x = 1.0f;
+  t.scale.y = 1.0f;
+  t.position_anchor.x = 0.0f;
+  t.position_anchor.y = 0.0f;
+  SetTransform(t);
+}
 
 void TileMap::OnUpdate(GameContext*, float delta_time) {
   for (auto& layer : layers_) {

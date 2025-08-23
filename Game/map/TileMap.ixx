@@ -48,7 +48,7 @@ private:
   std::vector<TileMapObjectProps> ParseObjectGroup(tinyxml2::XMLElement* mapElement);
 
 public:
-  TileMap();
+  TileMap(GameContext* ctx);
   void Load(std::string_view filepath, FixedPoolIndexType texture_id, TileRepository* tr);
 
   void OnUpdate(GameContext* ctx, float delta_time);

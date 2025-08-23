@@ -26,11 +26,13 @@ private:
 
   std::unique_ptr<SceneContext> scene_context = nullptr;
 
-  std::chrono::time_point<std::chrono::steady_clock> time_at_start_;
+  double timer_elapsed_ = 0; // in seconds
 
   void HandlePlayerMovementAndCollisions(float delta_time);
 
   void ResetTimer();
+
+  void UpdateUI(GameContext* ctx, float delta_time);
 
 public:
   void OnEnter(GameContext* ctx) override;
