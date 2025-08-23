@@ -11,11 +11,31 @@ import game.scene_object.camera;
 import game.map.tilemap_object_handler;
 
 export enum class MobActionState: char {
-  IDLE,
-  ATTACK,
-  HURT,
-  DEATH,
-  MOVING,
+  IDLE_LEFT,
+  IDLE_RIGHT,
+  IDLE_UP,  // default
+  IDLE_DOWN,
+  
+  ATTACK_LEFT,
+  ATTACK_RIGHT,
+  ATTACK_UP,
+  ATTACK_DOWN,
+  
+  HURT_LEFT,
+  HURT_RIGHT,
+  HURT_UP,
+  HURT_DOWN,
+  
+  DEATH_LEFT,
+  DEATH_RIGHT,
+  DEATH_UP,
+  DEATH_DOWN,
+  
+  MOVING_LEFT,
+  MOVING_RIGHT,
+  MOVING_UP,
+  MOVING_DOWN,
+  
   INACTIVE,
 };
 
@@ -29,7 +49,7 @@ export struct MobState {
   UV uv;
   Collider<MobState> collider;
   MobType type = MobType::NONE;
-  MobActionState state = MobActionState::IDLE;
+  MobActionState state = MobActionState::IDLE_DOWN;
   bool is_battle = false; // is in battle
   
   bool is_playing = true;
