@@ -6,6 +6,7 @@ module game.map;
 import game.map.tile_repository;
 import graphic.utils.types;
 import game.scene_object.camera;
+import game.map.tilemap_object_handler;
 
 TileMap::TileMap() {}
 
@@ -360,26 +361,30 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
     layers_.push_back(layer);
   }
 
-  // TODO: Handle layer
-  for
-  (
-    auto* objectGroup = mapElement->FirstChildElement("objectgroup");
-    objectGroup;
-    objectGroup = objectGroup
-    ->
-    NextSiblingElement(
-      "objectgroup"
-    )
-  ) {
-    for (auto* object = objectGroup->FirstChildElement("object"); object; object = object->
-         NextSiblingElement("object")) {
-      // unsigned int id = object->UnsignedAttribute("id", 0);
-      // std::string name = object->Attribute("name", "");
-      // std::string type = object->Attribute("type", "");
-      // float x = object->FloatAttribute("x", 0.0f);
-      // float y = object->FloatAttribute("y", 0.0f);
-      // float width = object->FloatAttribute("width", 0.0f);
-      // float height = object->FloatAttribute("height", 0.0f);
+  ParseObjectGroup(mapElement);
+}
+
+std::vector<TileMapObjectProps> TileMap::ParseObjectGroup(tinyxml2::XMLElement* mapElement) {
+  std::vector<TileMapObjectProps> map_object;
+
+  // for each object in each object group
+  for (auto* objectGroup = mapElement->FirstChildElement("objectgroup");
+       objectGroup; objectGroup = objectGroup->NextSiblingElement("objectgroup")) {
+    for (auto* object = objectGroup->FirstChildElement("object");
+         object; object = object->NextSiblingElement("object")) {
+      TileMapObjectProps props;
+
+      props.x = object->FloatAttribute("x", 0.0f);
+      props.y = object->FloatAttribute("y", 0.0f);
+      props.width = object->FloatAttribute("width", 0.0f);
+      props.height = object->FloatAttribute("height", 0.0f);
+
+      std::string name = object->Attribute("type") ? object->Attribute("type") : "";
+      std::string type = object->Attribute("name") ? object->Attribute("name") : "";
+      props.type = tilemap_object_handler::MapTileMapObject(type, name);
+
+      map_object.push_back(props);
     }
   }
+  return map_object;
 }
