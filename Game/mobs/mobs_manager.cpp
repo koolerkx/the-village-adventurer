@@ -11,7 +11,7 @@ void MobManager::Spawn(TileMapObjectProps props) {
   if (props.type == TileMapObjectType::MOB_SLIME) {
     const auto insert_result = mobs_pool_.Insert(mob::slime::MakeMob(props));
     const auto inserted = mobs_pool_.Get(insert_result.value());
-    inserted->collider.owner = inserted; // HACK: workaround handle the object lifecycle
+    inserted->collider.owner = inserted;              // HACK: workaround handle the object lifecycle
     inserted->attack_range_collider.owner = inserted; // HACK: workaround handle the object lifecycle
     inserted->id = insert_result.value();
   }
@@ -19,6 +19,8 @@ void MobManager::Spawn(TileMapObjectProps props) {
 
 void MobManager::OnUpdate(GameContext* ctx, float delta_time) {
   mobs_pool_.ForEach([delta_time](MobState& it) {
+    it.attack_cooldown = it.attack_cooldown > 0 ? it.attack_cooldown - delta_time : -1;
+
     switch (it.type) {
     case MobType::SLIME:
       mob::slime::UpdateMob(it, delta_time);
@@ -70,9 +72,11 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
     }
 
     // Handle Attack
-    if (!mob::is_attack_state(it.state)) {
+    if (!mob::is_attack_state(it.state) && it.attack_cooldown <= 0) {
       collision::HandleDetection(player_collider, std::span(&it.attack_range_collider, 1),
                                  [](Player* p, MobState* m, collision::CollisionResult res) -> void {
+                                  m->attack_cooldown = 2.0f;
+                                   
                                    m->state = MobActionState::ATTACK_DOWN;
                                    m->current_frame = 0;
                                    m->current_frame_time = 0;
