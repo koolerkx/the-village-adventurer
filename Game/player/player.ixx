@@ -1,6 +1,6 @@
 module;
 
-export module game.scene_object.player;
+export module game.player;
 
 import std;
 import graphic.utils.fixed_pool;
@@ -15,7 +15,7 @@ import game.collision.collider;
 import game.map;
 import game.scene_game.context;
 import game.map.field_object;
-import game.input.player;
+import game.player.input;
 import game.utils.throttle;
 
 export enum class PlayerState: unsigned char {

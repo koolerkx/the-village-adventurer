@@ -1,6 +1,6 @@
 module;
 
-export module game.input.player;
+export module game.player.input;
 
 import std;
 

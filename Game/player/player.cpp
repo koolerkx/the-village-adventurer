@@ -1,6 +1,6 @@
 module;
 
-module game.scene_object.player;
+module game.player;
 
 import std;
 import game.scene_object.camera;
@@ -9,7 +9,7 @@ import game.collision_handler;
 import game.map.field_object;
 import game.scene_object.skill;
 import game.utils.throttle;
-import game.input.player;
+import game.player.input;
 
 // Texture data
 static constexpr std::wstring_view texture_path = L"assets/character_01.png"; // TODO: extract
@@ -39,14 +39,14 @@ Player::Player(GameContext* ctx, SceneContext*, std::unique_ptr<IPlayerInput> in
   };
 }
 
-void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
+void Player::OnUpdate(GameContext*, SceneContext* scene_ctx, float delta_time) {
   const PlayerIntent it = input_->Intent(delta_time);
   direction_ = {it.move_x, it.move_y};
   if (direction_.x != 0.f || direction_.y != 0.f) {
     direction_facing_ = direction_;
   }
 
-  if (it.attack.pressed && attack_throttle_.CanCall()) {
+  if (it.attack.held && attack_throttle_.CanCall()) {
     scene_ctx->skill_manager->PlaySkill(
       SKILL_TYPE::NORMAL_ATTACK,
       {transform_.position.x, transform_.position.y},

@@ -1,9 +1,9 @@
 module;
 
-export module game.input.keyboard.player;
+export module game.player.input.keyboard;
 
 import std;
-import game.input.player;
+import game.player.input;
 import game.context;
 
 using Key = KeyCode;
