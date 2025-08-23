@@ -43,7 +43,8 @@ private:
 
   // Note: Collider not support scaling
   ObjectPool<FieldObject> field_object_pool_{};
-
+  
+  std::vector<TileMapObjectProps> map_objects_props_;
   std::vector<TileMapObjectProps> ParseObjectGroup(tinyxml2::XMLElement* mapElement);
 
 public:
@@ -90,5 +91,9 @@ public:
       colliders.push_back(it.collider);
     });
     return colliders;
+  }
+
+  std::vector<TileMapObjectProps> GetMobProps() {
+    return tilemap_object_handler::GetMobProps(map_objects_props_);
   }
 };

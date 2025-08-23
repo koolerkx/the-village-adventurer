@@ -13,6 +13,7 @@ import game.map.field_object;
 import game.collision.collider;
 import game.scene_object.skill;
 import game.ui.game_ui;
+import game.map.tilemap_object_handler;
 
 void GameScene::OnEnter(GameContext* ctx) {
   std::cout << "GameScene> OnEnter" << std::endl;
@@ -41,10 +42,16 @@ void GameScene::OnEnter(GameContext* ctx) {
 
   player_ = std::make_unique<Player>(ctx, scene_context.get());
   camera_ = std::make_unique<Camera>();
-
+  
   // Scene
   scene_context.reset(new SceneContext());
   scene_context->map = map_.get();
+
+  // Mob
+  mob_manager_ = std::make_unique<MobManager>();
+  for (auto& mob_props: map_->GetMobProps()) {
+    mob_manager_->Spawn(mob_props);
+  }
 
   // Skill
   skill_manager_ = std::make_unique<SkillManager>(ctx);

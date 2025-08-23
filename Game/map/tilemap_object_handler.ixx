@@ -7,6 +7,7 @@ import std;
 export enum class TileMapObjectType: char {
   MOB_SLIME,
   TRIGGER_ACTIVE_AREA,
+  NONE
 };
 
 export struct TileMapObjectProps {
@@ -19,6 +20,7 @@ export struct TileMapObjectProps {
 
 export namespace tilemap_object_handler {
   using ::TileMapObjectType;
+
   TileMapObjectType MapTileMapObject(std::string_view type, std::string_view name) {
     if (type == "trigger_area" && name == "active_area") {
       return TileMapObjectType::TRIGGER_ACTIVE_AREA;
@@ -26,5 +28,12 @@ export namespace tilemap_object_handler {
     if (type == "slime") {
       return TileMapObjectType::MOB_SLIME;
     }
+    return TileMapObjectType::NONE;
+  }
+
+  std::vector<TileMapObjectProps> GetMobProps(std::vector<TileMapObjectProps> props) {
+    return props
+      | std::views::filter([](const auto& it) { return it.type == TileMapObjectType::MOB_SLIME; })
+      | std::ranges::to<std::vector>();
   }
 }

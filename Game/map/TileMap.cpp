@@ -361,7 +361,7 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
     layers_.push_back(layer);
   }
 
-  ParseObjectGroup(mapElement);
+  map_objects_props_ = ParseObjectGroup(mapElement);
 }
 
 std::vector<TileMapObjectProps> TileMap::ParseObjectGroup(tinyxml2::XMLElement* mapElement) {
@@ -379,8 +379,8 @@ std::vector<TileMapObjectProps> TileMap::ParseObjectGroup(tinyxml2::XMLElement* 
       props.width = object->FloatAttribute("width", 0.0f);
       props.height = object->FloatAttribute("height", 0.0f);
 
-      std::string name = object->Attribute("type") ? object->Attribute("type") : "";
-      std::string type = object->Attribute("name") ? object->Attribute("name") : "";
+      std::string name = object->Attribute("name") ? object->Attribute("name") : "";
+      std::string type = object->Attribute("type") ? object->Attribute("type") : "";
       props.type = tilemap_object_handler::MapTileMapObject(type, name);
 
       map_object.push_back(props);
