@@ -32,8 +32,6 @@ void MobManager::OnUpdate(GameContext* ctx, float delta_time) {
 }
 
 void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delta_time) {
-  auto start = std::chrono::high_resolution_clock::now();
-  
   auto map_colliders = scene_ctx->map->GetFiledObjectColliders();
 
   // handle moving
@@ -45,29 +43,30 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
     if (it.velocity.x * it.velocity.x > 0.0001) {
       it.transform.position.x += it.velocity.x * delta_time;
     }
-    if (it.velocity.y * it.velocity.y > 0.0001) {
-      it.transform.position.y += it.velocity.y * delta_time;
-    }
-    if (!mob::is_moving_state(it.state)) {
-      it.velocity.x *= 0.90f;
-      it.velocity.y *= 0.90f;
-    }
-
     SyncCollider(it);
-
-    Collider<MobState> collider = it.collider;
-
-    collision::HandleDetection(collider,
+    collision::HandleDetection(it.collider,
                                map_colliders,
                                [&](MobState* m, FieldObject* fo, collision::CollisionResult res) -> void {
                                  it.transform.position = position_before;
                                  SyncCollider(it);
                                });
+
+    if (it.velocity.y * it.velocity.y > 0.0001) {
+      it.transform.position.y += it.velocity.y * delta_time;
+    }
+    SyncCollider(it);
+    collision::HandleDetection(it.collider,
+                               map_colliders,
+                               [&](MobState* m, FieldObject* fo, collision::CollisionResult res) -> void {
+                                 it.transform.position = position_before;
+                                 SyncCollider(it);
+                               });
+
+    if (!mob::is_moving_state(it.state)) {
+      it.velocity.x *= 0.90f;
+      it.velocity.y *= 0.90f;
+    }
   });
-  
-  auto end = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-  std::cout << "exe time: " << duration.count() / 1000.0 << " ms" << std::endl;
 }
 
 void MobManager::OnRender(GameContext* ctx, Camera* camera) {
@@ -150,7 +149,7 @@ void MobManager::MakeDamage(MobState& mob_state, int damage,
 }
 
 void MobManager::PushBack(MobState& mob_state, Vector2 direction) {
-  constexpr float speed = 50;
+  constexpr float speed = 75;
 
   // give impulse velocity
   mob_state.velocity.x = direction.x * speed;
