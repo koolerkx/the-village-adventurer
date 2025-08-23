@@ -173,6 +173,7 @@ void GameScene::HandleMobHitPlayerCollision(float delta_time) {
 
   collision::HandleDetection(player_collider, mob_hitbox_collider_span,
                              [](Player* p, MobHitBox* m, collision::CollisionResult result) -> void {
+                               if (m->attack_delay >=0) return;
                                if (m->hit_player) return;
                                m->hit_player = true;
                                m->timeout = 0;

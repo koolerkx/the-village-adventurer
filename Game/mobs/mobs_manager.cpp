@@ -35,6 +35,7 @@ void MobManager::OnUpdate(GameContext* ctx, float delta_time) {
 
   mob_hitbox_pool_.ForEach([delta_time](MobHitBox& it) {
     it.timeout -= delta_time;
+    it.attack_delay -= delta_time;
   });
 
   mob_hitbox_pool_.RemoveIf([](MobHitBox& it) {
@@ -167,6 +168,7 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
   });
 
   mob_hitbox_pool_.ForEach([&rect_view, rr, camera](MobHitBox it) -> void {
+    if (it.attack_delay >= 0) return;
     if (std::get_if<RectCollider>(&it.collider.shape)) {
       const auto& shape = std::get<RectCollider>(it.collider.shape);
 

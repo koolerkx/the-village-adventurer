@@ -108,6 +108,7 @@ export struct MobHitBox {
   // animation
   size_t current_frame = 0;
   float current_frame_time = 0.f;
+  float attack_delay = attack_delay;
   float timeout = 9999.0f;
   bool is_playing = false;
   bool is_animated = false;

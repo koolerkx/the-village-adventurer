@@ -278,7 +278,8 @@ export namespace mob {
           }
         },
         .damage = 10,
-        .timeout = 1.0f,
+        .attack_delay = 0.2f,
+        .timeout = 0.8f,
         .is_animated = false,
         .hit_player = false,
       };
