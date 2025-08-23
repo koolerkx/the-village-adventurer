@@ -12,6 +12,7 @@ void MobManager::Spawn(TileMapObjectProps props) {
     const auto insert_result = mobs_pool_.Insert(mob::slime::MakeMob(props));
     const auto inserted = mobs_pool_.Get(insert_result.value());
     inserted->collider.owner = inserted; // HACK: workaround handle the object lifecycle
+    inserted->attack_range_collider.owner = inserted; // HACK: workaround handle the object lifecycle
     inserted->id = insert_result.value();
   }
 }
@@ -31,11 +32,12 @@ void MobManager::OnUpdate(GameContext* ctx, float delta_time) {
   });
 }
 
-void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delta_time) {
+void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delta_time,
+                               Collider<Player> player_collider) {
   auto map_colliders = scene_ctx->map->GetFiledObjectColliders();
 
   // handle moving
-  mobs_pool_.ForEach([delta_time, map_colliders, this](MobState& it) {
+  mobs_pool_.ForEach([delta_time, map_colliders, player_collider, this](MobState& it) {
     if (mob::is_death_state(it.state)) return;
 
     POSITION position_before = it.transform.position;
@@ -65,6 +67,18 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
     if (!mob::is_moving_state(it.state)) {
       it.velocity.x *= 0.90f;
       it.velocity.y *= 0.90f;
+    }
+
+    // Handle Attack
+    if (!mob::is_attack_state(it.state)) {
+      collision::HandleDetection(player_collider, std::span(&it.attack_range_collider, 1),
+                                 [](Player* p, MobState* m, collision::CollisionResult res) -> void {
+                                   m->state = MobActionState::ATTACK_DOWN;
+                                   m->current_frame = 0;
+                                   m->current_frame_time = 0;
+                                   m->is_playing = true;
+                                   m->is_loop = false;
+                                 });
     }
   });
 }
@@ -119,6 +133,14 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
                          shape.radius,
                          color::red, camera->GetCameraProps());
     }
+
+    const auto& shape = std::get<CircleCollider>(it.attack_range_collider.shape);
+    rr->DrawLineCircle({
+                         it.collider.position.x + shape.x,
+                         it.collider.position.y + shape.y, 0
+                       },
+                       shape.radius,
+                       color::blue, camera->GetCameraProps());
   });
 
   rr->DrawBoxes(rect_view, camera->GetCameraProps(), true);
@@ -161,6 +183,17 @@ std::vector<Collider<MobState>> MobManager::GetColliders() {
   colliders.reserve(mobs_pool_.Size());
 
   mobs_pool_.ForEach([&colliders](const MobState& it) -> void {
+    colliders.push_back(it.collider);
+  });
+
+  return colliders;
+}
+
+std::vector<Collider<MobHitBox>> MobManager::GetHitBoxColliders() {
+  std::vector<Collider<MobHitBox>> colliders;
+  colliders.reserve(mobs_pool_.Size());
+
+  mob_hitbox_pool_.ForEach([&colliders](const MobHitBox& it) -> void {
     colliders.push_back(it.collider);
   });
 

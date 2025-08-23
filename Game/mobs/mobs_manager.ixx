@@ -11,6 +11,7 @@ import game.scene_object.camera;
 import game.map.tilemap_object_handler;
 import game.types;
 import game.scene_game.context;
+import game.player;
 
 export enum class MobActionState: char {
   IDLE_LEFT,
@@ -51,6 +52,7 @@ export struct MobState {
   Transform transform;
   UV uv;
   Collider<MobState> collider;
+  Collider<MobState> attack_range_collider;
   MobType type = MobType::NONE;
   MobActionState state = MobActionState::IDLE_DOWN;
   bool is_battle = false; // is in battle
@@ -87,14 +89,35 @@ export namespace mob {
       state == MobActionState::MOVING_LEFT ||
       state == MobActionState::MOVING_RIGHT;
   }
+
+  bool is_attack_state(MobActionState state) {
+    return state == MobActionState::ATTACK_DOWN ||
+      state == MobActionState::ATTACK_UP ||
+      state == MobActionState::ATTACK_LEFT ||
+      state == MobActionState::ATTACK_RIGHT;
+  }
 }
+
+export struct MobHitBox {
+  Transform transform;
+  UV uv;
+  Collider<MobHitBox> collider;
+  // animation
+  size_t current_frame = 0;
+  float current_frame_time = 0.f;
+  bool is_playing = true;
+
+  std::unordered_set<ObjectPoolIndexType> hit_mobs {}; // hit each mob only once
+};
 
 export class MobManager {
 private:
   FixedPoolIndexType texture_id_;
   ObjectPool<MobState> mobs_pool_;
+  ObjectPool<MobHitBox> mob_hitbox_pool_;
 
   void SyncCollider(MobState& mob_state);
+
 public:
   MobManager(GameContext* ctx) {
     texture_id_ = ctx->render_resource_manager->texture_manager->Load(L"assets/mobs.png"); // extract path
@@ -103,11 +126,12 @@ public:
   void Spawn(TileMapObjectProps);
 
   void OnUpdate(GameContext* ctx, float delta_time);
-  void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
+  void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time, Collider<Player> player_collider);
   void OnRender(GameContext* ctx, Camera* camera);
 
   void MakeDamage(MobState& mob_state, int damage, const std::move_only_function<void()> post_action);
   void PushBack(MobState& mob_state, Vector2 direction);
 
   std::vector<Collider<MobState>> GetColliders();
+  std::vector<Collider<MobHitBox>> GetHitBoxColliders();
 };

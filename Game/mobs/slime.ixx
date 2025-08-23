@@ -7,6 +7,7 @@ import game.map.tilemap_object_handler;
 import game.collision.collider;
 import graphic.utils.types;
 import game.scene_object;
+import game.types;
 
 export namespace mob {
   namespace slime {
@@ -162,10 +163,20 @@ export namespace mob {
         }
       };
 
+      const Collider<MobState> atk_c = {
+        .is_trigger = true,
+        .position = {props.x + t.size.x / 2, props.y + t.size.x / 2},
+        .owner = nullptr, // handle outside
+        .shape = CircleCollider{
+          .x = 0, .y = 0, .radius = 12
+        }
+      };
+
       return {
         .transform = t,
         .uv = uv,
         .collider = c,
+        .attack_range_collider = atk_c,
         .type = MobType::SLIME,
         .state = MobActionState::IDLE_DOWN,
         .is_battle = false,
@@ -189,10 +200,12 @@ export namespace mob {
     void UpdateMob(MobState& mob_state, float delta_time) {
       // handle animation end
       if (!mob_state.is_playing) {
-        if (is_hurt_state(mob_state.state)) {
+        if (is_hurt_state(mob_state.state) || is_attack_state(mob_state.state)) {
           mob_state.state = MobActionState::IDLE_DOWN;
           mob_state.is_loop = true;
           mob_state.is_playing = true;
+          mob_state.current_frame = 0;
+          mob_state.current_frame_time = 0;
         }
         if (is_death_state(mob_state.state)) {
           mob_state.is_alive = false;
@@ -230,6 +243,10 @@ export namespace mob {
       state.is_loop = false;
       state.is_playing = true;
       state.current_frame_time = animation_data[MobActionState::HURT_DOWN].frame_durations[0];
+    }
+
+    void HandleTriggerAttackRange() {
+      
     }
 
     void SyncCollider(MobState& state) {

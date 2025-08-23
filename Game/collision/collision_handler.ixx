@@ -157,12 +157,17 @@ export namespace collision {
     }
     if (std::holds_alternative<RectCollider>(a.shape)) {
       for (auto& b : b_pool) {
-        if (!std::holds_alternative<RectCollider>(b.shape)) continue;
+        if (std::holds_alternative<CircleCollider>(b.shape)) {
+          if (CollideCircleRect(b, a)) {
+            on_trigger(a.owner, b.owner, {true});
+          }
+        }
+        if (std::holds_alternative<RectCollider>(b.shape)) {
+          CollisionResult result = CollideAABB(a, b);
 
-        CollisionResult result = CollideAABB(a, b);
-
-        if (result.is_colliding) {
-          on_trigger(a.owner, b.owner, result);
+          if (result.is_colliding) {
+            on_trigger(a.owner, b.owner, result);
+          }
         }
       }
     }
