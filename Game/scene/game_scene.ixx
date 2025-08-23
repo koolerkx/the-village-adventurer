@@ -6,7 +6,7 @@ import std;
 import game.scene;
 import game.map;
 
-import game.scene_object.player;
+import game.player;
 import game.scene_object.camera;
 import game.scene_game.context;
 import game.scene_object.skill;

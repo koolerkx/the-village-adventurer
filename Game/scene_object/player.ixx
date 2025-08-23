@@ -15,6 +15,7 @@ import game.collision.collider;
 import game.map;
 import game.scene_game.context;
 import game.map.field_object;
+import game.input.player;
 import game.utils.throttle;
 
 export enum class PlayerState: unsigned char {
@@ -121,6 +122,7 @@ private:
   void UpdateState();
   void UpdateAnimation(float delta_time);
 
+  std::unique_ptr<IPlayerInput> input_;
   Throttle attack_throttle_{0.3f};
   Throttle function_key_throttle_{0.3f};
 
@@ -165,7 +167,7 @@ public:
   void Heal(float amount) { health_ = std::min(health_ + amount, max_health_); }
   float GetHPPercentage() const { return health_ / max_health_; }
 
-  Player(GameContext* ctx, SceneContext* scene_ctx);
+  Player(GameContext* ctx, SceneContext* scene_ctx, std::unique_ptr<IPlayerInput> input);
   void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);

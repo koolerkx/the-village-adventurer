@@ -9,12 +9,15 @@ import game.collision_handler;
 import game.map.field_object;
 import game.scene_object.skill;
 import game.utils.throttle;
+import game.input.player;
 
 // Texture data
 static constexpr std::wstring_view texture_path = L"assets/character_01.png"; // TODO: extract
 static constexpr PlayerState default_state = PlayerState::IDLE_UP;
 
-Player::Player(GameContext* ctx, SceneContext*) {
+Player::Player(GameContext* ctx, SceneContext*, std::unique_ptr<IPlayerInput> input) {
+  input_ = std::move(input);
+
   const auto tm = ctx->render_resource_manager->texture_manager.get();
 
   texture_id_ = tm->Load(texture_path.data());
@@ -37,30 +40,26 @@ Player::Player(GameContext* ctx, SceneContext*) {
 }
 
 void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
-  // Handle Input
-  direction_ = {0, 0};
-  if (ctx->input_handler->GetKey(KeyCode::KK_W)) direction_.y -= 1.0f;
-  if (ctx->input_handler->GetKey(KeyCode::KK_S)) direction_.y += 1.0f;
-  if (ctx->input_handler->GetKey(KeyCode::KK_A)) direction_.x -= 1.0f;
-  if (ctx->input_handler->GetKey(KeyCode::KK_D)) direction_.x += 1.0f;
-
-  if (direction_.x != 0 || direction_.y != 0) {
+  const PlayerIntent it = input_->Intent(delta_time);
+  direction_ = {it.move_x, it.move_y};
+  if (direction_.x != 0.f || direction_.y != 0.f) {
     direction_facing_ = direction_;
   }
 
-  if (ctx->input_handler->GetKey(KeyCode::KK_F1) && function_key_throttle_.CanCall()) Damage(10.0f);
-  if (ctx->input_handler->GetKey(KeyCode::KK_F2) && function_key_throttle_.CanCall()) Heal(10.0f);
-
-  const float player_rotation = scene_object::GetPlayerRotationByDirection(direction_facing_); // Right = 0
-
-  if (ctx->input_handler->GetKey(KeyCode::KK_SPACE) && attack_throttle_.CanCall())
+  if (it.attack.pressed && attack_throttle_.CanCall()) {
     scene_ctx->skill_manager->PlaySkill(
       SKILL_TYPE::NORMAL_ATTACK,
       {transform_.position.x, transform_.position.y},
-      player_rotation
+      scene_object::GetPlayerRotationByDirection(direction_facing_) // Right = 0
     );
+  }
 
-  UpdateAnimation(delta_time);
+#if defined(DEBUG)
+  if (it.damage_debug.pressed) Damage(10);
+  if (it.heal_debug.pressed)   Heal(10);
+#endif
+
+    UpdateAnimation(delta_time);
 }
 
 void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {

@@ -1,5 +1,5 @@
 module;
-#include "tinyxml/tinyxml2.h";
+#include "tinyxml/tinyxml2.h"
 export module game.map;
 
 import std;

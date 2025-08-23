@@ -14,6 +14,7 @@ import game.collision.collider;
 import game.scene_object.skill;
 import game.ui.game_ui;
 import game.map.tilemap_object_handler;
+import game.player.input.keyboard;
 
 void GameScene::OnEnter(GameContext* ctx) {
   std::cout << "GameScene> OnEnter" << std::endl;
@@ -29,7 +30,8 @@ void GameScene::OnEnter(GameContext* ctx) {
   scene_context->skill_manager = skill_manager_.get();
 
   // Player
-  player_ = std::make_unique<Player>(ctx, scene_context.get());
+  std::unique_ptr<KeyboardPlayerInput> player_keyboard_input_ = std::make_unique<KeyboardPlayerInput>(ctx);
+  player_ = std::make_unique<Player>(ctx, scene_context.get(), std::move(player_keyboard_input_));
   camera_ = std::make_unique<Camera>();
 
   // UI
