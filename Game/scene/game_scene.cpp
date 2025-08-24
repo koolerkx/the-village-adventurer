@@ -69,6 +69,8 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   HandlePlayerMovementAndCollisions(delta_time);
   camera_->UpdatePosition(player_->GetPositionVector(), delta_time);
 
+  HandlePlayerEnterMapCollision(delta_time);
+
   HandleSkillHitMobCollision(delta_time);
   HandleMobHitPlayerCollision(delta_time);
 
@@ -125,6 +127,29 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
                      [&](FieldObject* fo) { OnPlayerEnterFieldObject(fo); });
   MoveAndCollideAxis(*player_, delta_time, y, colliders, Axis::Y,
                      [&](FieldObject* fo) { OnPlayerEnterFieldObject(fo); });
+}
+
+void GameScene::HandlePlayerEnterMapCollision(float delta_time) {
+  auto collider = map_->GetMapCollider();
+  auto state = map_->GetCollideState();
+
+  if (state == CollideState::COLLIDE_LAST_FRAME) {
+    // OnExit
+    map_->SetCollideState(CollideState::NOT_COLLIDE);
+  }
+  if (state == CollideState::COLLIDING) {
+    map_->SetCollideState(CollideState::COLLIDE_LAST_FRAME);
+  }
+
+  collision::HandleDetection(player_->GetCollider(), std::span(&collider, 1),
+                             [state, &map = this->map_, &ui = this->ui_]
+                           (Player*, TileMap*, collision::CollisionResult) -> void {
+                               if (state == CollideState::NOT_COLLIDE) {
+                                 // OnEnter
+                                 ui->PlayEnterAreaMessage(map->GetMapName());
+                               }
+                               map->SetCollideState(CollideState::COLLIDING);
+                             });
 }
 
 void GameScene::HandleSkillHitMobCollision(float) {

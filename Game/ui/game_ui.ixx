@@ -47,6 +47,11 @@ std::unordered_map<std::string, UV> texture_map = {
   {"KeyboardSUp", UV{{32, 387}, {16, 16}}},
   {"KeyboardDUp", UV{{48, 355}, {16, 16}}},
 
+  // Area Message
+  {"MessageUpper", UV{{96, 289}, {83, 8}}},
+  {"MessageLower", UV{{179, 289}, {83, 8}}},
+  
+
   // full screen overlay
   {"DamageOverlay", UV{{128, 323}, {320, 180}}},
   {"HealOverlay", UV{{128, 503}, {320, 180}}},
@@ -87,6 +92,11 @@ private:
   float heal_flash_opacity_current_ = 0.0f;
   float damage_flash_opacity_target_ = 0.0f;
   float damage_flash_opacity_current_ = 0.0f;
+
+  bool is_showing_area_message_ = false;
+  std::wstring area_message_;
+  float area_message_opacity_target_ = 0.0f;
+  float area_message_opacity_current_ = 0.0f;
 
   bool is_show_ui_ = true;
 
@@ -140,6 +150,8 @@ public:
       {position.x, position.y, 0}, name, damage
     });
   }
+
+  void PlayEnterAreaMessage(std::wstring);
 
   GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_path);
 

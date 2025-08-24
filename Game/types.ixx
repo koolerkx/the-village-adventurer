@@ -58,3 +58,9 @@ export struct Padding {
   float bottom = .0f;
   float left = .0f;
 };
+
+export enum class CollideState {
+  COLLIDING,
+  NOT_COLLIDE,
+  COLLIDE_LAST_FRAME
+};

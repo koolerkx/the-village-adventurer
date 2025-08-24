@@ -7,6 +7,12 @@ import graphic.utils.types;
 import graphic.utils.font;
 import game.ui.interpolation;
 
+void GameUI::PlayEnterAreaMessage(std::wstring message) {
+  area_message_ = message;
+  area_message_opacity_current_ = 1.0f;
+  is_showing_area_message_ = true;
+}
+
 GameUI::GameUI(GameContext* ctx, SceneContext*, std::wstring texture_path) {
   texture_id_ = ctx->render_resource_manager->texture_manager->Load(texture_path);
 
@@ -42,6 +48,17 @@ void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
     interpolation::SmoothType::EaseInOut,
     25.0f
   );
+
+  if (is_showing_area_message_) {
+    area_message_opacity_current_ = interpolation::UpdateSmoothValue(
+      area_message_opacity_current_,
+      area_message_opacity_target_,
+      delta_time,
+      interpolation::SmoothType::EaseOut,
+      0.25f
+    );
+    if (area_message_opacity_current_ < 0.1) is_showing_area_message_ = false;
+  }
 }
 
 void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
@@ -52,7 +69,7 @@ void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
     heal_flash_opacity_target_ = 0;
     damage_flash_opacity_target_ = 0;
   }
-  
+
   for (auto& text : damage_texts) {
     text.opacity = interpolation::UpdateSmoothValue(
       text.opacity,
@@ -168,6 +185,25 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     },
     texture_map["TimerBackground"], color::white
   });
+
+  if (is_showing_area_message_) {
+    render_items.emplace_back(RenderInstanceItem{
+      Transform{
+        .position = {-166 / 2, 129, 0},
+        .size = {166, 16},
+        .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
+      },
+      texture_map["MessageUpper"], color::setOpacity(color::white, area_message_opacity_current_)
+    });
+    render_items.emplace_back(RenderInstanceItem{
+      Transform{
+        .position = {-166 / 2, 177, 0},
+        .size = {166, 16},
+        .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
+      },
+      texture_map["MessageLower"], color::setOpacity(color::white, area_message_opacity_current_)
+    });
+  }
 
   // Session: Center Bottom
   // Attack Hint: Background
@@ -345,6 +381,20 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .line_height = 0.0f,
                  .color = color::white
                });
+
+  if (is_showing_area_message_) {
+    StringSpriteSize area_message_size = default_font_->GetStringSize(area_message_, {}, {20.0f});
+    rr->DrawFont(area_message_, font_key_,
+                 Transform{
+                   .position = {-area_message_size.width / 2, 149, 0},
+                   .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
+                 }, StringSpriteProps{
+                   .pixel_size = 20.0f,
+                   .letter_spacing = 0.0f,
+                   .line_height = 0.0f,
+                   .color = color::setOpacity(color::white, area_message_opacity_current_)
+                 });
+  }
 
   // Session: Center Bottom
   // Attack Hint: text

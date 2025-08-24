@@ -47,6 +47,10 @@ private:
   std::vector<TileMapObjectProps> map_objects_props_;
   std::vector<TileMapObjectProps> ParseObjectGroup(tinyxml2::XMLElement* mapElement);
 
+  std::wstring map_name_;
+  Collider<TileMap> map_collider_;
+  CollideState collide_state_ = CollideState::NOT_COLLIDE;
+
 public:
   TileMap(GameContext* ctx, Vector2 position);
   void Load(std::string_view filepath, FixedPoolIndexType texture_id, TileRepository* tr);
@@ -100,4 +104,10 @@ public:
   std::vector<TileMapObjectProps> GetActiveAreaProps() {
     return tilemap_object_handler::GetActiveAreaProps(map_objects_props_, {transform_.position.x, transform_.position.y});
   }
+
+  CollideState GetCollideState() const { return collide_state_; }
+  void SetCollideState(CollideState state) { collide_state_ = state; }
+
+  std::wstring GetMapName() const { return map_name_; }
+  Collider<TileMap> GetMapCollider() const { return map_collider_; }
 };

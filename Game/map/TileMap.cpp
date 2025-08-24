@@ -8,6 +8,7 @@ import graphic.utils.types;
 import game.scene_object.camera;
 import game.map.tilemap_object_handler;
 import game.scene_manager;
+import game.utils.encode;
 
 TileMap::TileMap(GameContext* ctx, Vector2 position) {
   std::string default_map = SceneManager::GetInstance().GetGameConfig()->default_map;
@@ -23,7 +24,7 @@ TileMap::TileMap(GameContext* ctx, Vector2 position) {
 
   // load map
   Load(default_map_path, id, tr);
-  
+
   Transform t = GetTransform();
 
   // TODO: remove debug data
@@ -34,6 +35,18 @@ TileMap::TileMap(GameContext* ctx, Vector2 position) {
   t.position_anchor.x = 0.0f;
   t.position_anchor.y = 0.0f;
   SetTransform(t);
+
+  // Map Collider
+  map_collider_ = Collider<TileMap>{
+    .is_trigger = true,
+    .position = {position},
+    .owner = this,
+    .shape = RectCollider{
+      .x = 0, .y = 0,
+      .width = static_cast<float>(map_width_ * tile_width_),
+      .height = static_cast<float>(map_height_ * tile_height_),
+    }
+  };
 }
 
 void TileMap::OnUpdate(GameContext*, float delta_time) {
@@ -231,6 +244,16 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
       << (mapElement->Attribute("height") ? mapElement->Attribute("height") : "missing")
       << std::endl;
     assert(false);
+  }
+
+  if (const char* class_name = mapElement->Attribute("class"); !class_name) {
+    std::cerr << "Failed to read 'class' attribute: "
+      << (mapElement->Attribute("class") ? mapElement->Attribute("class") : "missing")
+      << std::endl;
+    assert(false);
+  }
+  else {
+    map_name_ = encode::Utf8ToUtf16(class_name);
   }
 
   // Layer
