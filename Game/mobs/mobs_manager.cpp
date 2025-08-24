@@ -17,22 +17,25 @@ void MobManager::Spawn(TileMapObjectProps props) {
   }
 }
 
-void MobManager::OnUpdate(GameContext* ctx, float delta_time) {
-  mobs_pool_.ForEach([delta_time](MobState& it) {
+void MobManager::OnUpdate(GameContext* ctx, float delta_time, OnUpdateProps props) {
+  // Update Mob State Hitbox
+  mobs_pool_.ForEach([delta_time, props](MobState& it) {
     it.attack_cooldown = it.attack_cooldown > 0 ? it.attack_cooldown - delta_time : -1;
 
     switch (it.type) {
     case MobType::SLIME:
-      mob::slime::UpdateMob(it, delta_time);
+      mob::slime::UpdateMob(it, delta_time, props.player_position);
     default:
       break;
     }
   });
 
+  // Remove inactive, dead mobs
   mobs_pool_.RemoveIf([](MobState& it) {
     return !it.is_alive;
   });
 
+  // Update Hitbox
   mob_hitbox_pool_.ForEach([delta_time](MobHitBox& it) {
     it.timeout -= delta_time;
     it.attack_delay -= delta_time;
@@ -47,10 +50,11 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
                                Collider<Player> player_collider) {
   auto map_colliders = scene_ctx->map->GetFiledObjectColliders();
 
-  // handle moving
   mobs_pool_.ForEach([delta_time, map_colliders, player_collider, this](MobState& it) {
     if (mob::is_death_state(it.state)) return;
 
+    // handle push back wall collision push back
+#pragma region WALL_COLLISION
     POSITION position_before = it.transform.position;
 
     if (it.velocity.x * it.velocity.x > 0.0001) {
@@ -79,8 +83,10 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
       it.velocity.x *= 0.90f;
       it.velocity.y *= 0.90f;
     }
+#pragma endregion
 
     // Handle Attack
+    // XXX: Note taht attack state will overwrite moving state, the state will jump between two state when its in cooldown
     if (!mob::is_attack_state(it.state) && it.attack_cooldown <= 0) {
       collision::HandleDetection(player_collider, std::span(&it.attack_range_collider, 1),
                                  [this](Player* p, MobState* m, collision::CollisionResult res) -> void {

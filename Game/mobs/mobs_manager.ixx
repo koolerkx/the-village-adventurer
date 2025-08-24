@@ -64,6 +64,7 @@ export struct MobState {
   float current_frame_time = 0.f;
 
   float attack_cooldown;
+  float moving_cooldown;
 
   Vector2 velocity;
   // mob data
@@ -71,6 +72,13 @@ export struct MobState {
 };
 
 export namespace mob {
+  bool is_idle_state(MobActionState state) {
+    return state == MobActionState::IDLE_DOWN ||
+      state == MobActionState::IDLE_UP ||
+      state == MobActionState::IDLE_LEFT ||
+      state == MobActionState::IDLE_RIGHT;
+  }
+
   bool is_hurt_state(MobActionState state) {
     return state == MobActionState::HURT_DOWN ||
       state == MobActionState::HURT_UP ||
@@ -116,6 +124,10 @@ export struct MobHitBox {
   bool hit_player; // hit player only once
 };
 
+export struct OnUpdateProps {
+  Vector2 player_position{};
+};
+
 export class MobManager {
 private:
   FixedPoolIndexType texture_id_;
@@ -131,7 +143,7 @@ public:
 
   void Spawn(TileMapObjectProps);
 
-  void OnUpdate(GameContext* ctx, float delta_time);
+  void OnUpdate(GameContext* ctx, float delta_time, OnUpdateProps props);
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time, Collider<Player> player_collider);
   void OnRender(GameContext* ctx, Camera* camera);
 

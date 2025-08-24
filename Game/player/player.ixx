@@ -51,12 +51,12 @@ private:
     .is_circle = false, // rect
   };
   static constexpr float COLLIDER_PADDING = 2.0f;
-  static constexpr UV DEFAULT_UV {
+  static constexpr UV DEFAULT_UV{
     {0, 0},
     {32, 32}
   };
 #pragma endregion
-  
+
   Transform transform_ = DEFAULT_TRANSFORM;
   Transform transform_before_ = transform_;
   UV uv_ = DEFAULT_UV;
@@ -121,7 +121,8 @@ public:
   void Heal(float amount) { health_ = std::min(health_ + amount, max_health_); }
   float GetHPPercentage() const { return health_ / max_health_; }
 
-  Player(FixedPoolIndexType texture_id, std::unique_ptr<IPlayerInput> input, std::unordered_map<PlayerState, scene_object::AnimationFrameData> anim_data);
+  Player(FixedPoolIndexType texture_id, std::unique_ptr<IPlayerInput> input,
+         std::unordered_map<PlayerState, scene_object::AnimationFrameData> anim_data);
   void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);

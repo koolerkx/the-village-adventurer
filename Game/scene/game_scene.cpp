@@ -54,7 +54,9 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   map_->OnUpdate(ctx, delta_time);
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnUpdate(ctx, delta_time);
-  mob_manager_->OnUpdate(ctx, delta_time);
+  mob_manager_->OnUpdate(ctx, delta_time, {
+                           .player_position = player_->GetPositionVector()
+                         });
 
   UpdateUI(ctx, delta_time);
 }

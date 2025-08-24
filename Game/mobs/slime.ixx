@@ -8,6 +8,7 @@ import game.collision.collider;
 import graphic.utils.types;
 import game.scene_object;
 import game.types;
+import game.math;
 
 export namespace mob {
   namespace slime {
@@ -179,7 +180,7 @@ export namespace mob {
         .attack_range_collider = atk_c,
         .type = MobType::SLIME,
         .state = MobActionState::IDLE_DOWN,
-        .is_battle = false,
+        .is_battle = true, // TODO: change the flag trigger by active area
         .is_loop = true,
         .is_playing = true,
         .hp = DEFAULT_HP
@@ -197,38 +198,6 @@ export namespace mob {
       };
     }
 
-    void UpdateMob(MobState& mob_state, float delta_time) {
-      // handle animation end
-      if (!mob_state.is_playing) {
-        if (is_hurt_state(mob_state.state) || is_attack_state(mob_state.state)) {
-          mob_state.state = MobActionState::IDLE_DOWN;
-          mob_state.is_loop = true;
-          mob_state.is_playing = true;
-          mob_state.current_frame = 0;
-          mob_state.current_frame_time = 0;
-        }
-        if (is_death_state(mob_state.state)) {
-          mob_state.is_alive = false;
-        }
-      }
-
-      scene_object::AnimationState anim_state{
-        .is_loop = mob_state.is_loop,
-        .play_on_start = true,
-        .is_playing = mob_state.is_playing,
-        .frames = animation_data[mob_state.state].frames,
-        .frame_durations = animation_data[mob_state.state].frame_durations,
-        .current_frame = mob_state.current_frame,
-        .current_frame_time = mob_state.current_frame_time
-      };
-
-      scene_object::UpdateAnimation(anim_state, delta_time, mob_state.uv);
-
-      mob_state.current_frame = anim_state.current_frame;
-      mob_state.current_frame_time = anim_state.current_frame_time;
-      mob_state.is_playing = anim_state.is_playing;
-    }
-
     void HandleDeath(MobState& state) {
       state.state = MobActionState::DEATH_DOWN; // todo: handle facing direction
       state.current_frame = 0;
@@ -244,6 +213,21 @@ export namespace mob {
       state.is_loop = false;
       state.is_playing = true;
       state.current_frame_time = animation_data[MobActionState::HURT_DOWN].frame_durations[0];
+    }
+
+    void HandleMovement(MobState& state, Vector2 destination) {
+      constexpr float SPEED = 25.0f; // todo: extract as config
+      state.velocity.x = 0;
+
+      Vector2 mob_center = {state.transform.position.x + state.transform.size.x / 2, state.transform.position.y + state.transform.size.y / 2};
+      Vector2 dir = math::GetDirection(mob_center, destination);
+
+      // Move in easing function
+      float animation_progress = static_cast<float>(state.current_frame) / static_cast<float>(animation_data[state.state].frames.size());
+
+      float speed = SPEED * math::interpolation::EaseInOutQuint(animation_progress);
+      state.velocity.x = dir.x * speed;
+      state.velocity.y = dir.y * speed;
     }
 
     void SyncCollider(MobState& state) {
@@ -282,6 +266,60 @@ export namespace mob {
         .is_animated = false,
         .hit_player = false,
       };
+    }
+
+    void UpdateMob(MobState& mob_state, float delta_time, Vector2 player_position) {
+      // handle animation end
+      if (!mob_state.is_playing) {
+        if (is_hurt_state(mob_state.state)    // when hurt animation end
+          || is_attack_state(mob_state.state) // when attack animation end
+          || is_moving_state(mob_state.state) // when moving animation end
+        ) {
+          mob_state.state = MobActionState::IDLE_DOWN;
+          mob_state.is_loop = true;
+          mob_state.is_playing = true;
+          mob_state.current_frame = 0;
+          mob_state.current_frame_time = 0;
+        }
+        if (is_death_state(mob_state.state)) {
+          mob_state.is_alive = false;
+        }
+      }
+
+      // Change the state to moving if needed
+      mob_state.moving_cooldown = mob_state.moving_cooldown >= 0.0f ? mob_state.moving_cooldown - delta_time : -1;
+      // bool is_in_moving_threshold = math::GetDistance(player_position, {mob_state.transform.position.x, mob_state.transform.position.y}) > 16;
+      if (is_idle_state(mob_state.state) && mob_state.moving_cooldown < 0.0f ) {
+        constexpr float MOVING_COOLDOWN = 2.0;
+        mob_state.moving_cooldown += MOVING_COOLDOWN;
+        if (mob_state.is_battle) {
+          mob_state.state = MobActionState::MOVING_DOWN;
+          mob_state.is_loop = false;
+          mob_state.is_playing = true;
+          mob_state.current_frame = 0;
+          mob_state.current_frame_time = 0;
+        }
+      }
+      if (is_moving_state(mob_state.state)) {
+        HandleMovement(mob_state, player_position);
+      }
+
+      // update animation
+      scene_object::AnimationState anim_state{
+        .is_loop = mob_state.is_loop,
+        .play_on_start = true,
+        .is_playing = mob_state.is_playing,
+        .frames = animation_data[mob_state.state].frames,
+        .frame_durations = animation_data[mob_state.state].frame_durations,
+        .current_frame = mob_state.current_frame,
+        .current_frame_time = mob_state.current_frame_time
+      };
+
+      scene_object::UpdateAnimation(anim_state, delta_time, mob_state.uv);
+
+      mob_state.current_frame = anim_state.current_frame;
+      mob_state.current_frame_time = anim_state.current_frame_time;
+      mob_state.is_playing = anim_state.is_playing;
     }
   }
 }
