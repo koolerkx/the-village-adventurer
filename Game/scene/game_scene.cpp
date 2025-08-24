@@ -46,6 +46,9 @@ void GameScene::OnEnter(GameContext* ctx) {
   for (auto& mob_props : map_->GetMobProps()) {
     mob_manager_->Spawn(mob_props);
   }
+  for (auto& mob_props : map_->GetActiveAreaProps()) {
+    mob_manager_->CreateActiveArea(mob_props);
+  }
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {

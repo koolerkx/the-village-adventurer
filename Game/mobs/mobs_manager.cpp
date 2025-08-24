@@ -17,6 +17,38 @@ void MobManager::Spawn(TileMapObjectProps props) {
   }
 }
 
+/**
+ * @brief Create trigger area and bind mob inside the trigger
+ * @pre MobManager::Spawn
+ */
+void MobManager::CreateActiveArea(TileMapObjectProps props) {
+  std::vector<ObjectPoolIndexType> ids;
+  mobs_pool_.ForEach([props, &ids](MobState& mob_state, ObjectPoolIndexType id) {
+    if (mob_state.transform.position.x > props.x && mob_state.transform.position.y > props.y && mob_state.transform.
+      position.x < props.x + props.width && mob_state.transform.position.y < props.y + props.height) {
+      // inside
+      ids.push_back(id);
+    }
+  });
+
+  auto collider = Collider<ActiveArea>{
+    .position = {props.x, props.y},
+    .shape = RectCollider{
+      .x = 0,
+      .y = 0,
+      .width = props.width,
+      .height = props.height
+    }
+  };
+
+  auto insert_result = active_area_pool_.Insert({collider, ids});
+  const auto inserted = active_area_pool_.Get(insert_result.value());
+  inserted->collider.owner = inserted; // HACK: workaround handle the object lifecycle
+  inserted->id = insert_result.value();
+
+  active_area_state[insert_result.value()] = ActiveAreaState::NOT_COLLIDE;
+}
+
 void MobManager::OnUpdate(GameContext*, float delta_time, OnUpdateProps props) {
   // Update Mob State Hitbox
   mobs_pool_.ForEach([delta_time, props](MobState& it) {
@@ -48,6 +80,36 @@ void MobManager::OnUpdate(GameContext*, float delta_time, OnUpdateProps props) {
 
 void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delta_time,
                                Collider<Player> player_collider) {
+  // update mobs active state
+  active_area_pool_.ForEach(
+    [player_collider, &active_area_state = this->active_area_state, &mobs_pool_ = this->mobs_pool_](ActiveArea& it, ObjectPoolIndexType id) {
+      if (active_area_state[id] == ActiveAreaState::COLLID_LAST_FRAME) {
+        active_area_state[id] = ActiveAreaState::NOT_COLLIDE;
+        // OnExit
+        for (ObjectPoolIndexType mob_id : it.mobs) {
+          const auto mob = mobs_pool_.Get(mob_id);
+          mob->is_battle = false;
+        }
+      }
+      if (active_area_state[id] == ActiveAreaState::COLLIDING)
+        active_area_state[id] = ActiveAreaState::COLLID_LAST_FRAME;
+
+      collision::HandleDetection(player_collider, std::span(&it.collider, 1),
+                                 [&](Player*, ActiveArea* area, collision::CollisionResult) -> void {
+                                   if (active_area_state[id] == ActiveAreaState::NOT_COLLIDE) {
+                                     // OnEnter
+                                     for (ObjectPoolIndexType mob_id : it.mobs) {
+                                       const auto mob = mobs_pool_.Get(mob_id);
+                                       mob->is_battle = true;
+                                     }
+                                   }
+                                   if (active_area_state[id] == ActiveAreaState::COLLID_LAST_FRAME) {
+                                     // Colliding
+                                   }
+                                   active_area_state[id] = ActiveAreaState::COLLIDING;
+                                 });
+    });
+
   auto map_colliders = scene_ctx->map->GetFiledObjectColliders();
 
   mobs_pool_.ForEach([delta_time, map_colliders, player_collider, this](MobState& it) {
@@ -252,6 +314,18 @@ std::vector<Collider<MobHitBox>> MobManager::GetHitBoxColliders() {
   colliders.reserve(mobs_pool_.Size());
 
   mob_hitbox_pool_.ForEach([&colliders](const MobHitBox& it) -> void {
+    colliders.push_back(it.collider);
+  });
+
+  return colliders;
+}
+
+// should be 1 per map 
+std::vector<Collider<ActiveArea>> MobManager::GetActiveAreaColliders() {
+  std::vector<Collider<ActiveArea>> colliders;
+  colliders.reserve(mobs_pool_.Size());
+
+  active_area_pool_.ForEach([&colliders](const ActiveArea& it) -> void {
     colliders.push_back(it.collider);
   });
 

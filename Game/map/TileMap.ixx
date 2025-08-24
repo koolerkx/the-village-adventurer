@@ -96,4 +96,8 @@ public:
   std::vector<TileMapObjectProps> GetMobProps() {
     return tilemap_object_handler::GetMobProps(map_objects_props_, {transform_.position.x, transform_.position.y});
   }
+
+  std::vector<TileMapObjectProps> GetActiveAreaProps() {
+    return tilemap_object_handler::GetActiveAreaProps(map_objects_props_, {transform_.position.x, transform_.position.y});
+  }
 };

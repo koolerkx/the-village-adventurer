@@ -42,4 +42,15 @@ export namespace tilemap_object_handler {
       })
       | std::ranges::to<std::vector>();
   }
+
+  std::vector<TileMapObjectProps> GetActiveAreaProps(std::vector<TileMapObjectProps> props, Vector2 offset_position) {
+    return props
+      | std::views::filter([](const auto& it) { return it.type == TileMapObjectType::TRIGGER_ACTIVE_AREA; })
+      | std::views::transform([offset_position](auto& it) {
+        it.x += offset_position.x;
+        it.y += offset_position.y;
+        return it;
+      })
+      | std::ranges::to<std::vector>();
+  }
 }

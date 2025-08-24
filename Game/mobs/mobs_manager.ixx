@@ -71,6 +71,18 @@ export struct MobState {
   int hp;
 };
 
+export struct ActiveArea {
+  Collider<ActiveArea> collider;
+  std::vector<ObjectPoolIndexType> mobs;
+  FixedPoolIndexType id;
+};
+
+enum class ActiveAreaState {
+  NOT_COLLIDE,
+  COLLIDING,
+  COLLID_LAST_FRAME
+};
+
 export namespace mob {
   bool is_idle_state(MobActionState state) {
     return state == MobActionState::IDLE_DOWN ||
@@ -133,6 +145,8 @@ private:
   FixedPoolIndexType texture_id_;
   ObjectPool<MobState> mobs_pool_;
   ObjectPool<MobHitBox> mob_hitbox_pool_;
+  ObjectPool<ActiveArea> active_area_pool_;
+  std::unordered_map<ObjectPoolIndexType, ActiveAreaState> active_area_state;
 
   void SyncCollider(MobState& mob_state);
 
@@ -142,6 +156,7 @@ public:
   }
 
   void Spawn(TileMapObjectProps);
+  void CreateActiveArea(TileMapObjectProps);
 
   void OnUpdate(GameContext* ctx, float delta_time, OnUpdateProps props);
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time, Collider<Player> player_collider);
@@ -152,4 +167,5 @@ public:
 
   std::vector<Collider<MobState>> GetColliders();
   std::vector<Collider<MobHitBox>> GetHitBoxColliders();
+  std::vector<Collider<ActiveArea>> GetActiveAreaColliders();
 };

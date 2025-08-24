@@ -11,7 +11,7 @@ import game.context;
 export class Camera {
 private:
   Vector2 position_ = {0.0f, 0.0f};
-  float zoom_ = 3.0f;
+  float zoom_ = 1.0f;
 
   Vector2 velocity_ = {0.0f, 0.0f};
 

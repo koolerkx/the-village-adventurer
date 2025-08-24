@@ -180,7 +180,7 @@ export namespace mob {
         .attack_range_collider = atk_c,
         .type = MobType::SLIME,
         .state = MobActionState::IDLE_DOWN,
-        .is_battle = true, // TODO: change the flag trigger by active area
+        .is_battle = false, // TODO: change the flag trigger by active area
         .is_loop = true,
         .is_playing = true,
         .hp = DEFAULT_HP
