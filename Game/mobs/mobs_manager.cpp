@@ -83,7 +83,7 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
   // update mobs active state
   active_area_pool_.ForEach(
     [player_collider, &active_area_state = this->active_area_state, &mobs_pool_ = this->mobs_pool_](ActiveArea& it, ObjectPoolIndexType id) {
-      if (active_area_state[id] == ActiveAreaState::COLLID_LAST_FRAME) {
+      if (active_area_state[id] == ActiveAreaState::COLLIDE_LAST_FRAME) {
         active_area_state[id] = ActiveAreaState::NOT_COLLIDE;
         // OnExit
         for (ObjectPoolIndexType mob_id : it.mobs) {
@@ -92,7 +92,7 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
         }
       }
       if (active_area_state[id] == ActiveAreaState::COLLIDING)
-        active_area_state[id] = ActiveAreaState::COLLID_LAST_FRAME;
+        active_area_state[id] = ActiveAreaState::COLLIDE_LAST_FRAME;
 
       collision::HandleDetection(player_collider, std::span(&it.collider, 1),
                                  [&](Player*, ActiveArea* area, collision::CollisionResult) -> void {
@@ -103,7 +103,7 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
                                        mob->is_battle = true;
                                      }
                                    }
-                                   if (active_area_state[id] == ActiveAreaState::COLLID_LAST_FRAME) {
+                                   if (active_area_state[id] == ActiveAreaState::COLLIDE_LAST_FRAME) {
                                      // Colliding
                                    }
                                    active_area_state[id] = ActiveAreaState::COLLIDING;

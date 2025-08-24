@@ -12,7 +12,7 @@ import game.map.tilemap_object_handler;
 import game.types;
 import game.scene_game.context;
 import game.player;
-
+import game.math;
 export enum class MobActionState: char {
   IDLE_LEFT,
   IDLE_RIGHT,
@@ -55,7 +55,8 @@ export struct MobState {
   Collider<MobState> attack_range_collider;
   MobType type = MobType::NONE;
   MobActionState state = MobActionState::IDLE_DOWN;
-  bool is_battle = false; // is in battle
+  Vector2 inactive_position; // back to this position when inactive
+  bool is_battle = false;    // is in battle
 
   bool is_alive = true;
   bool is_loop = false;
@@ -80,7 +81,7 @@ export struct ActiveArea {
 enum class ActiveAreaState {
   NOT_COLLIDE,
   COLLIDING,
-  COLLID_LAST_FRAME
+  COLLIDE_LAST_FRAME
 };
 
 export namespace mob {
@@ -117,6 +118,13 @@ export namespace mob {
       state == MobActionState::ATTACK_UP ||
       state == MobActionState::ATTACK_LEFT ||
       state == MobActionState::ATTACK_RIGHT;
+  }
+  bool is_position_reset(Vector2 mob_pos, Vector2 inactive_pos) {
+    constexpr float DISTANCE_THRESHOLD = 32.0f;
+    if (math::GetDistance(mob_pos, inactive_pos) < DISTANCE_THRESHOLD) {
+      return true;
+    }
+    return false;
   }
 }
 
