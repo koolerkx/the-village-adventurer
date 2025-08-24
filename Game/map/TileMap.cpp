@@ -8,6 +8,7 @@ import graphic.utils.types;
 import game.scene_object.camera;
 import game.map.tilemap_object_handler;
 import game.scene_manager;
+import game.map.combine_grid;
 
 TileMap::TileMap(GameContext* ctx, Vector2 position) {
   std::string default_map = SceneManager::GetInstance().GetGameConfig()->default_map;
@@ -23,7 +24,7 @@ TileMap::TileMap(GameContext* ctx, Vector2 position) {
 
   // load map
   Load(default_map_path, id, tr);
-  
+
   Transform t = GetTransform();
 
   // TODO: remove debug data
@@ -234,6 +235,8 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
   }
 
   // Layer
+  std::vector<FieldObject*> field_objects;
+
   for (auto* layerElement = mapElement->FirstChildElement("layer"); layerElement; layerElement = layerElement->
        NextSiblingElement("layer")) {
     MapLayer layer;
@@ -312,7 +315,6 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
       }
 
       // handle field object
-
       FieldObject obj;
 
       obj.position = {static_cast<float>(x), static_cast<float>(y)};
@@ -382,10 +384,33 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
         }
         auto inserted = field_object_pool_.Get(result.value());
         inserted->collider.owner = inserted; // HACK: workaround handle the object lifecycle
+
+        field_objects.push_back(inserted);
       }
     }
     layers_.push_back(layer);
   }
+
+  std::vector<RectCollider> colliders;
+  for (auto obj : field_objects) {
+    if (auto rect_ = std::get_if<RectCollider>(&obj->collider.shape)) {
+      RectCollider rect;
+      rect.x = rect_->x + obj->collider.position.x;
+      rect.y = rect_->y + obj->collider.position.x;
+      rect.height = rect_->height;
+      rect.width = rect_->width;
+      
+      colliders.push_back(rect);
+    }
+  }
+  
+  auto result = MergeTilesToRects(colliders, static_cast<float>(tile_width_), static_cast<float>(tile_height_));
+
+  for (auto r: result) {
+    std::cout << r.x << " " << r.y << " " << r.height << " " << r.width << std::endl;
+  }
+  std::cout << "BEFORE: " << colliders.size() << std::endl;
+  std::cout << "AFTER: " << result.size() << std::endl;
 
   map_objects_props_ = ParseObjectGroup(mapElement);
 }
