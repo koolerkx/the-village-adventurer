@@ -16,6 +16,7 @@ import game.ui.game_ui;
 import game.map.tilemap_object_handler;
 import game.player.input.keyboard;
 import player.factory;
+import game.math;
 
 void GameScene::OnEnter(GameContext* ctx) {
   std::cout << "GameScene> OnEnter" << std::endl;
@@ -65,7 +66,7 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
 
   HandleSkillHitMobCollision(delta_time);
   HandleMobHitPlayerCollision(delta_time);
-  
+
   skill_manager_->OnFixedUpdate(ctx, delta_time);
   mob_manager_->OnFixedUpdate(ctx, scene_context.get(), delta_time, player_->GetCollider());
 
@@ -133,6 +134,15 @@ void GameScene::HandleSkillHitMobCollision(float delta_time) {
     if (!skill_hitbox->hit_mobs.contains(mob_state->id) && !mob::is_death_state(mob_state->state)) {
       skill_hitbox->hit_mobs.insert(mob_state->id);
       mob_manager->MakeDamage(*mob_state, skill_hitbox->data->damage, [&]() {
+        Vector2 mob_center = {
+          mob_state->transform.position.x + mob_state->transform.size.x,
+          mob_state->transform.position.y + mob_state->transform.size.y
+        };
+        Vector2 skill_center = {
+          skill_hitbox->transform.position.x + skill_hitbox->transform.size.x / 2,
+          skill_hitbox->transform.position.y + skill_hitbox->transform.size.y / 2
+        };
+
         // make damage text
         ui->AddDamageText(
           {
@@ -144,21 +154,9 @@ void GameScene::HandleSkillHitMobCollision(float delta_time) {
         );
 
         // attack push back
-        float dirX = mob_state->transform.position.x - skill_hitbox->transform.position.x;
-        float dirY = mob_state->transform.position.y - skill_hitbox->transform.position.y;
+        Vector2 dir = math::GetDirection(skill_center, mob_center);
 
-        float magnitude = std::sqrt(dirX * dirX + dirY * dirY);
-
-        if (magnitude > 0.0f) {
-          dirX = dirX / magnitude;
-          dirY = dirY / magnitude;
-        }
-        else {
-          dirX = 0.0f;
-          dirY = 0.0f;
-        }
-
-        mob_manager->PushBack(*mob_state, {dirX, dirY});
+        mob_manager->PushBack(*mob_state, {dir.x, dir.y});
       });
     }
   };
@@ -173,7 +171,7 @@ void GameScene::HandleMobHitPlayerCollision(float delta_time) {
 
   collision::HandleDetection(player_collider, mob_hitbox_collider_span,
                              [](Player* p, MobHitBox* m, collision::CollisionResult result) -> void {
-                               if (m->attack_delay >=0) return;
+                               if (m->attack_delay >= 0) return;
                                if (m->hit_player) return;
                                m->hit_player = true;
                                m->timeout = 0;
