@@ -238,14 +238,13 @@ export namespace mob {
     }
 
     void HandleHurt(MobState& state) {
+      if (is_attack_state(state.state)) return;
       state.state = MobActionState::HURT_DOWN; // todo: handle facing direction
       state.current_frame = 0;
       state.is_loop = false;
       state.is_playing = true;
       state.current_frame_time = animation_data[MobActionState::HURT_DOWN].frame_durations[0];
     }
-
-    void HandleTriggerAttackRange() {}
 
     void SyncCollider(MobState& state) {
       state.collider.position = {
