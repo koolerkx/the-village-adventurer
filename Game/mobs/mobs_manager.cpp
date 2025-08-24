@@ -17,7 +17,7 @@ void MobManager::Spawn(TileMapObjectProps props) {
   }
 }
 
-void MobManager::OnUpdate(GameContext* ctx, float delta_time, OnUpdateProps props) {
+void MobManager::OnUpdate(GameContext*, float delta_time, OnUpdateProps props) {
   // Update Mob State Hitbox
   mobs_pool_.ForEach([delta_time, props](MobState& it) {
     it.attack_cooldown = it.attack_cooldown > 0 ? it.attack_cooldown - delta_time : -1;
@@ -63,7 +63,7 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
     SyncCollider(it);
     collision::HandleDetection(it.collider,
                                map_colliders,
-                               [&](MobState* m, FieldObject* fo, collision::CollisionResult res) -> void {
+                               [&](MobState*, FieldObject*, collision::CollisionResult) -> void {
                                  it.transform.position = position_before;
                                  SyncCollider(it);
                                });
@@ -74,7 +74,7 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
     SyncCollider(it);
     collision::HandleDetection(it.collider,
                                map_colliders,
-                               [&](MobState* m, FieldObject* fo, collision::CollisionResult res) -> void {
+                               [&](MobState*, FieldObject*, collision::CollisionResult) -> void {
                                  it.transform.position = position_before;
                                  SyncCollider(it);
                                });
@@ -89,7 +89,7 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
     // XXX: Note taht attack state will overwrite moving state, the state will jump between two state when its in cooldown
     if (!mob::is_attack_state(it.state) && it.attack_cooldown <= 0) {
       collision::HandleDetection(player_collider, std::span(&it.attack_range_collider, 1),
-                                 [this](Player* p, MobState* m, collision::CollisionResult res) -> void {
+                                 [this](Player*, MobState* m, collision::CollisionResult) -> void {
                                    m->attack_cooldown = 2.0f;
 
                                    m->state = MobActionState::ATTACK_DOWN;

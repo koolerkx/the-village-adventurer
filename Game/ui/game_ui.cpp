@@ -61,7 +61,7 @@ void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
       interpolation::SmoothType::EaseOut,
       0.75f
     );
-    text.position.y -= 0.1;
+    text.position.y -= 0.1f;
   }
 
   damage_texts.erase(std::remove_if(damage_texts.begin(), damage_texts.end(),
@@ -414,7 +414,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   RenderDamageText(ctx, scene_ctx, camera);
 }
 
-void GameUI::RenderDamageText(GameContext* ctx, SceneContext* scene_ctx, Camera* camera) {
+void GameUI::RenderDamageText(GameContext* ctx, SceneContext*, Camera* camera) {
   auto rr = ctx->render_resource_manager->renderer.get();
   std::wstringstream wss;
 

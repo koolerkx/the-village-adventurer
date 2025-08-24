@@ -50,7 +50,7 @@ export namespace math {
     float EaseInOutQuint(float x) {
       return (x < 0.5f)
                ? 16.0f * x * x * x * x * x
-               : 1.0f - std::pow(-2.0f * x + 2.0f, 5) / 2.0f;
+               : 1.0f - static_cast<float>(std::pow(-2.0f * x + 2.0f, 5)) / 2.0f;
     }
   }
 };

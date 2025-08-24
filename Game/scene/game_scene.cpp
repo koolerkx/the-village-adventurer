@@ -124,7 +124,7 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
                      [&](FieldObject* fo) { OnPlayerEnterFieldObject(fo); });
 }
 
-void GameScene::HandleSkillHitMobCollision(float delta_time) {
+void GameScene::HandleSkillHitMobCollision(float) {
   auto mob_colliders = mob_manager_->GetColliders();
   auto skill_colliders = skill_manager_->GetColliders();
 
@@ -132,7 +132,7 @@ void GameScene::HandleSkillHitMobCollision(float delta_time) {
   std::span skill_colliders_span{skill_colliders.data(), skill_colliders.size()};
 
   auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_]
-  (MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult result) -> void {
+  (MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult) -> void {
     if (!skill_hitbox->hit_mobs.contains(mob_state->id) && !mob::is_death_state(mob_state->state)) {
       skill_hitbox->hit_mobs.insert(mob_state->id);
       mob_manager->MakeDamage(*mob_state, skill_hitbox->data->damage, [&]() {
@@ -166,13 +166,13 @@ void GameScene::HandleSkillHitMobCollision(float delta_time) {
   collision::HandleDetection(mob_colliders_span, skill_colliders_span, cb);
 }
 
-void GameScene::HandleMobHitPlayerCollision(float delta_time) {
+void GameScene::HandleMobHitPlayerCollision(float) {
   Collider<Player> player_collider = player_->GetCollider();
   std::vector<Collider<MobHitBox>> mob_hitbox_collider = mob_manager_->GetHitBoxColliders();
   std::span mob_hitbox_collider_span{mob_hitbox_collider.data(), mob_hitbox_collider.size()};
 
   collision::HandleDetection(player_collider, mob_hitbox_collider_span,
-                             [](Player* p, MobHitBox* m, collision::CollisionResult result) -> void {
+                             [](Player* p, MobHitBox* m, collision::CollisionResult) -> void {
                                if (m->attack_delay >= 0) return;
                                if (m->hit_player) return;
                                m->hit_player = true;
