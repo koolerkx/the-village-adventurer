@@ -6,16 +6,18 @@ import std;
 import game.scene;
 import game.map;
 
-import game.scene_object.player;
+import game.player;
 import game.scene_object.camera;
 import game.scene_game.context;
 import game.scene_object.skill;
 import game.ui.game_ui;
+import game.mobs_manager;
 
 export class GameScene : public IScene {
 private:
   std::unique_ptr<TileMap> map_{nullptr};
 
+  std::unique_ptr<MobManager> mob_manager_ = nullptr;
   std::unique_ptr<SkillManager> skill_manager_ = nullptr;
 
   std::unique_ptr<Player> player_ = nullptr;
@@ -24,11 +26,15 @@ private:
 
   std::unique_ptr<SceneContext> scene_context = nullptr;
 
-  std::chrono::time_point<std::chrono::steady_clock> time_at_start_;
+  double timer_elapsed_ = 0; // in seconds
 
   void HandlePlayerMovementAndCollisions(float delta_time);
+  void HandleSkillHitMobCollision(float delta_time);
+  void HandleMobHitPlayerCollision(float delta_time);
 
   void ResetTimer();
+
+  void UpdateUI(GameContext* ctx, float delta_time);
 
 public:
   void OnEnter(GameContext* ctx) override;

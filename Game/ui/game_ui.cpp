@@ -44,7 +44,7 @@ void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
   );
 }
 
-void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float) {
+void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
   // workaround: fixed flash rate in one tick, TODO: use setTimeout instead
   if (is_get_damage_frame_ && is_hp_flashing_) {
     is_hp_flashing_ = false;
@@ -52,9 +52,24 @@ void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float) {
     heal_flash_opacity_target_ = 0;
     damage_flash_opacity_target_ = 0;
   }
+  
+  for (auto& text : damage_texts) {
+    text.opacity = interpolation::UpdateSmoothValue(
+      text.opacity,
+      0,
+      delta_time,
+      interpolation::SmoothType::EaseOut,
+      0.75f
+    );
+    text.position.y -= 0.1f;
+  }
+
+  damage_texts.erase(std::remove_if(damage_texts.begin(), damage_texts.end(),
+                                    [](DamageTextProps text) { return text.opacity <= 0.05; }),
+                     damage_texts.end());
 }
 
-void GameUI::OnRender(GameContext* ctx, SceneContext*, Camera*) {
+void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera) {
   if (!is_show_ui_) return;
 
   auto& rr = ctx->render_resource_manager->renderer;
@@ -395,4 +410,34 @@ void GameUI::OnRender(GameContext* ctx, SceneContext*, Camera*) {
                  .line_height = 0.0f,
                  .color = color::white
                });
+
+  RenderDamageText(ctx, scene_ctx, camera);
+}
+
+void GameUI::RenderDamageText(GameContext* ctx, SceneContext*, Camera* camera) {
+  auto rr = ctx->render_resource_manager->renderer.get();
+  std::wstringstream wss;
+
+  for (auto damage_text : damage_texts) {
+    wss.str(L"");
+    wss << damage_text.skill_name << " " << std::to_wstring(damage_text.damage);
+
+    auto text_props = StringSpriteProps{
+      .pixel_size = 6.0f,
+      .letter_spacing = 0.0f,
+      .line_height = 0.0f,
+      .color = color::setOpacity(color::yellow500, damage_text.opacity)
+    };
+
+    auto size = default_font_->GetStringSize(wss.str(), {}, text_props);
+
+    rr->DrawFont(
+      wss.str(),
+      font_key_,
+      Transform{
+        .position = {damage_text.position.x - size.width / 2, damage_text.position.y - size.height / 2, 0}
+      }, text_props,
+      camera->GetCameraProps()
+    );
+  }
 }

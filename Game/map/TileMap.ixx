@@ -1,5 +1,5 @@
 module;
-
+#include "tinyxml/tinyxml2.h"
 export module game.map;
 
 import std;
@@ -11,6 +11,7 @@ import game.scene_object.camera;
 import game.collision.collider;
 import game.map.field_object;
 import game.object_pool;
+import game.map.tilemap_object_handler;
 
 static constexpr std::size_t MAX_WALL_COUNT = 2048; // TODO: extract
 
@@ -42,9 +43,12 @@ private:
 
   // Note: Collider not support scaling
   ObjectPool<FieldObject> field_object_pool_{};
+  
+  std::vector<TileMapObjectProps> map_objects_props_;
+  std::vector<TileMapObjectProps> ParseObjectGroup(tinyxml2::XMLElement* mapElement);
 
 public:
-  TileMap();
+  TileMap(GameContext* ctx, Vector2 position);
   void Load(std::string_view filepath, FixedPoolIndexType texture_id, TileRepository* tr);
 
   void OnUpdate(GameContext* ctx, float delta_time);
@@ -87,5 +91,9 @@ public:
       colliders.push_back(it.collider);
     });
     return colliders;
+  }
+
+  std::vector<TileMapObjectProps> GetMobProps() {
+    return tilemap_object_handler::GetMobProps(map_objects_props_, {transform_.position.x, transform_.position.y});
   }
 };

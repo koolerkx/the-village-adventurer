@@ -6,8 +6,35 @@ module game.map;
 import game.map.tile_repository;
 import graphic.utils.types;
 import game.scene_object.camera;
+import game.map.tilemap_object_handler;
+import game.scene_manager;
 
-TileMap::TileMap() {}
+TileMap::TileMap(GameContext* ctx, Vector2 position) {
+  std::string default_map = SceneManager::GetInstance().GetGameConfig()->default_map;
+  TileRepository* tr = SceneManager::GetInstance().GetTileRepository();
+
+  std::string default_map_path = "map/map_data/" + default_map + ".tmx";
+
+  std::string texture_path = SceneManager::GetInstance().GetGameConfig()->map_texture_filepath;
+  std::wstring w_texture_path = std::wstring(texture_path.begin(), texture_path.end());
+
+  // load texture
+  FixedPoolIndexType id = ctx->render_resource_manager->texture_manager->Load(w_texture_path);
+
+  // load map
+  Load(default_map_path, id, tr);
+  
+  Transform t = GetTransform();
+
+  // TODO: remove debug data
+  t.position.x = position.x;
+  t.position.y = position.y;
+  t.scale.x = 1.0f;
+  t.scale.y = 1.0f;
+  t.position_anchor.x = 0.0f;
+  t.position_anchor.y = 0.0f;
+  SetTransform(t);
+}
 
 void TileMap::OnUpdate(GameContext*, float delta_time) {
   for (auto& layer : layers_) {
@@ -360,26 +387,30 @@ void TileMap::Load(std::string_view filepath, FixedPoolIndexType texture_id, Til
     layers_.push_back(layer);
   }
 
-  // TODO: Handle layer
-  for
-  (
-    auto* objectGroup = mapElement->FirstChildElement("objectgroup");
-    objectGroup;
-    objectGroup = objectGroup
-    ->
-    NextSiblingElement(
-      "objectgroup"
-    )
-  ) {
-    for (auto* object = objectGroup->FirstChildElement("object"); object; object = object->
-         NextSiblingElement("object")) {
-      // unsigned int id = object->UnsignedAttribute("id", 0);
-      // std::string name = object->Attribute("name", "");
-      // std::string type = object->Attribute("type", "");
-      // float x = object->FloatAttribute("x", 0.0f);
-      // float y = object->FloatAttribute("y", 0.0f);
-      // float width = object->FloatAttribute("width", 0.0f);
-      // float height = object->FloatAttribute("height", 0.0f);
+  map_objects_props_ = ParseObjectGroup(mapElement);
+}
+
+std::vector<TileMapObjectProps> TileMap::ParseObjectGroup(tinyxml2::XMLElement* mapElement) {
+  std::vector<TileMapObjectProps> map_object;
+
+  // for each object in each object group
+  for (auto* objectGroup = mapElement->FirstChildElement("objectgroup");
+       objectGroup; objectGroup = objectGroup->NextSiblingElement("objectgroup")) {
+    for (auto* object = objectGroup->FirstChildElement("object");
+         object; object = object->NextSiblingElement("object")) {
+      TileMapObjectProps props;
+
+      props.x = object->FloatAttribute("x", 0.0f);
+      props.y = object->FloatAttribute("y", 0.0f);
+      props.width = object->FloatAttribute("width", 0.0f);
+      props.height = object->FloatAttribute("height", 0.0f);
+
+      std::string name = object->Attribute("name") ? object->Attribute("name") : "";
+      std::string type = object->Attribute("type") ? object->Attribute("type") : "";
+      props.type = tilemap_object_handler::MapTileMapObject(type, name);
+
+      map_object.push_back(props);
     }
   }
+  return map_object;
 }

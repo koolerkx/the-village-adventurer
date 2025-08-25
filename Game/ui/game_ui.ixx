@@ -9,6 +9,7 @@ import game.scene_object.camera;
 import graphic.utils.fixed_pool;
 import graphic.utils.font;
 import graphic.utils.types;
+import game.types;
 
 std::unordered_map<std::string, UV> texture_map = {
   // HP Bar
@@ -51,6 +52,13 @@ std::unordered_map<std::string, UV> texture_map = {
   {"HealOverlay", UV{{128, 503}, {320, 180}}},
 };
 
+struct DamageTextProps {
+  POSITION position;
+  std::wstring skill_name;
+  short damage;
+  float opacity = 1;
+};
+
 export class GameUI {
 private:
   FixedPoolIndexType texture_id_;
@@ -86,7 +94,9 @@ private:
   const bool is_show_skill_ = false;
   const bool is_show_coin_ = false;
   const bool is_show_event_log_ = false;
-  
+
+  std::vector<DamageTextProps> damage_texts;
+
 public:
   void SetHpPercentage(float percentage) {
     if (std::abs(hp_percentage_target_ - percentage) > 0.00001f) {
@@ -99,11 +109,16 @@ public:
     hp_percentage_target_ = percentage;
   }
 
-  void SetTimerText(int minute, int second) {
+  void SetTimerText(double elapsed_seconds) {
+    int total_seconds = static_cast<int>(elapsed_seconds);
+
+    int minutes = (total_seconds % 3600) / 60;
+    int seconds = total_seconds % 60;
+
     std::wstringstream wss;
-    wss << std::setw(2) << std::setfill(L'0') << minute
+    wss << std::setw(2) << std::setfill(L'0') << minutes
       << L":"
-      << std::setw(2) << std::setfill(L'0') << second;
+      << std::setw(2) << std::setfill(L'0') << seconds;
     timer_text_ = wss.str();
   }
 
@@ -119,9 +134,17 @@ public:
     is_show_ui_ = is_show_ui;
   }
 
+  // position is the center of object
+  void AddDamageText(Vector2 position, std::wstring name, short damage) {
+    damage_texts.emplace_back(DamageTextProps{
+      {position.x, position.y, 0}, name, damage
+    });
+  }
+
   GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_path);
 
   void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
+  void RenderDamageText(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
 };

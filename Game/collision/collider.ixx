@@ -20,7 +20,7 @@ export using ColliderShape = std::variant<RectCollider, CircleCollider>;
 export template <typename Owner>
 struct Collider {
   bool is_trigger = false;
-  Vector2 position; // item world position
+  Vector2 position; // item world position, left top for rect, center for circle
   float rotation;
   Vector2 rotation_pivot{0, 0}; // center-center
   Owner* owner;

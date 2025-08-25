@@ -328,6 +328,21 @@ void Renderer::DrawSprite(RenderItem render_item, CameraProps camera_props) {
   device_context_->Draw(vertex_num_, 0);
 }
 
+void Renderer::DrawLineCircle(POSITION center, float radius, const COLOR& color, CameraProps camera_props) {
+  RenderItem item = {
+    .texture_id = texture_manager_->Load(L"assets/circle.png"),
+    // TODO: handle exception, debug use should not block game running
+    .transform = {
+      .position = {center.x - radius, center.y - radius, 0},
+      .size = {radius * 2, radius * 2}
+    },
+    .uv = {{0, 0}, {64, 64}},
+    .color = color
+  };
+
+  DrawSprite(item, camera_props);
+}
+
 void Renderer::DrawLine(const POSITION& start, const POSITION& end, const COLOR& color) {
   const std::wstring texture_filename = L"assets/block_white.png";
   const FixedPoolIndexType texture_id = texture_manager_->Load(texture_filename);
@@ -550,7 +565,7 @@ void Renderer::DrawPolygon(const std::array<POSITION, 4>& points,
   DrawLines(lines, camera_props, is_half_pixel_offset_correction);
 }
 
-void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props) {
+void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props, CameraProps camera_props) {
   Font* font = Font::GetFont(font_key);
 
   if (props.is_draw_rect) {
@@ -563,12 +578,12 @@ void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transfor
       }
     });
 
-    DrawRects(ary);
+    DrawRects(ary, camera_props);
   }
 
   std::vector<RenderInstanceItem> items = font->MakeStringRenderInstanceItems(str, transform, props);
   std::span<RenderInstanceItem> items_span = std::span(items.data(), items.size());
-  DrawSpritesInstanced(items_span, font->GetTextureId());
+  DrawSpritesInstanced(items_span, font->GetTextureId(), camera_props);
 }
 
 void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_items,
