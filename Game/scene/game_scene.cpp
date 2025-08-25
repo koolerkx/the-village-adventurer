@@ -24,7 +24,7 @@ void GameScene::OnEnter(GameContext* ctx) {
   // Scene
   scene_context.reset(new SceneContext());
 
-  Vector2 default_map_position = {-256, -512};
+  Vector2 default_map_position = {-256, -256};
   map_ = std::make_unique<TileMap>(ctx, default_map_position);
   scene_context->map = map_.get();
 

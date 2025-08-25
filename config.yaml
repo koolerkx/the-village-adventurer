@@ -10,11 +10,12 @@ config:
       instanced_vertex_shader: "assets/shaders/instanced_shader_vertex_2d.cso"
       pixel_shader: "assets/shaders/shader_pixel_2d.cso"
   map:
-    default_map: "forest1"
+    default_map: "town"
     map_texture: "assets/field.png"
     map_metadata: "map/assets/field.tsx"
     map:
       files:
+        - "map/map_data/town.tmx"
         - "map/map_data/forest1.tmx"
       animate_files:
         - "tbd"
