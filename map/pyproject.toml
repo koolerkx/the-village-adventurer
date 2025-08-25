@@ -1,8 +1,0 @@
-[project]
-name = "map"
-version = "0.1.0"
-description = "map concat"
-requires-python = ">=3.13"
-dependencies = [
-    "pillow>=11.3.0",
-]
