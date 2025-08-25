@@ -180,7 +180,8 @@ export namespace mob {
         .attack_range_collider = atk_c,
         .type = MobType::SLIME,
         .state = MobActionState::IDLE_DOWN,
-        .is_battle = true, // TODO: change the flag trigger by active area
+        .inactive_position = {props.x + t.size.x / 2, props.y + t.size.x / 2},
+        .is_battle = false, // TODO: change the flag trigger by active area
         .is_loop = true,
         .is_playing = true,
         .hp = DEFAULT_HP
@@ -219,11 +220,14 @@ export namespace mob {
       constexpr float SPEED = 25.0f; // todo: extract as config
       state.velocity.x = 0;
 
-      Vector2 mob_center = {state.transform.position.x + state.transform.size.x / 2, state.transform.position.y + state.transform.size.y / 2};
+      Vector2 mob_center = {
+        state.transform.position.x + state.transform.size.x / 2, state.transform.position.y + state.transform.size.y / 2
+      };
       Vector2 dir = math::GetDirection(mob_center, destination);
 
       // Move in easing function
-      float animation_progress = static_cast<float>(state.current_frame) / static_cast<float>(animation_data[state.state].frames.size());
+      float animation_progress = static_cast<float>(state.current_frame) / static_cast<float>(animation_data[state.
+        state].frames.size());
 
       float speed = SPEED * math::interpolation::EaseInOutQuint(animation_progress);
       state.velocity.x = dir.x * speed;
@@ -288,8 +292,7 @@ export namespace mob {
 
       // Change the state to moving if needed
       mob_state.moving_cooldown = mob_state.moving_cooldown >= 0.0f ? mob_state.moving_cooldown - delta_time : -1;
-      // bool is_in_moving_threshold = math::GetDistance(player_position, {mob_state.transform.position.x, mob_state.transform.position.y}) > 16;
-      if (is_idle_state(mob_state.state) && mob_state.moving_cooldown < 0.0f ) {
+      if (is_idle_state(mob_state.state) && mob_state.moving_cooldown < 0.0f) {
         constexpr float MOVING_COOLDOWN = 2.0;
         mob_state.moving_cooldown += MOVING_COOLDOWN;
         if (mob_state.is_battle) {
@@ -299,9 +302,20 @@ export namespace mob {
           mob_state.current_frame = 0;
           mob_state.current_frame_time = 0;
         }
+        else if (is_idle_state(mob_state.state) && !mob_state.is_battle && !is_position_reset(
+          {
+            mob_state.transform.position.x + mob_state.transform.size.x / 2,
+            mob_state.transform.position.y + mob_state.transform.size.y / 2
+          }, mob_state.inactive_position)) {
+          mob_state.state = MobActionState::MOVING_DOWN;
+          mob_state.is_loop = false;
+          mob_state.is_playing = true;
+          mob_state.current_frame = 0;
+          mob_state.current_frame_time = 0;
+        }
       }
       if (is_moving_state(mob_state.state)) {
-        HandleMovement(mob_state, player_position);
+        HandleMovement(mob_state, mob_state.is_battle ? player_position : mob_state.inactive_position);
       }
 
       // update animation

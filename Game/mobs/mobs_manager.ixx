@@ -12,7 +12,7 @@ import game.map.tilemap_object_handler;
 import game.types;
 import game.scene_game.context;
 import game.player;
-
+import game.math;
 export enum class MobActionState: char {
   IDLE_LEFT,
   IDLE_RIGHT,
@@ -55,7 +55,8 @@ export struct MobState {
   Collider<MobState> attack_range_collider;
   MobType type = MobType::NONE;
   MobActionState state = MobActionState::IDLE_DOWN;
-  bool is_battle = false; // is in battle
+  Vector2 inactive_position; // back to this position when inactive
+  bool is_battle = false;    // is in battle
 
   bool is_alive = true;
   bool is_loop = false;
@@ -69,6 +70,18 @@ export struct MobState {
   Vector2 velocity;
   // mob data
   int hp;
+};
+
+export struct ActiveArea {
+  Collider<ActiveArea> collider;
+  std::vector<ObjectPoolIndexType> mobs;
+  FixedPoolIndexType id;
+};
+
+enum class ActiveAreaState {
+  NOT_COLLIDE,
+  COLLIDING,
+  COLLIDE_LAST_FRAME
 };
 
 export namespace mob {
@@ -106,6 +119,13 @@ export namespace mob {
       state == MobActionState::ATTACK_LEFT ||
       state == MobActionState::ATTACK_RIGHT;
   }
+  bool is_position_reset(Vector2 mob_pos, Vector2 inactive_pos) {
+    constexpr float DISTANCE_THRESHOLD = 32.0f;
+    if (math::GetDistance(mob_pos, inactive_pos) < DISTANCE_THRESHOLD) {
+      return true;
+    }
+    return false;
+  }
 }
 
 export struct MobHitBox {
@@ -133,6 +153,8 @@ private:
   FixedPoolIndexType texture_id_;
   ObjectPool<MobState> mobs_pool_;
   ObjectPool<MobHitBox> mob_hitbox_pool_;
+  ObjectPool<ActiveArea> active_area_pool_;
+  std::unordered_map<ObjectPoolIndexType, ActiveAreaState> active_area_state;
 
   void SyncCollider(MobState& mob_state);
 
@@ -142,6 +164,7 @@ public:
   }
 
   void Spawn(TileMapObjectProps);
+  void CreateActiveArea(TileMapObjectProps);
 
   void OnUpdate(GameContext* ctx, float delta_time, OnUpdateProps props);
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time, Collider<Player> player_collider);
@@ -152,4 +175,5 @@ public:
 
   std::vector<Collider<MobState>> GetColliders();
   std::vector<Collider<MobHitBox>> GetHitBoxColliders();
+  std::vector<Collider<ActiveArea>> GetActiveAreaColliders();
 };
