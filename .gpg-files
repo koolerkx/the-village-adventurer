@@ -1,9 +1,6 @@
-map/assets/BrightForest-A1.png
-map/assets/BrightForest-A2.png
-map/assets/BrightForest-B.png
-map/assets/base.png
-map/assets/chest.png
-map/map_assets.png
+assets/field.png
+map/assets/field.png
+map/assets/field.psd
 
 assets/character_01.png
 assets/attack.png
