@@ -20,7 +20,10 @@ import game.map.field_object;
 
 export class MapManager {
 private:
-  std::unordered_map<std::string, TileMap> maps;
+  std::unordered_map<std::string, std::vector<std::unique_ptr<MapData>>> map_data_preloaded_;
+  float map_width_px_;
+  float map_height_px_;
+  
   MapData Load(std::string_view filepath, TileRepository* tr);
 
   FixedPoolIndexType texture_id_;

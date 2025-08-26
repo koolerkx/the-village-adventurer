@@ -248,24 +248,61 @@ MapData MapManager::Load(std::string_view filepath, TileRepository* tr) {
   return data;
 }
 
+namespace {
+  struct MapPath {
+    std::string path;
+    std::string type;
+    int id;
+  };
+
+  MapPath ParseMapPathString(const std::string& path) {
+    size_t lastSlash = path.find_last_of("/\\");
+    std::string filename = (lastSlash == std::string::npos) ? path : path.substr(lastSlash + 1);
+
+    std::regex re(R"(([a-zA-Z]+)(\d*)\.tmx)");
+    std::smatch match;
+
+    MapPath info;
+    info.path = path;
+    info.id = 1; // default
+
+    if (std::regex_match(filename, match, re)) {
+      info.type = match[1];
+      if (match[2].matched && !match[2].str().empty()) {
+        info.id = std::stoi(match[2].str());
+      }
+    }
+    return info;
+  }
+}
+
 MapManager::MapManager(GameContext* ctx) {
   TileRepository* tr = SceneManager::GetInstance().GetTileRepository();
 
-  auto files = SceneManager::GetInstance().GetGameConfig()->file_paths;
-  
   std::string texture_path = SceneManager::GetInstance().GetGameConfig()->map_texture_filepath;
   std::wstring w_texture_path = std::wstring(texture_path.begin(), texture_path.end());
 
   texture_id_ = ctx->render_resource_manager->texture_manager->Load(w_texture_path);
 
-  // todo: store as cache for generated map
-  std::unique_ptr<MapData> map_data = std::make_unique<MapData>(Load(files[0], tr));
+  // Handle map data, store as cache for generated map 
+  auto files = SceneManager::GetInstance().GetGameConfig()->file_paths;
+  for (std::string file : files) {
+    MapPath map_path = ParseMapPathString(file);
+
+    map_data_preloaded_[map_path.type].push_back(std::make_unique<MapData>(Load(file, tr)));
+  }
+
+  std::string default_map = SceneManager::GetInstance().GetGameConfig()->default_map;
+  MapData* map_data = map_data_preloaded_[default_map][0].get();
+
+  map_width_px_ = static_cast<float>(map_data->map_width) * map_data->tile_width;
+  map_height_px_ = static_cast<float>(map_data->map_height) * map_data->tile_height;
 
   Vector2 base_position = {
-    -(static_cast<float>(map_data->map_width) * map_data->tile_width) / 2,
-    -(static_cast<float>(map_data->map_height) * map_data->tile_height) / 2,
+    -map_width_px_ / 2,
+    -map_height_px_ / 2,
   };
-  active_map_ = std::make_shared<TileMap>(map_data.get(), texture_id_, base_position);
+  active_map_ = std::make_shared<TileMap>(map_data, texture_id_, base_position);
 }
 
 void MapManager::OnUpdate(GameContext* ctx, float delta_time) {
