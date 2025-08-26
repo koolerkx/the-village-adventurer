@@ -13,6 +13,7 @@ import game.map.tilemap_object_handler;
 
 import game.collision.collider;
 import game.map.field_object;
+#include <assert.h>
 
 // export struct MapManagerProps {
 //   FixedPoolIndexType texture_id;
@@ -23,13 +24,13 @@ private:
   std::unordered_map<std::string, std::vector<std::unique_ptr<MapData>>> map_data_preloaded_;
   float map_width_px_;
   float map_height_px_;
-  
+
   MapData Load(std::string_view filepath, TileRepository* tr);
 
   FixedPoolIndexType texture_id_;
 
-  // std::vector<std::shared_ptr<TileMap>> tile_maps;
-  std::shared_ptr<TileMap> active_map_ = nullptr;
+  std::vector<std::shared_ptr<TileMap>> tile_maps;
+  std::weak_ptr<TileMap> active_map_;
 
 public:
   MapManager(GameContext* ctx);
@@ -37,24 +38,52 @@ public:
   void OnUpdate(GameContext* ctx, float delta_time);
   void OnRender(GameContext* ctx, Camera* camera);
 
-  TileMap* GetActiveMap() { return active_map_.get(); }
+  std::shared_ptr<TileMap> GetActiveMap() {
+    if (auto map = active_map_.lock())
+      return map;
+    return nullptr;
+  }
 
   std::vector<TileMapObjectProps> GetMobProps() {
-    return active_map_->GetMobProps();
+    if (auto map = active_map_.lock())
+      return map->GetMobProps();
+    assert(false);
   }
 
   std::vector<TileMapObjectProps> GetActiveAreaProps() {
-    return active_map_->GetActiveAreaProps();
+    if (auto map = active_map_.lock())
+      return map->GetActiveAreaProps();
+    assert(false);
   }
 
-  CollideState GetCollideState() const { return active_map_->GetCollideState(); }
-  void SetCollideState(CollideState state) { active_map_->SetCollideState(state); }
+  CollideState GetCollideState() const {
+    if (auto map = active_map_.lock())
+      return map->GetCollideState();
+    assert(false);
+  }
 
-  std::wstring GetMapName() const { return active_map_->GetMapName(); }
-  Collider<TileMap> GetMapCollider() const { return active_map_->GetMapCollider(); }
+  void SetCollideState(CollideState state) {
+    if (auto map = active_map_.lock())
+      return map->SetCollideState(state);
+    assert(false);
+  }
+
+  std::wstring GetMapName() const {
+    if (auto map = active_map_.lock())
+      return map->GetMapName();
+    assert(false);
+  }
+
+  Collider<TileMap> GetMapCollider() const {
+    if (auto map = active_map_.lock())
+      return map->GetMapCollider();
+    assert(false);
+  }
 
 
   std::span<Collider<FieldObject>> GetFiledObjectColliders() {
-    return active_map_->GetFiledObjectColliders();
+    if (auto map = active_map_.lock())
+      return map->GetFiledObjectColliders();
+    assert(false);
   }
 };

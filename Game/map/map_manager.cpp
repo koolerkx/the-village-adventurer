@@ -6,6 +6,7 @@ module game.map.map_manager;
 import game.map.tile_repository;
 import game.map.field_object;
 import game.map.tilemap_object_handler;
+import game.map.linked_map;
 import game.collision.collider;
 import game.scene_manager;
 
@@ -302,13 +303,22 @@ MapManager::MapManager(GameContext* ctx) {
     -map_width_px_ / 2,
     -map_height_px_ / 2,
   };
-  active_map_ = std::make_shared<TileMap>(map_data, texture_id_, base_position);
+
+  size_t map_idx = tile_maps.size();
+  tile_maps.emplace_back(std::make_shared<TileMap>(map_data, texture_id_, base_position));
+
+  LinkedMap base_map;
+  base_map.current = tile_maps[map_idx];
+
+  active_map_ = base_map.current;
 }
 
 void MapManager::OnUpdate(GameContext* ctx, float delta_time) {
-  active_map_->OnUpdate(ctx, delta_time);
+  if (auto active_map = active_map_.lock())
+    active_map->OnUpdate(ctx, delta_time);
 }
 
 void MapManager::OnRender(GameContext* ctx, Camera* camera) {
-  active_map_->OnRender(ctx, camera);
+  if (auto active_map = active_map_.lock())
+    active_map->OnRender(ctx, camera);
 }
