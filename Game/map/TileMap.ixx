@@ -13,9 +13,9 @@ import game.map.field_object;
 import game.object_pool;
 import game.map.tilemap_object_handler;
 
-static constexpr std::size_t MAX_WALL_COUNT = 2048; // TODO: extract
+constexpr int MAX_WALL_COUNT = 4096; 
 
-struct MapTile {
+export struct MapTile {
   std::vector<unsigned int> x{}; // 0 ~ map_width * tile_width
   std::vector<unsigned int> y{}; // 0 ~ (map_width - 1) * tile_height
   std::vector<unsigned int> u{}; // 0 ~ map_width * tile_width
@@ -23,37 +23,47 @@ struct MapTile {
   std::vector<int> tile_id{};
 };
 
-struct MapLayer {
+export struct MapLayer {
   MapTile tiles; ///< Display only tile
   // index -> animation state
   std::unordered_map<unsigned int, TileAnimationState> tile_animation_states_;
 };
 
-export class TileMap {
-private:
-  unsigned int tile_width_{16};  // px
-  unsigned int tile_height_{16}; // px
-  unsigned int map_width_{16};   // blocks
-  unsigned int map_height_{16};  // blocks
-  std::vector<MapLayer> layers_;
-
-  Transform transform_{};
-
-  FixedPoolIndexType texture_id_{0};
+export struct MapData {
+  std::wstring map_name = L"";
+  unsigned int tile_width = 16;  // px
+  unsigned int tile_height = 16; // px
+  unsigned int map_width = 16;   // blocks
+  unsigned int map_height = 16;  // blocks
 
   // Note: Collider not support scaling
-  ObjectPool<FieldObject> field_object_pool_{};
-  
-  std::vector<TileMapObjectProps> map_objects_props_;
-  std::vector<TileMapObjectProps> ParseObjectGroup(tinyxml2::XMLElement* mapElement);
+  ObjectPool<FieldObject> field_object_pool{}; // wall and interactable object
+  std::vector<MapLayer> layers;
+  std::vector<TileMapObjectProps> map_objects_props;
+};
 
-  std::wstring map_name_;
+export class TileMap {
+private:
+  // MapData;
+  std::wstring map_name_ = L"";
+  unsigned int tile_width_ = 16;  // px
+  unsigned int tile_height_ = 16; // px
+  unsigned int map_width_ = 16;   // blocks
+  unsigned int map_height_ = 16;  // blocks
+
+  ObjectPool<FieldObject> field_object_pool_{}; // wall and interactable object
+  std::vector<MapLayer> layers_;
+  std::vector<TileMapObjectProps> map_objects_props_;
+  
+  Transform transform_{};
+
+  FixedPoolIndexType texture_id_;
+
   Collider<TileMap> map_collider_;
   CollideState collide_state_ = CollideState::NOT_COLLIDE;
 
 public:
-  TileMap(GameContext* ctx, Vector2 position);
-  void Load(std::string_view filepath, FixedPoolIndexType texture_id, TileRepository* tr);
+  TileMap(MapData* map_data, FixedPoolIndexType texture_id, Vector2 base_position);
 
   void OnUpdate(GameContext* ctx, float delta_time);
   void OnRender(GameContext* ctx, Camera* camera);

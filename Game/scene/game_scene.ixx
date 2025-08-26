@@ -5,6 +5,7 @@ export module game.scene_game;
 import std;
 import game.scene;
 import game.map;
+import game.map.map_manager;
 
 import game.player;
 import game.scene_object.camera;
@@ -15,7 +16,7 @@ import game.mobs_manager;
 
 export class GameScene : public IScene {
 private:
-  std::unique_ptr<TileMap> map_{nullptr};
+  std::unique_ptr<MapManager> map_manager_{nullptr};
 
   std::unique_ptr<MobManager> mob_manager_ = nullptr;
   std::unique_ptr<SkillManager> skill_manager_ = nullptr;

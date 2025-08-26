@@ -17,6 +17,7 @@ import game.map.tilemap_object_handler;
 import game.player.input.keyboard;
 import player.factory;
 import game.math;
+import game.map.map_manager;
 
 void GameScene::OnEnter(GameContext* ctx) {
   std::cout << "GameScene> OnEnter" << std::endl;
@@ -24,14 +25,14 @@ void GameScene::OnEnter(GameContext* ctx) {
   // Scene
   scene_context.reset(new SceneContext());
 
-  Vector2 default_map_position = {-256, -256};
-  map_ = std::make_unique<TileMap>(ctx, default_map_position);
-  scene_context->map = map_.get();
+  // map_ = std::make_unique<TileMap>(ctx, default_map_position);
+  map_manager_ = std::make_unique<MapManager>(ctx);
 
   // Skill
   skill_manager_ = std::make_unique<SkillManager>(ctx);
   scene_context->skill_manager = skill_manager_.get();
-
+  scene_context->map = map_manager_->GetActiveMap();
+  
   // Player
   auto pf = std::make_unique<PlayerFactory>();
   player_ = std::move(pf->Create(ctx));
@@ -43,10 +44,10 @@ void GameScene::OnEnter(GameContext* ctx) {
 
   // Mob
   mob_manager_ = std::make_unique<MobManager>(ctx);
-  for (auto& mob_props : map_->GetMobProps()) {
+  for (auto& mob_props : map_manager_->GetMobProps()) {
     mob_manager_->Spawn(mob_props);
   }
-  for (auto& mob_props : map_->GetActiveAreaProps()) {
+  for (auto& mob_props : map_manager_->GetActiveAreaProps()) {
     mob_manager_->CreateActiveArea(mob_props);
   }
 }
@@ -54,7 +55,7 @@ void GameScene::OnEnter(GameContext* ctx) {
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   // std::cout << "GameScene> OnUpdate: " << delta_time << std::endl;
 
-  map_->OnUpdate(ctx, delta_time);
+  map_manager_->OnUpdate(ctx, delta_time);
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnUpdate(ctx, delta_time);
   mob_manager_->OnUpdate(ctx, delta_time, {
@@ -83,7 +84,7 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
 void GameScene::OnRender(GameContext* ctx) {
   // std::cout << "GameScene> OnRender" << std::endl;
 
-  map_->OnRender(ctx, camera_.get());
+  map_manager_->OnRender(ctx, camera_.get());
   mob_manager_->OnRender(ctx, camera_.get());
   player_->OnRender(ctx, scene_context.get(), camera_.get());
   skill_manager_->OnRender(ctx, camera_.get(), player_->GetTransform());
@@ -121,7 +122,7 @@ namespace {
 
 void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
   const auto [x, y] = player_->GetVelocity();
-  auto colliders = map_->GetFiledObjectColliders();
+  auto colliders = map_manager_->GetFiledObjectColliders();
 
   MoveAndCollideAxis(*player_, delta_time, x, colliders, Axis::X,
                      [&](FieldObject* fo) { OnPlayerEnterFieldObject(fo); });
@@ -130,19 +131,19 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
 }
 
 void GameScene::HandlePlayerEnterMapCollision(float delta_time) {
-  auto collider = map_->GetMapCollider();
-  auto state = map_->GetCollideState();
+  auto collider = map_manager_->GetMapCollider();
+  auto state = map_manager_->GetCollideState();
 
   if (state == CollideState::COLLIDE_LAST_FRAME) {
     // OnExit
-    map_->SetCollideState(CollideState::NOT_COLLIDE);
+    map_manager_->SetCollideState(CollideState::NOT_COLLIDE);
   }
   if (state == CollideState::COLLIDING) {
-    map_->SetCollideState(CollideState::COLLIDE_LAST_FRAME);
+    map_manager_->SetCollideState(CollideState::COLLIDE_LAST_FRAME);
   }
 
   collision::HandleDetection(player_->GetCollider(), std::span(&collider, 1),
-                             [state, &map = this->map_, &ui = this->ui_]
+                             [state, &map = this->map_manager_, &ui = this->ui_]
                            (Player*, TileMap*, collision::CollisionResult) -> void {
                                if (state == CollideState::NOT_COLLIDE) {
                                  // OnEnter
