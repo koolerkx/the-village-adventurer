@@ -17,5 +17,6 @@ config:
       files:
         - "map/map_data/town.tmx"
         - "map/map_data/forest1.tmx"
+        - "map/map_data/forest2.tmx"
       animate_files:
         - "tbd"

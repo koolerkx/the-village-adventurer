@@ -249,17 +249,17 @@ MapData MapManager::Load(std::string_view filepath, TileRepository* tr) {
 }
 
 MapManager::MapManager(GameContext* ctx) {
-  std::string default_map = SceneManager::GetInstance().GetGameConfig()->default_map;
   TileRepository* tr = SceneManager::GetInstance().GetTileRepository();
 
-  std::string default_map_path = "map/map_data/" + default_map + ".tmx";
+  auto files = SceneManager::GetInstance().GetGameConfig()->file_paths;
+  
   std::string texture_path = SceneManager::GetInstance().GetGameConfig()->map_texture_filepath;
   std::wstring w_texture_path = std::wstring(texture_path.begin(), texture_path.end());
 
   texture_id_ = ctx->render_resource_manager->texture_manager->Load(w_texture_path);
 
   // todo: store as cache for generated map
-  std::unique_ptr<MapData> map_data = std::make_unique<MapData>(Load(default_map_path, tr));
+  std::unique_ptr<MapData> map_data = std::make_unique<MapData>(Load(files[0], tr));
 
   Vector2 base_position = {
     -(static_cast<float>(map_data->map_width) * map_data->tile_width) / 2,

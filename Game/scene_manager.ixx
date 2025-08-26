@@ -13,6 +13,7 @@ export struct GameConfig {
   std::string default_map;
   std::string map_texture_filepath;
   std::string map_tile_filepath;
+  std::vector<std::string> file_paths;
 };
 
 export class SceneManager {
