@@ -44,6 +44,8 @@ public:
 
   std::shared_ptr<TileMap> GetActiveMap();
   std::vector<std::shared_ptr<TileMap>> GetActiveMaps();
+  std::vector<std::shared_ptr<LinkedMapNode>> GetActiveLinkedMaps();
+  void ForEachActiveLinkedMapsNode(std::function<void(std::shared_ptr<LinkedMapNode>)> fn);
 
   std::vector<TileMapObjectProps> GetMobProps() {
     std::vector<TileMapObjectProps> v1{};
@@ -63,32 +65,12 @@ public:
     return v1;
   }
 
-  CollideState GetCollideState() const {
-    if (auto node = active_map_node_.lock())
-      if (auto map = node->data.lock())
-        return map->GetCollideState();
-    assert(false);
-  }
-
-  void SetCollideState(CollideState state) {
-    if (auto node = active_map_node_.lock())
-      if (auto map = node->data.lock())
-        return map->SetCollideState(state);
-    assert(false);
-  }
-
   std::wstring GetMapName() const {
     if (auto node = active_map_node_.lock())
       if (auto map = node->data.lock())
         return map->GetMapName();
     assert(false);
-  }
-
-  Collider<TileMap> GetMapCollider() const {
-    if (auto node = active_map_node_.lock())
-      if (auto map = node->data.lock())
-        return map->GetMapCollider();
-    assert(false);
+    return L"";
   }
 
   std::vector<Collider<FieldObject>> GetFiledObjectColliders() {
@@ -99,4 +81,6 @@ public:
     }
     return v1;
   }
+
+  void EnterNewMap(std::shared_ptr<LinkedMapNode> node);
 };

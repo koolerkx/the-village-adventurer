@@ -478,37 +478,46 @@ std::vector<std::shared_ptr<TileMap>> MapManager::GetActiveMaps() {
   std::vector<std::shared_ptr<TileMap>> maps;
   maps.reserve(9);
 
-  auto node = active_map_node_.lock();
-  if (!node) return {};
-  auto map = node->data.lock();
-  if (!map) return {};
-  maps.push_back(map);
-
-  auto up_node = node->up.lock();
-  auto up_map = up_node->data.lock();
-  maps.push_back(up_map);
-  auto down_node = node->down.lock();
-  auto down_map = down_node->data.lock();
-  maps.push_back(down_map);
-  auto left_node = node->left.lock();
-  auto left_map = left_node->data.lock();
-  maps.push_back(left_map);
-  auto right_node = node->right.lock();
-  auto right_map = right_node->data.lock();
-  maps.push_back(right_map);
-
-  auto up_left_node = up_node->left.lock();
-  auto up_left_map = up_left_node->data.lock();
-  maps.push_back(up_left_map);
-  auto up_right_node = up_node->right.lock();
-  auto up_right_map = up_right_node->data.lock();
-  maps.push_back(up_right_map);
-  auto down_left_node = down_node->left.lock();
-  auto down_left_map = down_left_node->data.lock();
-  maps.push_back(down_left_map);
-  auto down_right_node = down_node->right.lock();
-  auto down_right_map = down_right_node->data.lock();
-  maps.push_back(down_right_map);
+  for (auto node : GetActiveLinkedMaps()) {
+    auto map = node->data.lock();
+    maps.push_back(map);
+  }
 
   return maps;
+}
+
+std::vector<std::shared_ptr<LinkedMapNode>> MapManager::GetActiveLinkedMaps() {
+  std::vector<std::shared_ptr<LinkedMapNode>> nodes;
+  auto base_node = active_map_node_.lock();
+  nodes.push_back(base_node);
+  auto up_node = base_node->up.lock();
+  nodes.push_back(up_node);
+  auto down_node = base_node->down.lock();
+  nodes.push_back(down_node);
+  auto left_node = base_node->left.lock();
+  nodes.push_back(left_node);
+  auto right_node = base_node->right.lock();
+  nodes.push_back(right_node);
+  auto up_left_node = up_node->left.lock();
+  nodes.push_back(up_left_node);
+  auto up_right_node = up_node->right.lock();
+  nodes.push_back(up_right_node);
+  auto down_left_node = down_node->left.lock();
+  nodes.push_back(down_left_node);
+  auto down_right_node = down_node->right.lock();
+  nodes.push_back(down_right_node);
+
+  return nodes;
+}
+
+void MapManager::ForEachActiveLinkedMapsNode(std::function<void(std::shared_ptr<LinkedMapNode>)> fn) {
+  auto nodes = GetActiveLinkedMaps();
+  for (auto node: nodes) {
+    fn(node);
+  }
+}
+
+void MapManager::EnterNewMap(std::shared_ptr<LinkedMapNode> node) {
+  active_map_node_ = node;
+  ExpandMap(node);
 }

@@ -18,6 +18,7 @@ import game.player.input.keyboard;
 import player.factory;
 import game.math;
 import game.map.map_manager;
+import game.map.linked_map;
 
 void GameScene::OnEnter(GameContext* ctx) {
   std::cout << "GameScene> OnEnter" << std::endl;
@@ -32,7 +33,7 @@ void GameScene::OnEnter(GameContext* ctx) {
   skill_manager_ = std::make_unique<SkillManager>(ctx);
   scene_context->skill_manager = skill_manager_.get();
   scene_context->map = map_manager_->GetActiveMap();
-  
+
   // Player
   auto pf = std::make_unique<PlayerFactory>();
   player_ = std::move(pf->Create(ctx));
@@ -131,26 +132,33 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
 }
 
 void GameScene::HandlePlayerEnterMapCollision(float) {
-  auto collider = map_manager_->GetMapCollider();
-  auto state = map_manager_->GetCollideState();
+  map_manager_->ForEachActiveLinkedMapsNode(
+    [&player = player_, &map_manager = this->map_manager_, &ui = this->ui_](std::shared_ptr<LinkedMapNode> node) -> void {
+      auto map = node->data.lock();
+      if (!map) return;
 
-  if (state == CollideState::COLLIDE_LAST_FRAME) {
-    // OnExit
-    map_manager_->SetCollideState(CollideState::NOT_COLLIDE);
-  }
-  if (state == CollideState::COLLIDING) {
-    map_manager_->SetCollideState(CollideState::COLLIDE_LAST_FRAME);
-  }
+      auto state = map->GetCollideState();
+      auto collider = map->GetMapCollider();
 
-  collision::HandleDetection(player_->GetCollider(), std::span(&collider, 1),
-                             [state, &map = this->map_manager_, &ui = this->ui_]
-                           (Player*, TileMap*, collision::CollisionResult) -> void {
-                               if (state == CollideState::NOT_COLLIDE) {
-                                 // OnEnter
-                                 ui->PlayEnterAreaMessage(map->GetMapName());
-                               }
-                               map->SetCollideState(CollideState::COLLIDING);
-                             });
+      if (state == CollideState::COLLIDE_LAST_FRAME) {
+        // OnExit
+        map->SetCollideState(CollideState::NOT_COLLIDE);
+      }
+      if (state == CollideState::COLLIDING) {
+        map->SetCollideState(CollideState::COLLIDE_LAST_FRAME);
+      }
+
+      collision::HandleDetection(player->GetCollider(), std::span(&collider, 1),
+                                 [&state, &map_manager, &map, &ui, &node]
+                               (Player*, TileMap*, collision::CollisionResult) -> void {
+                                   if (state == CollideState::NOT_COLLIDE) {
+                                     // OnEnter
+                                     ui->PlayEnterAreaMessage(map->GetMapName());
+                                     map_manager->EnterNewMap(node);
+                                   }
+                                   map->SetCollideState(CollideState::COLLIDING);
+                                 });
+    });
 }
 
 void GameScene::HandleSkillHitMobCollision(float) {
