@@ -27,7 +27,10 @@ TileMap::TileMap(MapData* map_data, FixedPoolIndexType texture_id, Vector2 base_
   map_objects_props_ = map_data->map_objects_props;
 
   // for (const auto& layer: map_data->layers) {
-  //   layers_.push_back({layer});
+  //   MapLayer new_layer{};
+  //   new_layer.tiles = layer.tiles;
+  //   new_layer.tile_animation_states_ = layer.tile_animation_states_;
+  //   layers_.push_back(new_layer);
   // }
 
   map_data->field_object_pool.ForEach([&field_object_pool = field_object_pool_](const FieldObject& fo) -> void {

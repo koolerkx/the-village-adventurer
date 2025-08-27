@@ -1,5 +1,7 @@
 module;
 #include <cassert>
+
+#include "../input/key_logger.h"
 #include "../map/tinyxml/tinyxml2.h"
 
 module game.map.map_manager;
@@ -88,7 +90,6 @@ MapData MapManager::Load(std::string_view filepath, TileRepository* tr) {
   ReadUnsignedAttribute(mapElement, "height", &data.map_height);
 
   const char* class_name = ReadWStringAttribute(mapElement, "class");
-
   data.map_name = encode::Utf8ToUtf16(class_name);
 
   // Layer
@@ -153,6 +154,7 @@ MapData MapManager::Load(std::string_view filepath, TileRepository* tr) {
         layer.tiles.tile_id.push_back(tile_ids[i]);
 
         // animation data and make tile anim state
+        // handle ground tile animation only
         if (std::optional<TileAnimationData> tile_animation_data_result = tr->GetTileAnimatedData(tile_ids[i]);
           tile_animation_data_result.has_value()) {
           TileAnimationData tile_animation_data = tile_animation_data_result.value();
@@ -165,8 +167,6 @@ MapData MapManager::Load(std::string_view filepath, TileRepository* tr) {
             .frame_durations = tile_animation_data.frame_durations
           };
         }
-
-        continue;
       }
 
       // handle field object
@@ -192,6 +192,7 @@ MapData MapManager::Load(std::string_view filepath, TileRepository* tr) {
         continue;
       }
 
+      // handle wall and object animation
       std::optional<TileAnimationData> tile_animation_data = tr->GetTileAnimatedData(tile_ids[i]);
       if (tile_animation_data.has_value()) {
         auto anim_data = tile_animation_data.value();
@@ -277,12 +278,147 @@ namespace {
   }
 }
 
+void MapManager::ExpandMap(std::shared_ptr<LinkedMapNode> map) {
+  if (map->data.expired()) return;
+  std::shared_ptr<TileMap> current_map = map->data.lock();
+  Vector2 map_position = {current_map->GetTransform().position.x, current_map->GetTransform().position.y};
+
+  const std::string type = "forest";
+  MapData* map_data = map_data_preloaded_[type][0].get();
+
+  if (map->up.expired()) {
+    std::shared_ptr<LinkedMapNode> up_map = std::make_shared<LinkedMapNode>();
+    up_map->x = map->x;
+    up_map->y = map->y - 1;
+    map_nodes.push_back(up_map);
+
+    size_t map_idx = tile_maps.size();
+    Vector2 position = {map_position.x, map_position.y - map_height_px_};
+
+    tile_maps.emplace_back(std::make_shared<TileMap>(map_data, texture_id_, position));
+    up_map->data = tile_maps[map_idx];
+    map->up = up_map;
+    up_map->down = map;
+  }
+  if (map->down.expired()) {
+    std::shared_ptr<LinkedMapNode> down_map = std::make_shared<LinkedMapNode>();
+    down_map->x = map->x;
+    down_map->y = map->y + 1;
+    map_nodes.push_back(down_map);
+
+    size_t map_idx = tile_maps.size();
+    Vector2 position = {map_position.x, map_position.y + map_height_px_};
+
+    tile_maps.emplace_back(std::make_shared<TileMap>(map_data, texture_id_, position));
+    down_map->data = tile_maps[map_idx];
+    map->down = down_map;
+    down_map->up = map;
+  }
+  if (map->left.expired()) {
+    std::shared_ptr<LinkedMapNode> left_map = std::make_shared<LinkedMapNode>();
+    left_map->x = map->x - 1;
+    left_map->y = map->y;
+    map_nodes.push_back(left_map);
+
+    size_t map_idx = tile_maps.size();
+    Vector2 position = {map_position.x - map_width_px_, map_position.y};
+
+    tile_maps.emplace_back(std::make_shared<TileMap>(map_data, texture_id_, position));
+    left_map->data = tile_maps[map_idx];
+    map->left = left_map;
+    left_map->right = map;
+  }
+  if (map->right.expired()) {
+    std::shared_ptr<LinkedMapNode> right_map = std::make_shared<LinkedMapNode>();
+    right_map->x = map->x + 1;
+    right_map->y = map->y;
+    map_nodes.push_back(right_map);
+
+    size_t map_idx = tile_maps.size();
+    Vector2 position = {map_position.x + map_width_px_, map_position.y};
+
+    tile_maps.emplace_back(std::make_shared<TileMap>(map_data, texture_id_, position));
+    right_map->data = tile_maps[map_idx];
+    map->right = right_map;
+    right_map->left = map;
+  }
+  auto up = map->up.lock();
+  auto left = map->left.lock();
+  auto right = map->right.lock();
+  auto down = map->down.lock();
+  if (up && left && right && down) {
+    if (up->left.expired()) {
+      std::shared_ptr<LinkedMapNode> new_map = std::make_shared<LinkedMapNode>();
+      new_map->x = map->x - 1;
+      new_map->y = map->y - 1;
+      map_nodes.push_back(new_map);
+
+      size_t map_idx = tile_maps.size();
+      Vector2 position = {map_position.x - map_width_px_, map_position.y - map_height_px_};
+
+      tile_maps.emplace_back(std::make_shared<TileMap>(map_data, texture_id_, position));
+      new_map->data = tile_maps[map_idx];
+      up->left = new_map;
+      left->up = new_map;
+      new_map->right = up;
+      new_map->down = left;
+    }
+    if (up->right.expired()) {
+      std::shared_ptr<LinkedMapNode> new_map = std::make_shared<LinkedMapNode>();
+      new_map->x = map->x + 1;
+      new_map->y = map->y - 1;
+      map_nodes.push_back(new_map);
+
+      size_t map_idx = tile_maps.size();
+      Vector2 position = {map_position.x + map_width_px_, map_position.y - map_height_px_};
+
+      tile_maps.emplace_back(std::make_shared<TileMap>(map_data, texture_id_, position));
+      new_map->data = tile_maps[map_idx];
+      up->right = new_map;
+      right->up = new_map;
+      new_map->left = up;
+      new_map->down = right;
+    }
+    if (down->left.expired()) {
+      std::shared_ptr<LinkedMapNode> new_map = std::make_shared<LinkedMapNode>();
+      new_map->x = map->x - 1;
+      new_map->y = map->y + 1;
+      map_nodes.push_back(new_map);
+
+      size_t map_idx = tile_maps.size();
+      Vector2 position = {map_position.x - map_width_px_, map_position.y + map_height_px_};
+
+      tile_maps.emplace_back(std::make_shared<TileMap>(map_data, texture_id_, position));
+      new_map->data = tile_maps[map_idx];
+      down->left = new_map;
+      left->down = new_map;
+      new_map->right = down;
+      new_map->up = left;
+    }
+    if (down->right.expired()) {
+      std::shared_ptr<LinkedMapNode> new_map = std::make_shared<LinkedMapNode>();
+      new_map->x = map->x + 1;
+      new_map->y = map->y + 1;
+      map_nodes.push_back(new_map);
+
+      size_t map_idx = tile_maps.size();
+      Vector2 position = {map_position.x + map_width_px_, map_position.y + map_height_px_};
+
+      tile_maps.emplace_back(std::make_shared<TileMap>(map_data, texture_id_, position));
+      new_map->data = tile_maps[map_idx];
+      down->right = new_map;
+      right->down = new_map;
+      new_map->left = down;
+      new_map->up = right;
+    }
+  }
+}
+
 MapManager::MapManager(GameContext* ctx) {
   TileRepository* tr = SceneManager::GetInstance().GetTileRepository();
 
   std::string texture_path = SceneManager::GetInstance().GetGameConfig()->map_texture_filepath;
   std::wstring w_texture_path = std::wstring(texture_path.begin(), texture_path.end());
-
   texture_id_ = ctx->render_resource_manager->texture_manager->Load(w_texture_path);
 
   // Handle map data, store as cache for generated map 
@@ -307,18 +443,72 @@ MapManager::MapManager(GameContext* ctx) {
   size_t map_idx = tile_maps.size();
   tile_maps.emplace_back(std::make_shared<TileMap>(map_data, texture_id_, base_position));
 
-  LinkedMap base_map;
-  base_map.current = tile_maps[map_idx];
+  std::shared_ptr<LinkedMapNode> base_map_node = std::make_shared<LinkedMapNode>();
+  base_map_node->x = 0;
+  base_map_node->y = 0;
+  base_map_node->data = tile_maps[map_idx];
+  map_nodes.push_back(base_map_node);
+  ExpandMap(base_map_node);
 
-  active_map_ = base_map.current;
+  active_map_node_ = base_map_node;
 }
 
 void MapManager::OnUpdate(GameContext* ctx, float delta_time) {
-  if (auto active_map = active_map_.lock())
-    active_map->OnUpdate(ctx, delta_time);
+  for (auto map : GetActiveMaps()) {
+    map->OnUpdate(ctx, delta_time);
+  }
 }
 
 void MapManager::OnRender(GameContext* ctx, Camera* camera) {
-  if (auto active_map = active_map_.lock())
-    active_map->OnRender(ctx, camera);
+  for (auto map : GetActiveMaps()) {
+    map->OnRender(ctx, camera);
+  }
+}
+
+std::shared_ptr<TileMap> MapManager::GetActiveMap() {
+  if (auto node = active_map_node_.lock()) {
+    if (auto map = node->data.lock())
+      return map;
+  }
+  assert(false);
+  return nullptr;
+}
+
+std::vector<std::shared_ptr<TileMap>> MapManager::GetActiveMaps() {
+  std::vector<std::shared_ptr<TileMap>> maps;
+  maps.reserve(9);
+
+  auto node = active_map_node_.lock();
+  if (!node) return {};
+  auto map = node->data.lock();
+  if (!map) return {};
+  maps.push_back(map);
+
+  auto up_node = node->up.lock();
+  auto up_map = up_node->data.lock();
+  maps.push_back(up_map);
+  auto down_node = node->down.lock();
+  auto down_map = down_node->data.lock();
+  maps.push_back(down_map);
+  auto left_node = node->left.lock();
+  auto left_map = left_node->data.lock();
+  maps.push_back(left_map);
+  auto right_node = node->right.lock();
+  auto right_map = right_node->data.lock();
+  maps.push_back(right_map);
+
+  auto up_left_node = up_node->left.lock();
+  auto up_left_map = up_left_node->data.lock();
+  maps.push_back(up_left_map);
+  auto up_right_node = up_node->right.lock();
+  auto up_right_map = up_right_node->data.lock();
+  maps.push_back(up_right_map);
+  auto down_left_node = down_node->left.lock();
+  auto down_left_map = down_left_node->data.lock();
+  maps.push_back(down_left_map);
+  auto down_right_node = down_node->right.lock();
+  auto down_right_map = down_right_node->data.lock();
+  maps.push_back(down_right_map);
+
+  return maps;
 }

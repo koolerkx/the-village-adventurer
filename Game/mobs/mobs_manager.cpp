@@ -44,7 +44,7 @@ void MobManager::CreateActiveArea(TileMapObjectProps props) {
   auto insert_result = active_area_pool_.Insert({collider, ids});
   const auto inserted = active_area_pool_.Get(insert_result.value());
   inserted->collider.owner = inserted; // HACK: workaround handle the object lifecycle
-  inserted->id = insert_result.value();
+  inserted->id = static_cast<FixedPoolIndexType>(insert_result.value());
 
   active_area_state[insert_result.value()] = ActiveAreaState::NOT_COLLIDE;
 }
@@ -95,7 +95,7 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
         active_area_state[id] = ActiveAreaState::COLLIDE_LAST_FRAME;
 
       collision::HandleDetection(player_collider, std::span(&it.collider, 1),
-                                 [&](Player*, ActiveArea* area, collision::CollisionResult) -> void {
+                                 [&](Player*, ActiveArea*, collision::CollisionResult) -> void {
                                    if (active_area_state[id] == ActiveAreaState::NOT_COLLIDE) {
                                      // OnEnter
                                      for (ObjectPoolIndexType mob_id : it.mobs) {

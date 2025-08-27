@@ -47,8 +47,8 @@ void GameScene::OnEnter(GameContext* ctx) {
   for (auto& mob_props : map_manager_->GetMobProps()) {
     mob_manager_->Spawn(mob_props);
   }
-  for (auto& mob_props : map_manager_->GetActiveAreaProps()) {
-    mob_manager_->CreateActiveArea(mob_props);
+  for (auto& active_area_prop : map_manager_->GetActiveAreaProps()) {
+    mob_manager_->CreateActiveArea(active_area_prop);
   }
 }
 
@@ -130,7 +130,7 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
                      [&](FieldObject* fo) { OnPlayerEnterFieldObject(fo); });
 }
 
-void GameScene::HandlePlayerEnterMapCollision(float delta_time) {
+void GameScene::HandlePlayerEnterMapCollision(float) {
   auto collider = map_manager_->GetMapCollider();
   auto state = map_manager_->GetCollideState();
 
