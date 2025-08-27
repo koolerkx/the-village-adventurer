@@ -63,8 +63,16 @@ void MobManager::OnUpdate(GameContext*, float delta_time, OnUpdateProps props) {
   });
 
   // Remove inactive, dead mobs
-  mobs_pool_.RemoveIf([](MobState& it) {
-    return !it.is_alive;
+  mobs_pool_.RemoveIf([&active_area_pool = active_area_pool_](MobState& it) {
+    if (!it.is_alive) {
+      const auto mob_id = it.id;
+      active_area_pool.ForEach([mob_id](ActiveArea& area) {
+        if (area.mobs.size() <= 0) return;
+        std::erase(area.mobs, mob_id);
+      });
+      return true;
+    }
+    return false;
   });
 
   // Update Hitbox

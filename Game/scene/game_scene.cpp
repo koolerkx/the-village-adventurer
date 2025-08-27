@@ -45,7 +45,7 @@ void GameScene::OnEnter(GameContext* ctx) {
 
   // Mob
   mob_manager_ = std::make_unique<MobManager>(ctx);
-  for (auto& mob_props : map_manager_->GetMobProps()) {
+  for (const auto& mob_props : map_manager_->GetMobProps()) {
     mob_manager_->Spawn(mob_props);
   }
   for (auto& active_area_prop : map_manager_->GetActiveAreaProps()) {
@@ -156,7 +156,7 @@ void GameScene::HandlePlayerEnterMapCollision(float) {
                                        node, [&mob_manager](std::shared_ptr<LinkedMapNode> node) {
                                          auto map = node->data.lock();
                                          if (!map) return;
-                                         for (auto& mob_props : map->GetMobProps()) {
+                                         for (const auto& mob_props : map->GetMobProps()) {
                                            mob_manager->Spawn(mob_props);
                                          }
                                          for (auto& active_area_prop : map->GetActiveAreaProps()) {
