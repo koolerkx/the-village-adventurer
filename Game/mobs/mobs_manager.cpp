@@ -6,6 +6,7 @@ import game.mobs.slime;
 import graphic.utils.types;
 import game.collision_handler;
 import game.map.field_object;
+import game.map.linked_map;
 
 void MobManager::Spawn(TileMapObjectProps props) {
   if (props.type == TileMapObjectType::MOB_SLIME) {
@@ -119,8 +120,7 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
                                  });
     });
 
-  auto map_colliders = scene_ctx->map->GetFiledObjectColliders();
-
+  auto map_colliders = scene_ctx->active_map_node->data.lock()->GetFiledObjectColliders();
   mobs_pool_.ForEach([delta_time, map_colliders, player_collider, this](MobState& it) {
     if (mob::is_death_state(it.state)) return;
     static constexpr float active_range_radius = 512.0f;

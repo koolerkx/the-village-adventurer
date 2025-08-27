@@ -32,7 +32,7 @@ void GameScene::OnEnter(GameContext* ctx) {
   // Skill
   skill_manager_ = std::make_unique<SkillManager>(ctx);
   scene_context->skill_manager = skill_manager_.get();
-  scene_context->map = map_manager_->GetActiveMap();
+  scene_context->active_map_node = map_manager_->GetActiveLinkedMap();
 
   // Player
   auto pf = std::make_unique<PlayerFactory>();
@@ -70,7 +70,7 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   HandlePlayerMovementAndCollisions(delta_time);
   camera_->UpdatePosition(player_->GetPositionVector(), delta_time);
 
-  HandlePlayerEnterMapCollision(delta_time);
+  HandlePlayerEnterMapCollision(delta_time, scene_context.get());
 
   HandleSkillHitMobCollision(delta_time);
   HandleMobHitPlayerCollision(delta_time);
@@ -128,9 +128,9 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
                      [&](FieldObject* fo) { OnPlayerEnterFieldObject(fo); });
 }
 
-void GameScene::HandlePlayerEnterMapCollision(float) {
+void GameScene::HandlePlayerEnterMapCollision(float, SceneContext* scene_ctx) {
   map_manager_->ForEachActiveLinkedMapsNode(
-    [&player = player_, &map_manager = this->map_manager_, &ui = this->ui_, &mob_manager = this->mob_manager_
+    [&player = player_, &map_manager = this->map_manager_, &ui = this->ui_, &mob_manager = this->mob_manager_, &scene_ctx
     ](std::shared_ptr<LinkedMapNode> node) -> void {
       auto map = node->data.lock();
       if (!map) return;
@@ -147,14 +147,16 @@ void GameScene::HandlePlayerEnterMapCollision(float) {
       }
 
       collision::HandleDetection(player->GetCollider(), std::span(&collider, 1),
-                                 [&state, &map_manager, &map, &ui, &node, &mob_manager]
+                                 [&state, &map_manager, &map, &ui, &node, &mob_manager, &scene_ctx]
                                (Player*, TileMap*, collision::CollisionResult) -> void {
                                    if (state == CollideState::NOT_COLLIDE) {
                                      // OnEnter
                                      ui->PlayEnterAreaMessage(map->GetMapName());
+                                     
+                                     scene_ctx->active_map_node = node;
                                      map_manager->EnterNewMap(
-                                       node, [&mob_manager](std::shared_ptr<LinkedMapNode> node) {
-                                         auto map = node->data.lock();
+                                       node, [&mob_manager, &scene_ctx](std::shared_ptr<LinkedMapNode> new_node) {
+                                         auto map = new_node->data.lock();
                                          if (!map) return;
                                          for (const auto& mob_props : map->GetMobProps()) {
                                            mob_manager->Spawn(mob_props);

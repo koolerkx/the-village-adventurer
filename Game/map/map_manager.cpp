@@ -500,6 +500,11 @@ std::vector<std::shared_ptr<TileMap>> MapManager::GetActiveMaps() {
   return maps;
 }
 
+std::shared_ptr<LinkedMapNode> MapManager::GetActiveLinkedMap() {
+  auto base_node = active_map_node_.lock();
+  return base_node;
+}
+
 std::vector<std::shared_ptr<LinkedMapNode>> MapManager::GetActiveLinkedMaps() {
   std::vector<std::shared_ptr<LinkedMapNode>> nodes;
   auto base_node = active_map_node_.lock();

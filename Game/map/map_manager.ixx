@@ -44,6 +44,7 @@ public:
 
   std::shared_ptr<TileMap> GetActiveMap();
   std::vector<std::shared_ptr<TileMap>> GetActiveMaps();
+  std::shared_ptr<LinkedMapNode> GetActiveLinkedMap();
   std::vector<std::shared_ptr<LinkedMapNode>> GetActiveLinkedMaps();
   void ForEachActiveLinkedMapsNode(std::function<void(std::shared_ptr<LinkedMapNode>)> fn);
 
