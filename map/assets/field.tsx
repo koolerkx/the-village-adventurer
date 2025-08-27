@@ -257,6 +257,10 @@
   </objectgroup>
  </tile>
  <tile id="1800">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="2" y="2" width="14" height="14"/>
   </objectgroup>
@@ -267,6 +271,10 @@
   </animation>
  </tile>
  <tile id="1801">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="2" width="16" height="14"/>
   </objectgroup>
@@ -277,6 +285,10 @@
   </animation>
  </tile>
  <tile id="1802">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="2" width="14" height="14"/>
   </objectgroup>
@@ -287,6 +299,10 @@
   </animation>
  </tile>
  <tile id="1864">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="2" y="0" width="14" height="16"/>
   </objectgroup>
@@ -297,6 +313,10 @@
   </animation>
  </tile>
  <tile id="1865">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <animation>
    <frame tileid="1865" duration="300"/>
    <frame tileid="1872" duration="300"/>
@@ -304,6 +324,10 @@
   </animation>
  </tile>
  <tile id="1866">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="14" height="16"/>
   </objectgroup>
@@ -329,6 +353,10 @@
   </objectgroup>
  </tile>
  <tile id="1928">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="2" y="0" width="14" height="14"/>
   </objectgroup>
@@ -339,6 +367,10 @@
   </animation>
  </tile>
  <tile id="1929">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="16" height="14"/>
   </objectgroup>
@@ -349,6 +381,10 @@
   </animation>
  </tile>
  <tile id="1930">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="14" height="14"/>
   </objectgroup>
@@ -369,6 +405,10 @@
   </objectgroup>
  </tile>
  <tile id="2696">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="1" y="1" width="15" height="15"/>
   </objectgroup>
@@ -379,6 +419,10 @@
   </animation>
  </tile>
  <tile id="2697">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="1" width="16" height="15"/>
   </objectgroup>
@@ -389,6 +433,10 @@
   </animation>
  </tile>
  <tile id="2698">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="1" width="15" height="15"/>
   </objectgroup>
@@ -399,6 +447,10 @@
   </animation>
  </tile>
  <tile id="2760">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="1" y="0" width="15" height="16"/>
   </objectgroup>
@@ -409,6 +461,10 @@
   </animation>
  </tile>
  <tile id="2761">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <animation>
    <frame tileid="2760" duration="300"/>
    <frame tileid="2767" duration="300"/>
@@ -416,6 +472,10 @@
   </animation>
  </tile>
  <tile id="2762">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="15" height="16"/>
   </objectgroup>
@@ -426,6 +486,10 @@
   </animation>
  </tile>
  <tile id="2824">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="1" y="0" width="15" height="15"/>
   </objectgroup>
@@ -436,6 +500,10 @@
   </animation>
  </tile>
  <tile id="2825">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="16" height="15"/>
   </objectgroup>
@@ -446,6 +514,10 @@
   </animation>
  </tile>
  <tile id="2826">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="15" height="15"/>
   </objectgroup>
@@ -456,6 +528,10 @@
   </animation>
  </tile>
  <tile id="2828">
+  <properties>
+   <property name="loop" type="bool" value="true"/>
+   <property name="onstart" type="bool" value="true"/>
+  </properties>
   <objectgroup draworder="index" id="3">
    <object id="2" x="0" y="0" width="16" height="16"/>
   </objectgroup>
