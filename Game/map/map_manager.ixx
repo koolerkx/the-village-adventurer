@@ -34,7 +34,7 @@ private:
   std::vector<std::shared_ptr<TileMap>> tile_maps;
   std::weak_ptr<LinkedMapNode> active_map_node_;
 
-  void ExpandMap(std::shared_ptr<LinkedMapNode> map);
+  std::vector<std::shared_ptr<LinkedMapNode>> ExpandMap(std::shared_ptr<LinkedMapNode> map);
 
 public:
   MapManager(GameContext* ctx);
@@ -82,5 +82,6 @@ public:
     return v1;
   }
 
-  void EnterNewMap(std::shared_ptr<LinkedMapNode> node);
+  void EnterNewMap(std::shared_ptr<LinkedMapNode> node,
+                   std::function<void(std::shared_ptr<LinkedMapNode>)> cb = [](auto) -> void {});
 };

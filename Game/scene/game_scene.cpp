@@ -55,7 +55,6 @@ void GameScene::OnEnter(GameContext* ctx) {
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   // std::cout << "GameScene> OnUpdate: " << delta_time << std::endl;
-
   map_manager_->OnUpdate(ctx, delta_time);
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnUpdate(ctx, delta_time);
@@ -76,15 +75,13 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   HandleSkillHitMobCollision(delta_time);
   HandleMobHitPlayerCollision(delta_time);
 
+  ui_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnFixedUpdate(ctx, delta_time);
   mob_manager_->OnFixedUpdate(ctx, scene_context.get(), delta_time, player_->GetCollider());
-
-  ui_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
 }
 
 void GameScene::OnRender(GameContext* ctx) {
   // std::cout << "GameScene> OnRender" << std::endl;
-
   map_manager_->OnRender(ctx, camera_.get());
   mob_manager_->OnRender(ctx, camera_.get());
   player_->OnRender(ctx, scene_context.get(), camera_.get());
@@ -133,7 +130,8 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
 
 void GameScene::HandlePlayerEnterMapCollision(float) {
   map_manager_->ForEachActiveLinkedMapsNode(
-    [&player = player_, &map_manager = this->map_manager_, &ui = this->ui_](std::shared_ptr<LinkedMapNode> node) -> void {
+    [&player = player_, &map_manager = this->map_manager_, &ui = this->ui_, &mob_manager = this->mob_manager_
+    ](std::shared_ptr<LinkedMapNode> node) -> void {
       auto map = node->data.lock();
       if (!map) return;
 
@@ -149,12 +147,22 @@ void GameScene::HandlePlayerEnterMapCollision(float) {
       }
 
       collision::HandleDetection(player->GetCollider(), std::span(&collider, 1),
-                                 [&state, &map_manager, &map, &ui, &node]
+                                 [&state, &map_manager, &map, &ui, &node, &mob_manager]
                                (Player*, TileMap*, collision::CollisionResult) -> void {
                                    if (state == CollideState::NOT_COLLIDE) {
                                      // OnEnter
                                      ui->PlayEnterAreaMessage(map->GetMapName());
-                                     map_manager->EnterNewMap(node);
+                                     map_manager->EnterNewMap(
+                                       node, [&mob_manager](std::shared_ptr<LinkedMapNode> node) {
+                                         auto map = node->data.lock();
+                                         if (!map) return;
+                                         for (auto& mob_props : map->GetMobProps()) {
+                                           mob_manager->Spawn(mob_props);
+                                         }
+                                         for (auto& active_area_prop : map->GetActiveAreaProps()) {
+                                           mob_manager->CreateActiveArea(active_area_prop);
+                                         }
+                                       });
                                    }
                                    map->SetCollideState(CollideState::COLLIDING);
                                  });

@@ -82,7 +82,8 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
                                Collider<Player> player_collider) {
   // update mobs active state
   active_area_pool_.ForEach(
-    [player_collider, &active_area_state = this->active_area_state, &mobs_pool_ = this->mobs_pool_](ActiveArea& it, ObjectPoolIndexType id) {
+    [player_collider, &active_area_state = this->active_area_state, &mobs_pool_ = this->mobs_pool_](
+    ActiveArea& it, ObjectPoolIndexType id) {
       if (active_area_state[id] == ActiveAreaState::COLLIDE_LAST_FRAME) {
         active_area_state[id] = ActiveAreaState::NOT_COLLIDE;
         // OnExit
@@ -114,8 +115,8 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
 
   mobs_pool_.ForEach([delta_time, map_colliders, player_collider, this](MobState& it) {
     if (mob::is_death_state(it.state)) return;
-
-    // handle push back wall collision push back
+    static constexpr float active_range_radius = 512.0f;
+    if (math::GetDistance(it.collider.position, player_collider.position) > active_range_radius) return;
 #pragma region WALL_COLLISION
     POSITION position_before = it.transform.position;
 
@@ -148,7 +149,7 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
 #pragma endregion
 
     // Handle Attack
-    // XXX: Note taht attack state will overwrite moving state, the state will jump between two state when its in cooldown
+    // XXX: Note that attack state will overwrite moving state, the state will jump between two state when its in cooldown
     if (!mob::is_attack_state(it.state) && it.attack_cooldown <= 0) {
       collision::HandleDetection(player_collider, std::span(&it.attack_range_collider, 1),
                                  [this](Player*, MobState* m, collision::CollisionResult) -> void {

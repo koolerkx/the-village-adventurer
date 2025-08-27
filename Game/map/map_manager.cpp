@@ -278,14 +278,16 @@ namespace {
   }
 }
 
-void MapManager::ExpandMap(std::shared_ptr<LinkedMapNode> map) {
-  if (map->data.expired()) return;
+std::vector<std::shared_ptr<LinkedMapNode>> MapManager::ExpandMap(std::shared_ptr<LinkedMapNode> map) {
+  if (map->data.expired()) return {};
   std::shared_ptr<TileMap> current_map = map->data.lock();
   Vector2 map_position = {current_map->GetTransform().position.x, current_map->GetTransform().position.y};
 
   const std::string type = "forest";
   MapData* map_data = map_data_preloaded_[type][0].get();
 
+  std::vector<std::shared_ptr<LinkedMapNode>> new_added_nodes;
+  new_added_nodes.reserve(9);
   map_nodes.reserve(map_nodes.size() + 8);
   tile_maps.reserve(tile_maps.size() + 8);
 
@@ -294,6 +296,7 @@ void MapManager::ExpandMap(std::shared_ptr<LinkedMapNode> map) {
     up_map->x = map->x;
     up_map->y = map->y - 1;
     map_nodes.push_back(up_map);
+    new_added_nodes.push_back(up_map);
 
     size_t map_idx = tile_maps.size();
     Vector2 position = {map_position.x, map_position.y - map_height_px_};
@@ -308,6 +311,7 @@ void MapManager::ExpandMap(std::shared_ptr<LinkedMapNode> map) {
     down_map->x = map->x;
     down_map->y = map->y + 1;
     map_nodes.push_back(down_map);
+    new_added_nodes.push_back(down_map);
 
     size_t map_idx = tile_maps.size();
     Vector2 position = {map_position.x, map_position.y + map_height_px_};
@@ -322,6 +326,7 @@ void MapManager::ExpandMap(std::shared_ptr<LinkedMapNode> map) {
     left_map->x = map->x - 1;
     left_map->y = map->y;
     map_nodes.push_back(left_map);
+    new_added_nodes.push_back(left_map);
 
     size_t map_idx = tile_maps.size();
     Vector2 position = {map_position.x - map_width_px_, map_position.y};
@@ -336,6 +341,7 @@ void MapManager::ExpandMap(std::shared_ptr<LinkedMapNode> map) {
     right_map->x = map->x + 1;
     right_map->y = map->y;
     map_nodes.push_back(right_map);
+    new_added_nodes.push_back(right_map);
 
     size_t map_idx = tile_maps.size();
     Vector2 position = {map_position.x + map_width_px_, map_position.y};
@@ -355,6 +361,7 @@ void MapManager::ExpandMap(std::shared_ptr<LinkedMapNode> map) {
       new_map->x = map->x - 1;
       new_map->y = map->y - 1;
       map_nodes.push_back(new_map);
+      new_added_nodes.push_back(new_map);
 
       size_t map_idx = tile_maps.size();
       Vector2 position = {map_position.x - map_width_px_, map_position.y - map_height_px_};
@@ -371,6 +378,7 @@ void MapManager::ExpandMap(std::shared_ptr<LinkedMapNode> map) {
       new_map->x = map->x + 1;
       new_map->y = map->y - 1;
       map_nodes.push_back(new_map);
+      new_added_nodes.push_back(new_map);
 
       size_t map_idx = tile_maps.size();
       Vector2 position = {map_position.x + map_width_px_, map_position.y - map_height_px_};
@@ -387,6 +395,7 @@ void MapManager::ExpandMap(std::shared_ptr<LinkedMapNode> map) {
       new_map->x = map->x - 1;
       new_map->y = map->y + 1;
       map_nodes.push_back(new_map);
+      new_added_nodes.push_back(new_map);
 
       size_t map_idx = tile_maps.size();
       Vector2 position = {map_position.x - map_width_px_, map_position.y + map_height_px_};
@@ -403,6 +412,7 @@ void MapManager::ExpandMap(std::shared_ptr<LinkedMapNode> map) {
       new_map->x = map->x + 1;
       new_map->y = map->y + 1;
       map_nodes.push_back(new_map);
+      new_added_nodes.push_back(new_map);
 
       size_t map_idx = tile_maps.size();
       Vector2 position = {map_position.x + map_width_px_, map_position.y + map_height_px_};
@@ -415,6 +425,7 @@ void MapManager::ExpandMap(std::shared_ptr<LinkedMapNode> map) {
       new_map->up = right;
     }
   }
+  return new_added_nodes;
 }
 
 MapManager::MapManager(GameContext* ctx) {
@@ -515,12 +526,17 @@ std::vector<std::shared_ptr<LinkedMapNode>> MapManager::GetActiveLinkedMaps() {
 
 void MapManager::ForEachActiveLinkedMapsNode(std::function<void(std::shared_ptr<LinkedMapNode>)> fn) {
   auto nodes = GetActiveLinkedMaps();
-  for (auto node: nodes) {
+  for (auto node : nodes) {
     fn(node);
   }
 }
 
-void MapManager::EnterNewMap(std::shared_ptr<LinkedMapNode> node) {
+void MapManager::EnterNewMap(std::shared_ptr<LinkedMapNode> node,
+                             std::function<void(std::shared_ptr<LinkedMapNode>)> cb) {
   active_map_node_ = node;
-  ExpandMap(node);
+  auto new_node = ExpandMap(node);
+
+  for (auto n : new_node) {
+    cb(n);
+  }
 }
