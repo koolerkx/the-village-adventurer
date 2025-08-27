@@ -6,7 +6,7 @@ import std;
 
 export using ObjectPoolIndexType = unsigned __int16;
 
-constexpr std::size_t FALLBACK_MAX = 65535;
+constexpr std::size_t FALLBACK_MAX = 2048;
 
 export template <typename T,
                  typename IT = ObjectPoolIndexType,

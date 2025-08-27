@@ -286,6 +286,9 @@ void MapManager::ExpandMap(std::shared_ptr<LinkedMapNode> map) {
   const std::string type = "forest";
   MapData* map_data = map_data_preloaded_[type][0].get();
 
+  map_nodes.reserve(map_nodes.size() + 8);
+  tile_maps.reserve(tile_maps.size() + 8);
+
   if (map->up.expired()) {
     std::shared_ptr<LinkedMapNode> up_map = std::make_shared<LinkedMapNode>();
     up_map->x = map->x;
