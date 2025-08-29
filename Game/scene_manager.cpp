@@ -10,7 +10,6 @@ SceneManager& SceneManager::Init(std::unique_ptr<IScene> initial_scene,
   game_context_ = std::move(game_context);
   game_config_ = std::move(game_config);
 
-
   // Scene Manager Setup
   SceneManager& sm = GetInstance();
   // Load Map
@@ -19,6 +18,9 @@ SceneManager& SceneManager::Init(std::unique_ptr<IScene> initial_scene,
   // Enter initial Scene
   sm.ChangeScene(std::move(initial_scene));
 
+  audio_manager_ = std::make_unique<AudioManager>();
+  audio_manager_->PlayBGM(audio_clip::ambient_2);
+  
   return sm;
 }
 
@@ -53,10 +55,12 @@ void SceneManager::OnUpdate(float delta_time) {
     current_scene_->OnUpdate(game_context_.get(), delta_time);
   }
   ProcessPendingSceneChange();
+  audio_manager_->OnUpdate();
 }
 
 void SceneManager::OnFixedUpdate(float delta_time) const {
   current_scene_->OnFixedUpdate(game_context_.get(), delta_time);
+  audio_manager_->OnFixedUpdate();
 }
 
 void SceneManager::OnRender() const {
