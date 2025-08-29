@@ -6,7 +6,7 @@ import std;
 
 export using ObjectPoolIndexType = unsigned __int16;
 
-constexpr std::size_t FALLBACK_MAX = 65535;
+constexpr std::size_t FALLBACK_MAX = 2048;
 
 export template <typename T,
                  typename IT = ObjectPoolIndexType,
@@ -17,19 +17,22 @@ class ObjectPool {
   using Index = IT;
 
 private:
-  std::array<T, Max> data_{};
-  std::array<bool, Max> alive_{false};
+  std::unique_ptr<T[]> data_;     // heap array for objects
+  std::unique_ptr<bool[]> alive_; // heap array for flags
   std::vector<Index> free_list_;
   std::vector<Index> alive_indices_;
 
-  enum class InsertError {
-    POOL_FULL
-  };
+  enum class InsertError { POOL_FULL };
 
 public:
-  ObjectPool() {
+  ObjectPool()
+    : data_(std::make_unique<T[]>(Max)),
+      alive_(std::make_unique<bool[]>(Max)) {
     free_list_.reserve(Max);
     alive_indices_.reserve(Max);
+
+    std::fill_n(alive_.get(), Max, false);
+
     for (int i = static_cast<int>(Max) - 1; i >= 0; --i) {
       free_list_.push_back(static_cast<Index>(i));
     }
@@ -49,8 +52,10 @@ public:
 
   std::expected<Index, InsertError> Insert(T&& value) {
     if (free_list_.empty()) return std::unexpected(InsertError::POOL_FULL);
+
     Index idx = free_list_.back();
     free_list_.pop_back();
+
     data_[idx] = std::move(value);
     alive_[idx] = true;
     alive_indices_.push_back(idx);
@@ -82,12 +87,14 @@ public:
         if (fn(item)) {
           alive_indices_.erase(alive_indices_.begin() + i);
           free_list_.push_back(idx);
+          alive_[idx] = false;
         }
       }
       else if constexpr (std::is_invocable_v<Func, T&, Index>) {
         if (fn(item, idx)) {
           alive_indices_.erase(alive_indices_.begin() + i);
           free_list_.push_back(idx);
+          alive_[idx] = false;
         }
       }
     }
@@ -107,7 +114,6 @@ public:
 
   void Update(Index idx, const std::move_only_function<void(T&)>& func) {
     if (idx >= Max || !alive_[idx]) return;
-
     func(data_[idx]);
   }
 
@@ -127,7 +133,7 @@ public:
     }
   }
 
-  std::span<Index> AliveIndices() const {
-    return alive_indices_;
+  std::span<const Index> AliveIndices() const {
+    return {alive_indices_.data(), alive_indices_.size()};
   }
 };

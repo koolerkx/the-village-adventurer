@@ -160,7 +160,8 @@ bool Application::Init() {
                      std::make_unique<GameConfig>(GameConfig{
                          .default_map = config.map.default_map,
                          .map_texture_filepath = config.map.map_texture,
-                         .map_tile_filepath = config.map.map_metadata
+                         .map_tile_filepath = config.map.map_metadata,
+                         .file_paths = config.map.files
                        }
                      )
   );

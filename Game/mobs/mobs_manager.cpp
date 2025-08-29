@@ -6,6 +6,7 @@ import game.mobs.slime;
 import graphic.utils.types;
 import game.collision_handler;
 import game.map.field_object;
+import game.map.linked_map;
 
 void MobManager::Spawn(TileMapObjectProps props) {
   if (props.type == TileMapObjectType::MOB_SLIME) {
@@ -44,7 +45,7 @@ void MobManager::CreateActiveArea(TileMapObjectProps props) {
   auto insert_result = active_area_pool_.Insert({collider, ids});
   const auto inserted = active_area_pool_.Get(insert_result.value());
   inserted->collider.owner = inserted; // HACK: workaround handle the object lifecycle
-  inserted->id = insert_result.value();
+  inserted->id = static_cast<FixedPoolIndexType>(insert_result.value());
 
   active_area_state[insert_result.value()] = ActiveAreaState::NOT_COLLIDE;
 }
@@ -63,8 +64,16 @@ void MobManager::OnUpdate(GameContext*, float delta_time, OnUpdateProps props) {
   });
 
   // Remove inactive, dead mobs
-  mobs_pool_.RemoveIf([](MobState& it) {
-    return !it.is_alive;
+  mobs_pool_.RemoveIf([&active_area_pool = active_area_pool_](MobState& it) {
+    if (!it.is_alive) {
+      const auto mob_id = it.id;
+      active_area_pool.ForEach([mob_id](ActiveArea& area) {
+        if (area.mobs.size() <= 0) return;
+        std::erase(area.mobs, mob_id);
+      });
+      return true;
+    }
+    return false;
   });
 
   // Update Hitbox
@@ -82,7 +91,8 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
                                Collider<Player> player_collider) {
   // update mobs active state
   active_area_pool_.ForEach(
-    [player_collider, &active_area_state = this->active_area_state, &mobs_pool_ = this->mobs_pool_](ActiveArea& it, ObjectPoolIndexType id) {
+    [player_collider, &active_area_state = this->active_area_state, &mobs_pool_ = this->mobs_pool_](
+    ActiveArea& it, ObjectPoolIndexType id) {
       if (active_area_state[id] == ActiveAreaState::COLLIDE_LAST_FRAME) {
         active_area_state[id] = ActiveAreaState::NOT_COLLIDE;
         // OnExit
@@ -95,7 +105,7 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
         active_area_state[id] = ActiveAreaState::COLLIDE_LAST_FRAME;
 
       collision::HandleDetection(player_collider, std::span(&it.collider, 1),
-                                 [&](Player*, ActiveArea* area, collision::CollisionResult) -> void {
+                                 [&](Player*, ActiveArea*, collision::CollisionResult) -> void {
                                    if (active_area_state[id] == ActiveAreaState::NOT_COLLIDE) {
                                      // OnEnter
                                      for (ObjectPoolIndexType mob_id : it.mobs) {
@@ -110,12 +120,11 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
                                  });
     });
 
-  auto map_colliders = scene_ctx->map->GetFiledObjectColliders();
-
+  auto map_colliders = scene_ctx->active_map_node->data.lock()->GetFiledObjectColliders();
   mobs_pool_.ForEach([delta_time, map_colliders, player_collider, this](MobState& it) {
     if (mob::is_death_state(it.state)) return;
-
-    // handle push back wall collision push back
+    static constexpr float active_range_radius = 512.0f;
+    if (math::GetDistance(it.collider.position, player_collider.position) > active_range_radius) return;
 #pragma region WALL_COLLISION
     POSITION position_before = it.transform.position;
 
@@ -148,7 +157,7 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
 #pragma endregion
 
     // Handle Attack
-    // XXX: Note taht attack state will overwrite moving state, the state will jump between two state when its in cooldown
+    // XXX: Note that attack state will overwrite moving state, the state will jump between two state when its in cooldown
     if (!mob::is_attack_state(it.state) && it.attack_cooldown <= 0) {
       collision::HandleDetection(player_collider, std::span(&it.attack_range_collider, 1),
                                  [this](Player*, MobState* m, collision::CollisionResult) -> void {

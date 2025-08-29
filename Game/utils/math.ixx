@@ -37,10 +37,14 @@ export namespace math {
     return GetDirection({a.x, a.y}, {b.x, b.y});
   }
 
-  float GetDistance(Vector2 a, Vector2 b) {
+  float GetSquaredDistance(Vector2 a, Vector2 b) {
     float dx = b.x - a.x;
     float dy = b.y - a.y;
     return dx * dx + dy * dy;
+  }
+
+  float GetDistance(Vector2 a, Vector2 b) {
+    return std::sqrt(GetSquaredDistance(a, b));
   }
 
   /**
