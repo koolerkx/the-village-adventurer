@@ -17,32 +17,36 @@ void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {
   title_ui_->OnUpdate(ctx, delta_time);
   auto am = SceneManager::GetInstance().GetAudioManager();
 
-  if ((ctx->input_handler->GetKey(KeyCode::KK_UP) || ctx->input_handler->GetKey(KeyCode::KK_W))
-    && input_throttle_.CanCall()) {
-    selected_option_++;
-    selected_option_ %= options_count;
-    title_ui_->SetSelectedOption(selected_option_);
-    am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
-  }
-
-  if ((ctx->input_handler->GetKey(KeyCode::KK_DOWN) || ctx->input_handler->GetKey(KeyCode::KK_S))
-    && input_throttle_.CanCall()) {
-    selected_option_--;
-    selected_option_ += options_count;
-    selected_option_ %= options_count;
-    title_ui_->SetSelectedOption(selected_option_);
-    am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
-  }
-
-  if ((ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE))
-    && enter_throttle_.CanCall()) {
-    if (static_cast<SelectedOption>(selected_option_) == SelectedOption::START_GAME) {
-      am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
-      SceneManager::GetInstance().ChangeScene(std::make_unique<GameScene>());
+  if (is_allow_control_) {
+    if ((ctx->input_handler->GetKey(KeyCode::KK_UP) || ctx->input_handler->GetKey(KeyCode::KK_W))
+      && input_throttle_.CanCall()) {
+      selected_option_++;
+      selected_option_ %= options_count;
+      title_ui_->SetSelectedOption(selected_option_);
+      am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
     }
-    else if (static_cast<SelectedOption>(selected_option_) == SelectedOption::END_GAME) {
-      am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
-      SceneManager::GetInstance().SetLeave(true);
+
+    if ((ctx->input_handler->GetKey(KeyCode::KK_DOWN) || ctx->input_handler->GetKey(KeyCode::KK_S))
+      && input_throttle_.CanCall()) {
+      selected_option_--;
+      selected_option_ += options_count;
+      selected_option_ %= options_count;
+      title_ui_->SetSelectedOption(selected_option_);
+      am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
+    }
+
+    if ((ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE))
+      && enter_throttle_.CanCall()) {
+      if (static_cast<SelectedOption>(selected_option_) == SelectedOption::START_GAME) {
+        am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
+        title_ui_->SetFadeOverlayAlphaTarget(1.0f, color::black, []() -> void {
+          SceneManager::GetInstance().ChangeScene(std::make_unique<GameScene>());
+        });
+      }
+      else if (static_cast<SelectedOption>(selected_option_) == SelectedOption::END_GAME) {
+        am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
+        SceneManager::GetInstance().SetLeave(true);
+      }
     }
   }
 }

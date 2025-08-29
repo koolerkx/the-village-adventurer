@@ -20,8 +20,9 @@ private:
   const int options_count = 2;
   uint8_t selected_option_ = 0;
 
-  Throttle input_throttle_{0.2f};
+  Throttle input_throttle_{0.3f};
   Throttle enter_throttle_{0.2f};
+  bool is_allow_control_ = true;
 
 public:
   void OnEnter(GameContext* ctx) override;

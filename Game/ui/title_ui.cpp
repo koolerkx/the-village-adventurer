@@ -2,6 +2,9 @@ module;
 
 module game.ui.title_ui;
 
+import std;
+import game.ui.interpolation;
+
 TitleUI::TitleUI(GameContext* ctx) {
   auto [font_spritemap_filename, font_metadata_filename] = defined_font_map[DefinedFont::FUSION_PIXEL_FONT_DEBUG];
   font_key_ = Font::MakeFontGetKey(font_spritemap_filename, font_metadata_filename,
@@ -16,12 +19,30 @@ TitleUI::TitleUI(GameContext* ctx) {
   background_3_texture_id_ = tm->Load(L"assets/title_bg_3.png");
   background_4_texture_id_ = tm->Load(L"assets/title_bg_4.png");
   ui_texture_id_ = tm->Load(L"assets/ui.png");
+  overlay_texture_id_ = tm->Load(L"assets/block_white.png");
 }
 
 void TitleUI::OnUpdate(GameContext* ctx, float delta_time) {
   uv_horizontal_offset_ += delta_time * uv_offset_speed_;
 
   movement_acc_ += delta_time;
+  
+  fade_overlay_alpha_current_ = interpolation::UpdateSmoothValue(
+    fade_overlay_alpha_current_,
+    fade_overlay_alpha_target_,
+    delta_time,
+    interpolation::SmoothType::EaseOut,
+    1.0f
+  );
+
+  if (fade_overlay_callback_) {
+    float diff = std::fabs(fade_overlay_alpha_target_ - fade_overlay_alpha_current_);
+    if (diff < 0.01f) {
+      auto cb = fade_overlay_callback_;
+      fade_overlay_callback_ = {};
+      cb();
+    }
+  }
 }
 
 void TitleUI::OnFixedUpdate(GameContext* ctx, float delta_time) {}
@@ -103,15 +124,15 @@ void TitleUI::OnRender(GameContext* ctx, Camera* camera) {
   });
 
   auto start_text_props = StringSpriteProps{
-    .pixel_size = 32.0f,
+    .pixel_size = 24.0f,
     .letter_spacing = 0.0f,
     .line_height = 0.0f,
     .color = color::white
   };
 
-  auto start_text_size = default_font_->GetStringSize(L"スタート", {}, start_text_props);
+  auto start_text_size = default_font_->GetStringSize(L"ゲームスタート", {}, start_text_props);
 
-  rr->DrawFont(L"スタート",
+  rr->DrawFont(L"ゲームスタート",
                font_key_,
                Transform{
                  .position = {
@@ -163,7 +184,7 @@ void TitleUI::OnRender(GameContext* ctx, Camera* camera) {
   // Selected Frame
   float selected_frame_x = selected_option_ == 0 ? start_button_center_x : end_button_center_x;
   float selected_frame_y = selected_option_ == 0 ? start_button_center_y : end_button_center_y;
-  
+
   float selected_width = 260 + selected_frame_moving_range_ * std::abs(
     std::cos(selected_frame_moving_speed_ * movement_acc_));
   float selected_height = 64 + selected_frame_moving_range_ * std::abs(
@@ -198,4 +219,14 @@ void TitleUI::OnRender(GameContext* ctx, Camera* camera) {
                },
                end_text_props);
 
+  // overlay
+  rr->DrawSprite(RenderItem{
+    overlay_texture_id_,
+    Transform{
+      {0, 0, 0},
+      {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height)},
+    },
+    {{0, 0}, {8, 8}},
+    color::setOpacity(fade_overlay_color_, fade_overlay_alpha_current_)
+  });
 }
