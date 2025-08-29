@@ -1,12 +1,27 @@
 module;
+#include "stdint.h"
 
 export module game.title_scene;
 
+import std;
 import game.scene;
+import game.ui.title_ui;
+import game.utils.throttle;
+
+enum class SelectedOption: uint8_t {
+  START_GAME,
+  END_GAME
+};
 
 export class TitleScene : public IScene {
 private:
-  FixedPoolIndexType texture_id;
+  std::unique_ptr<TitleUI> title_ui_{nullptr};
+
+  const int options_count = 2;
+  uint8_t selected_option_ = 0;
+
+  Throttle input_throttle_{0.2f};
+  Throttle enter_throttle_{0.2f};
 
 public:
   void OnEnter(GameContext* ctx) override;

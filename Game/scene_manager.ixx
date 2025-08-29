@@ -32,6 +32,8 @@ private:
   bool is_scene_change_pending_ = false;
   SceneManager() = default;
 
+  bool is_leave_ = false;
+
 public:
   static SceneManager& Init(std::unique_ptr<IScene> initial_scene,
                             std::unique_ptr<GameContext> game_context,
@@ -56,4 +58,9 @@ public:
   void OnUpdate(float delta_time);
   void OnFixedUpdate(float delta_time) const;
   void OnRender() const;
+
+  void SetLeave(bool val) { is_leave_ = val; }
+  bool IsLeave() const {
+    return is_leave_;
+  }
 };

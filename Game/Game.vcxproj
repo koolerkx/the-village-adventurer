@@ -58,6 +58,8 @@
         <ClCompile Include="ui\game_ui.cpp" />
         <ClCompile Include="ui\game_ui.ixx" />
         <ClCompile Include="ui\interpolation.ixx" />
+        <ClCompile Include="ui\title_ui.cpp" />
+        <ClCompile Include="ui\title_ui.ixx" />
         <ClCompile Include="utils\encode.ixx" />
         <ClCompile Include="utils\math.ixx" />
         <ClCompile Include="utils\throttle.ixx" />

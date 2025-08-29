@@ -24,7 +24,7 @@ std::unordered_map<std::string, UV> texture_map = {
   {"TimerBackground", UV{{215, 272}, {119, 17}}},
 
   // Attack Hint
-  {"RoundBackground", UV{{223, 146}, {64, 16}}},
+  {"RoundBackground", UV{{224, 146}, {64, 16}}},
   {"KeyboardSpaceUp", UV{{96, 563}, {32, 16}}},
   {"KeyboardSpaceDown", UV{{96, 627}, {32, 16}}},
 

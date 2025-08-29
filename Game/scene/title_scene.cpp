@@ -6,34 +6,53 @@ import std;
 import graphic.utils.types;
 import game.scene_manager;
 import game.scene_game;
+import game.audio.audio_clip;
 
 void TitleScene::OnEnter(GameContext* ctx) {
   std::cout << "TitleScene> OnEnter" << std::endl;
-
-  texture_id = ctx->render_resource_manager->texture_manager->Load(L"assets/block_test.png", "test");
-
-  SceneManager::GetInstance().ChangeScene(std::make_unique<GameScene>());
+  title_ui_ = std::make_unique<TitleUI>(ctx);
 }
 
-void TitleScene::OnUpdate(GameContext*, float) {
-  // std::cout << "TitleScene> OnUpdate" << std::endl;
+void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {
+  title_ui_->OnUpdate(ctx, delta_time);
+  auto am = SceneManager::GetInstance().GetAudioManager();
+
+  if ((ctx->input_handler->GetKey(KeyCode::KK_UP) || ctx->input_handler->GetKey(KeyCode::KK_W))
+    && input_throttle_.CanCall()) {
+    selected_option_++;
+    selected_option_ %= options_count;
+    title_ui_->SetSelectedOption(selected_option_);
+    am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
+  }
+
+  if ((ctx->input_handler->GetKey(KeyCode::KK_DOWN) || ctx->input_handler->GetKey(KeyCode::KK_S))
+    && input_throttle_.CanCall()) {
+    selected_option_--;
+    selected_option_ += options_count;
+    selected_option_ %= options_count;
+    title_ui_->SetSelectedOption(selected_option_);
+    am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
+  }
+
+  if ((ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE))
+    && enter_throttle_.CanCall()) {
+    if (static_cast<SelectedOption>(selected_option_) == SelectedOption::START_GAME) {
+      am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
+      SceneManager::GetInstance().ChangeScene(std::make_unique<GameScene>());
+    }
+    else if (static_cast<SelectedOption>(selected_option_) == SelectedOption::END_GAME) {
+      am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
+      SceneManager::GetInstance().SetLeave(true);
+    }
+  }
 }
 
-void TitleScene::OnFixedUpdate(GameContext*, float) {}
+void TitleScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
+  title_ui_->OnFixedUpdate(ctx, delta_time);
+}
 
-void TitleScene::OnRender(GameContext*) {
-  // Transform transform1 = {
-  //   .position = POSITION(100.0f, 100.0f, 0.0f),
-  //   .size = {100.0f, 100.0f},
-  //   .rotation_radian = 45.0f * static_cast<float>(std::numbers::pi) / 180.0f,
-  // };
-  // UV uv1 = {{0, 0}, {8, 8}};
-  // COLOR color1 = {1.0f, 1.0f, 1.0f, 1.0f};
-
-  // ctx->render_resource_manager->renderer->DrawSprite(texture_id, transform1, uv1, color1);
-
-
-  // std::cout << "TitleScene> OnRender\n";
+void TitleScene::OnRender(GameContext* ctx) {
+  title_ui_->OnRender(ctx, {});
 }
 
 void TitleScene::OnExit(GameContext*) {
