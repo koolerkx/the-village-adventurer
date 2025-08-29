@@ -130,7 +130,8 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
 
 void GameScene::HandlePlayerEnterMapCollision(float, SceneContext* scene_ctx) {
   map_manager_->ForEachActiveLinkedMapsNode(
-    [&player = player_, &map_manager = this->map_manager_, &ui = this->ui_, &mob_manager = this->mob_manager_, &scene_ctx
+    [&player = player_, &map_manager = this->map_manager_, &ui = this->ui_, &mob_manager = this->mob_manager_, &
+      scene_ctx
     ](std::shared_ptr<LinkedMapNode> node) -> void {
       auto map = node->data.lock();
       if (!map) return;
@@ -152,7 +153,7 @@ void GameScene::HandlePlayerEnterMapCollision(float, SceneContext* scene_ctx) {
                                    if (state == CollideState::NOT_COLLIDE) {
                                      // OnEnter
                                      ui->PlayEnterAreaMessage(map->GetMapName());
-                                     
+
                                      scene_ctx->active_map_node = node;
                                      map_manager->EnterNewMap(
                                        node, [&mob_manager, &scene_ctx](std::shared_ptr<LinkedMapNode> new_node) {
@@ -206,6 +207,7 @@ void GameScene::HandleSkillHitMobCollision(float) {
         Vector2 dir = math::GetDirection(skill_center, mob_center);
 
         mob_manager->PushBack(*mob_state, {dir.x, dir.y});
+        SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::hit_1);
       });
     }
   };
@@ -226,6 +228,7 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                                m->timeout = 0;
 
                                p->Damage(m->damage);
+                               SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::hit_2);
                              });
 }
 

@@ -11,6 +11,8 @@ import game.scene_object.skill;
 import game.utils.throttle;
 import game.player.input;
 
+import game.audio.audio_clip;
+
 // Texture data
 static constexpr PlayerState default_state = PlayerState::IDLE_UP;
 
@@ -48,6 +50,7 @@ void Player::OnUpdate(GameContext*, SceneContext* scene_ctx, float delta_time) {
       {transform_.position.x, transform_.position.y},
       scene_object::GetPlayerRotationByDirection(direction_facing_) // Right = 0
     );
+    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::attack_sword_light);
   }
 
 #if defined(DEBUG)
@@ -62,6 +65,9 @@ void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {
   // apply input to velocity
   if (direction_.x == 0 && direction_.y == 0) {
     velocity_ = {0, 0};
+    // stop walking
+    SceneManager::GetInstance().GetAudioManager()->StopWalking();
+    
   }
   else {
     float len = std::sqrt(direction_.x * direction_.x + direction_.y * direction_.y);
@@ -69,6 +75,9 @@ void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {
       (direction_.x / len) * move_speed_,
       (direction_.y / len) * move_speed_
     };
+
+    // play walking
+    SceneManager::GetInstance().GetAudioManager()->PlayWalking();
   }
 
   UpdateState();

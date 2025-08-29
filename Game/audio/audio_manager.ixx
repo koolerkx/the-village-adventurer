@@ -32,6 +32,7 @@ private:
   CriAtomExAcbHn acb_hn_;
 
   BGM_Player bgm_player_{nullptr, nullptr};
+  CriAtomExPlayerHn walking_player_{nullptr};
   std::array<CriAtomExPlayerHn, 32> audio_clip_players_{nullptr};
 
 public:
@@ -43,4 +44,7 @@ public:
 
   CriAtomExPlaybackId PlayAudioClip(audio_clip clip);
   void PlayBGM(audio_clip clip);
+  
+  void PlayWalking(audio_clip clip = audio_clip::walk_grass);
+  void StopWalking();
 };

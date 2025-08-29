@@ -39,11 +39,14 @@ AudioManager::AudioManager() {
 
   CriAtomExStandardVoicePoolConfig vp_cfg{};
   criAtomExVoicePool_SetDefaultConfigForStandardVoicePool(&vp_cfg);
+  vp_cfg.num_voices = 128;
   pool_ = criAtomExVoicePool_AllocateStandardVoicePool(&vp_cfg, nullptr, 0);
 
   // Create Player
   for (auto& player : audio_clip_players_) {
     player = criAtomExPlayer_Create(nullptr, nullptr, 0);
+    // criAtomExPlayer_SetVolume(player, 0.5f);
+    // criAtomExPlayer_UpdateAll(player);
   }
 
   static constexpr int crossfade_ms = 3000;
@@ -56,6 +59,10 @@ AudioManager::AudioManager() {
   criAtomExPlayer_AttachFader(bgm_player_.other, nullptr, nullptr, 0);
   criAtomExPlayer_SetFadeInTime(bgm_player_.other, crossfade_ms);
   criAtomExPlayer_SetFadeOutTime(bgm_player_.other, crossfade_ms);
+
+  walking_player_ = criAtomExPlayer_Create(nullptr, nullptr, 0);
+  criAtomExPlayer_SetVolume(walking_player_, 0.3f);
+  criAtomExPlayer_UpdateAll(walking_player_);
 }
 
 AudioManager::~AudioManager() {
@@ -89,7 +96,8 @@ CriAtomExPlaybackId AudioManager::PlayAudioClip(audio_clip clip) {
 
   CriAtomExPlaybackId playback_id = CRIATOMEX_INVALID_PLAYBACK_ID;
   for (auto& player : audio_clip_players_) {
-    if (criAtomExPlayer_GetStatus(player) == CRIATOMEXPLAYER_STATUS_STOP) {
+    if (criAtomExPlayer_GetStatus(player) == CRIATOMEXPLAYER_STATUS_STOP
+      || criAtomExPlayer_GetStatus(player) == CRIATOMEXPLAYER_STATUS_PLAYEND) {
       criAtomExPlayer_SetCueId(player, acb_hn_, cue_sheet_id);
       playback_id = criAtomExPlayer_Start(player);
       break;
@@ -108,4 +116,16 @@ void AudioManager::PlayBGM(audio_clip clip) {
   bgm_player_.current_playback_cue_id = cue_sheet_id;
   bgm_player_.current_playback_id = criAtomExPlayer_Start(bgm_player_.current);
   criAtomExPlayer_Stop(bgm_player_.other);
+}
+
+void AudioManager::PlayWalking(audio_clip clip) {
+  CriAtomExCueId cue_sheet_id = static_cast<CriAtomExCueId>(clip);
+  if (criAtomExPlayer_GetStatus(walking_player_) == CRIATOMEXPLAYER_STATUS_PLAYING) return;
+
+  criAtomExPlayer_SetCueId(walking_player_, acb_hn_, cue_sheet_id);
+  criAtomExPlayer_Start(walking_player_);
+}
+
+void AudioManager::StopWalking() {
+  criAtomExPlayer_Stop(walking_player_);
 }
