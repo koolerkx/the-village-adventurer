@@ -25,6 +25,15 @@ assets/attack.png
 assets/ui.png
 assets/mobs.png
 assets/fonts/fusion-pixel-12px-monospaced-ja.ttf
+assets/audio/GameCueSheet_0.acb
+assets/audio/top-down-game.acf
+
+# cri
+Game/audio/cri
+Game/audio/GameCueSheet_0.h
+Game/audio/top-down-game_acf.h
+cri_ware_pcx64_le_import.lib
+cri_ware_pcx64_le.dll
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

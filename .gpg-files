@@ -8,3 +8,8 @@ assets/ui.png
 assets/mobs.png
 
 assets/fonts/fusion-pixel-12px-monospaced-ja.ttf
+
+assets/audio/GameCueSheet_0.acb
+assets/audio/top-down-game.acf
+Game/audio/GameCueSheet_0.h
+Game/audio/top-down-game_acf.h
