@@ -9,6 +9,10 @@ module game.audio.audio_manager;
 
 import std;
 
+constexpr CriAtomExVector FRONT = {0.0f, 1.0f, 0.0f};
+constexpr CriAtomExVector TOP = {0.0f, 0.0f, 1.0f};
+constexpr float MAX_ATTENUATION_DISTANCE = 256.0f;
+
 namespace {
   static void user_error_callback_func(const CriChar8* errid, CriUint32 p1, CriUint32 p2, CriUint32* parray) {
     /* エラー文字列の表示 */
@@ -41,6 +45,21 @@ AudioManager::AudioManager() {
   criAtomExVoicePool_SetDefaultConfigForStandardVoicePool(&vp_cfg);
   vp_cfg.num_voices = 128;
   pool_ = criAtomExVoicePool_AllocateStandardVoicePool(&vp_cfg, nullptr, 0);
+  
+  // 3D Audio
+  CriAtomEx3dListenerConfig listener_config;
+  criAtomEx3dListener_SetDefaultConfig(&listener_config);
+  listener_ = criAtomEx3dListener_Create(&listener_config, nullptr, 0);
+
+  // always center
+  CriAtomExVector listener_pos = {0.0f, 0.0f, 0.0f};
+  criAtomEx3dListener_SetPosition(listener_, &listener_pos);
+  criAtomEx3dListener_Update(listener_);
+
+  CriAtomEx3dSourceConfig source_config;
+  criAtomEx3dSource_SetDefaultConfig(&source_config);
+  CriAtomEx3dSourceHn source = criAtomEx3dSource_Create(&source_config, nullptr, 0);
+  criAtomEx3dSource_Update(source);
 
   // Create Player
   for (auto& player : audio_clip_players_) {
@@ -66,11 +85,14 @@ AudioManager::AudioManager() {
 }
 
 AudioManager::~AudioManager() {
+  criAtomEx3dListener_Destroy(listener_);
+
   for (auto& player : audio_clip_players_) {
     criAtomExPlayer_Destroy(player);
   }
   criAtomExPlayer_Destroy(bgm_player_.current);
   criAtomExPlayer_Destroy(bgm_player_.other);
+  criAtomExPlayer_Destroy(walking_player_);
 
   criAtomExVoicePool_Free(pool_);
   criAtomExAcb_Release(acb_hn_);
@@ -83,21 +105,39 @@ void AudioManager::OnUpdate() {}
 void AudioManager::OnFixedUpdate() {
   criAtomEx_ExecuteMain();
 
-  CriAtomExPlayerStatus s = criAtomExPlayer_GetStatus(bgm_player_.current);
-
   if (criAtomExPlayer_GetStatus(bgm_player_.current) == CRIATOMEXPLAYER_STATUS_PLAYEND) {
     criAtomExPlayer_SetCueId(bgm_player_.current, acb_hn_, bgm_player_.current_playback_cue_id);
     bgm_player_.current_playback_id = criAtomExPlayer_Start(bgm_player_.current);
   }
 }
 
-CriAtomExPlaybackId AudioManager::PlayAudioClip(audio_clip clip) {
+void AudioManager::UpdateListenerPosition(Vector2 position) {
+  CriAtomExVector listener_pos = {position.x, position.y, 0.0f};
+  
+  criAtomEx3dListener_SetPosition(listener_, &listener_pos);
+  criAtomEx3dListener_Update(listener_);
+}
+
+CriAtomExPlaybackId AudioManager::PlayAudioClip(audio_clip clip, Vector2 position) {
   CriAtomExCueId cue_sheet_id = static_cast<CriAtomExCueId>(clip);
 
   CriAtomExPlaybackId playback_id = CRIATOMEX_INVALID_PLAYBACK_ID;
   for (auto& player : audio_clip_players_) {
     if (criAtomExPlayer_GetStatus(player) == CRIATOMEXPLAYER_STATUS_STOP
       || criAtomExPlayer_GetStatus(player) == CRIATOMEXPLAYER_STATUS_PLAYEND) {
+      CriAtomEx3dSourceConfig source_config;
+      criAtomEx3dSource_SetDefaultConfig(&source_config);
+      CriAtomEx3dSourceHn source = criAtomEx3dSource_Create(&source_config, nullptr, 0);
+
+      CriAtomExVector audio_pos = {position.x, position.y, 1};
+      criAtomEx3dSource_SetPosition(source, &audio_pos);
+      criAtomEx3dSource_SetOrientation(source, &FRONT, &TOP);
+      criAtomEx3dSource_SetVolume(source, 1.0f);
+      criAtomEx3dSource_SetMinMaxAttenuationDistance(source, 1.0f, MAX_ATTENUATION_DISTANCE);
+      criAtomEx3dSource_Update(source);
+
+      criAtomExPlayer_Set3dSourceHn(player, source);
+
       criAtomExPlayer_SetCueId(player, acb_hn_, cue_sheet_id);
       playback_id = criAtomExPlayer_Start(player);
       break;

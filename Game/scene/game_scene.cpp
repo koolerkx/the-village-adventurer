@@ -78,6 +78,8 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   ui_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnFixedUpdate(ctx, delta_time);
   mob_manager_->OnFixedUpdate(ctx, scene_context.get(), delta_time, player_->GetCollider());
+
+  SceneManager::GetInstance().GetAudioManager()->UpdateListenerPosition({player_->GetTransform().position.x, player_->GetTransform().position.y});
 }
 
 void GameScene::OnRender(GameContext* ctx) {
@@ -207,7 +209,11 @@ void GameScene::HandleSkillHitMobCollision(float) {
         Vector2 dir = math::GetDirection(skill_center, mob_center);
 
         mob_manager->PushBack(*mob_state, {dir.x, dir.y});
-        SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::hit_1);
+        Vector2 audio_pos = {
+          mob_center.x + (dir.x * 12.0f),
+          mob_center.y + (dir.y * 12.0f)
+        };
+        SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::hit_1, audio_pos);
       });
     }
   };

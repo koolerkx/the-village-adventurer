@@ -50,7 +50,13 @@ void Player::OnUpdate(GameContext*, SceneContext* scene_ctx, float delta_time) {
       {transform_.position.x, transform_.position.y},
       scene_object::GetPlayerRotationByDirection(direction_facing_) // Right = 0
     );
-    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::attack_sword_light);
+
+    Vector2 audio_pos = {
+      transform_.position.x + (direction_.x * 12.0f),
+      transform_.position.y + (direction_.y * 12.0f)
+    };
+
+    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::attack_sword_light, audio_pos);
   }
 
 #if defined(DEBUG)
@@ -67,7 +73,6 @@ void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {
     velocity_ = {0, 0};
     // stop walking
     SceneManager::GetInstance().GetAudioManager()->StopWalking();
-    
   }
   else {
     float len = std::sqrt(direction_.x * direction_.x + direction_.y * direction_.y);

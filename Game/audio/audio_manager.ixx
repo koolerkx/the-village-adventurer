@@ -10,13 +10,11 @@ module;
 export module game.audio.audio_manager;
 
 import std;
+import game.types;
 export import game.audio.audio_clip;
 
 constexpr const char* ACF_FILE = "assets/audio/top-down-game.acf";
 constexpr const char* ACB_FILE = "assets/audio/GameCueSheet_0.acb";
-
-constexpr CriAtomExVector FRONT = {0.0f, 1.0f, 0.0f};
-constexpr CriAtomExVector TOP = {0.0f, 0.0f, 1.0f};
 
 export struct BGM_Player {
   CriAtomExPlayerHn current{nullptr};
@@ -30,6 +28,7 @@ export class AudioManager {
 private:
   CriAtomExVoicePoolHn pool_;
   CriAtomExAcbHn acb_hn_;
+  CriAtomEx3dListenerHn listener_;
 
   BGM_Player bgm_player_{nullptr, nullptr};
   CriAtomExPlayerHn walking_player_{nullptr};
@@ -41,10 +40,11 @@ public:
 
   void OnUpdate();
   void OnFixedUpdate();
+  void UpdateListenerPosition(Vector2 position = {0, 0});
 
-  CriAtomExPlaybackId PlayAudioClip(audio_clip clip);
+  CriAtomExPlaybackId PlayAudioClip(audio_clip clip, Vector2 position = {0, 0});
   void PlayBGM(audio_clip clip);
-  
+
   void PlayWalking(audio_clip clip = audio_clip::walk_grass);
   void StopWalking();
 };
