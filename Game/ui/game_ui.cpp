@@ -20,6 +20,8 @@ GameUI::GameUI(GameContext* ctx, SceneContext*, std::wstring texture_path) {
   font_key_ = Font::MakeFontGetKey(font_spritemap_filename, font_metadata_filename,
                                    ctx->render_resource_manager->texture_manager.get());
   default_font_ = Font::GetFont(font_key_);
+
+  fade_overlay_texture_id_ = ctx->render_resource_manager->texture_manager->Load(L"assets/block_white.png");
 }
 
 void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
@@ -27,26 +29,24 @@ void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
     hp_percentage_current_,
     hp_percentage_target_,
     delta_time,
-    hp_percentage_current_ > hp_percentage_target_
-      ? interpolation::SmoothType::EaseIn     // HP loss
-      : interpolation::SmoothType::EaseInOut, // HP gain
-    25.0f
+    interpolation::SmoothType::EaseOut,
+    0.5f
   );
 
   heal_flash_opacity_current_ = interpolation::UpdateSmoothValue(
     heal_flash_opacity_current_,
     heal_flash_opacity_target_,
     delta_time,
-    interpolation::SmoothType::EaseInOut,
-    25.0f
+    interpolation::SmoothType::EaseOut,
+    0.5f
   );
 
   damage_flash_opacity_current_ = interpolation::UpdateSmoothValue(
     damage_flash_opacity_current_,
     damage_flash_opacity_target_,
     delta_time,
-    interpolation::SmoothType::EaseInOut,
-    25.0f
+    interpolation::SmoothType::EaseOut,
+    0.5f
   );
 
   if (is_showing_area_message_) {
@@ -55,10 +55,37 @@ void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
       area_message_opacity_target_,
       delta_time,
       interpolation::SmoothType::EaseOut,
-      0.25f
+    0.5f
     );
     if (area_message_opacity_current_ < 0.1) is_showing_area_message_ = false;
   }
+
+  if (std::abs(fade_overlay_alpha_current_ - fade_overlay_alpha_target_) > 0.01f)
+    fade_overlay_alpha_current_ = interpolation::UpdateSmoothValue(
+      fade_overlay_alpha_current_,
+      fade_overlay_alpha_target_,
+      delta_time,
+      interpolation::SmoothType::EaseOut,
+      0.5f
+    );
+
+  if (fade_overlay_callback_) {
+    float diff = std::fabs(fade_overlay_alpha_target_ - fade_overlay_alpha_current_);
+    if (diff <= 0.25f) {
+      auto cb = fade_overlay_callback_;
+      fade_overlay_callback_ = {};
+      cb();
+    }
+  }
+
+  if (std::fabs(ui_opacity_current_ - ui_opacity_target_) > 0.01f)
+    ui_opacity_current_ = interpolation::UpdateSmoothValue(
+      ui_opacity_current_,
+      ui_opacity_target_,
+      delta_time,
+      interpolation::SmoothType::EaseOut,
+      1.0f
+    );
 }
 
 void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
@@ -117,7 +144,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .position = {24, 24, 0},
       .size = {320, 64},
     },
-    texture_map["HPBarPanel"], color::white
+    texture_map["HPBarPanel"],
+    color::setOpacity(color::white, ui_opacity_current_)
   });
   // HP Bar: Heart Background Circle
   render_items.emplace_back(RenderInstanceItem{
@@ -125,7 +153,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .position = {28, 20, 0},
       .size = {72, 72},
     },
-    texture_map["BigCircle"], color::white
+    texture_map["BigCircle"],
+    color::setOpacity(color::white, ui_opacity_current_)
   });
   // HP Bar: Heart
   render_items.emplace_back(RenderInstanceItem{
@@ -133,7 +162,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .position = {38, 30, 0},
       .size = {52, 52},
     },
-    texture_map["Heart"], color::white
+    texture_map["Heart"],
+    color::setOpacity(color::white, ui_opacity_current_)
   });
   // HP Bar: HB Bar
   render_items.emplace_back(RenderInstanceItem{
@@ -141,7 +171,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .position = {110, 59, 0},
       .size = {200 * hp_percentage_current_, 14},
     },
-    texture_map["HPBar"], color::white
+    texture_map["HPBar"],
+    color::setOpacity(color::white, ui_opacity_current_)
   });
   if (is_get_damage_frame_) {
     render_items.emplace_back(RenderInstanceItem{
@@ -149,7 +180,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
         .position = {110, 59, 0},
         .size = {200 * hp_percentage_current_, 14},
       },
-      texture_map["Block"], color::white
+      texture_map["Block"],
+      color::setOpacity(color::white, ui_opacity_current_)
     });
     is_hp_flashing_ = true;
   }
@@ -159,7 +191,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .position = {106, 54, 0},
       .size = {208, 24},
     },
-    texture_map["HPBarFrame"], color::white
+    texture_map["HPBarFrame"],
+    color::setOpacity(color::white, ui_opacity_current_)
   });
 
   // Session: Left Bottom
@@ -171,7 +204,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
         .size = {320, 180},
         .position_anchor = {0, static_cast<float>(ctx->window_height), 0}
       },
-      texture_map["Block"], color::setOpacity(color::black, 0.25f)
+      texture_map["Block"], color::setOpacity(color::black, 0.25f * ui_opacity_current_)
     });
   }
 
@@ -183,7 +216,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .size = {315, 45},
       .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
     },
-    texture_map["TimerBackground"], color::white
+    texture_map["TimerBackground"],
+    color::setOpacity(color::white, ui_opacity_current_)
   });
 
   if (is_showing_area_message_) {
@@ -193,7 +227,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
         .size = {166, 16},
         .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
       },
-      texture_map["MessageUpper"], color::setOpacity(color::white, area_message_opacity_current_)
+      texture_map["MessageUpper"], color::setOpacity(color::white, area_message_opacity_current_ * ui_opacity_current_)
     });
     render_items.emplace_back(RenderInstanceItem{
       Transform{
@@ -201,7 +235,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
         .size = {166, 16},
         .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
       },
-      texture_map["MessageLower"], color::setOpacity(color::white, area_message_opacity_current_)
+      texture_map["MessageLower"], color::setOpacity(color::white, area_message_opacity_current_ * ui_opacity_current_)
     });
   }
 
@@ -213,7 +247,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .size = {122, 32},
       .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
     },
-    texture_map["RoundBackground"], color::white
+    texture_map["RoundBackground"],
+    color::setOpacity(color::white, ui_opacity_current_)
   });
   // Attack Hint: Space bar
   render_items.emplace_back(RenderInstanceItem{
@@ -222,7 +257,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .size = {32, 16},
       .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
     },
-    texture_map["KeyboardSpaceUp"], color::white
+    texture_map["KeyboardSpaceUp"],
+    color::setOpacity(color::white, ui_opacity_current_)
   });
 
   // Skill Slot
@@ -236,7 +272,9 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
           .size = {48, 48},
           .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
         },
-        texture_map["SkillSlot"], color::white
+        texture_map["SkillSlot"],
+        color::setOpacity(color::white, ui_opacity_current_)
+
       });
 
       if (skill_selected_ != i) continue;
@@ -247,7 +285,9 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
           .size = {48, 48},
           .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
         },
-        texture_map["SkillSelected"], color::white
+        texture_map["SkillSelected"],
+        color::setOpacity(color::white, ui_opacity_current_)
+
       });
     }
   }
@@ -261,7 +301,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
         .size = {182, 46},
         .position_anchor = {static_cast<float>(ctx->window_width), 0, 0}
       },
-      texture_map["RoundBackground"], color::white
+      texture_map["RoundBackground"],
+      color::setOpacity(color::white, ui_opacity_current_)
     });
     // Coin: Icon
     render_items.emplace_back(RenderInstanceItem{
@@ -270,7 +311,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
         .size = {24, 28},
         .position_anchor = {static_cast<float>(ctx->window_width), 0, 0}
       },
-      texture_map["Coin"], color::white
+      texture_map["Coin"],
+      color::setOpacity(color::white, ui_opacity_current_)
     });
   }
 
@@ -282,7 +324,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .size = {224, 98},
       .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
     },
-    texture_map["Block"], color::setOpacity(color::black, 0.25f)
+    texture_map["Block"], color::setOpacity(color::black, 0.25f * ui_opacity_current_)
   });
   // Input Hint: Corner
   render_items.emplace_back(RenderInstanceItem{
@@ -291,7 +333,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .size = {49, 22},
       .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
     },
-    texture_map["Corner"], color::white
+    texture_map["Corner"],
+    color::setOpacity(color::white, ui_opacity_current_)
   });
   // Input Hint: Key
   render_items.emplace_back(RenderInstanceItem{
@@ -300,7 +343,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .size = {20, 20},
       .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
     },
-    texture_map["KeyboardWUp"], color::white
+    texture_map["KeyboardWUp"],
+    color::setOpacity(color::white, ui_opacity_current_)
   });
   render_items.emplace_back(RenderInstanceItem{
     Transform{
@@ -308,7 +352,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .size = {20, 20},
       .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
     },
-    texture_map["KeyboardAUp"], color::white
+    texture_map["KeyboardAUp"],
+    color::setOpacity(color::white, ui_opacity_current_)
   });
   render_items.emplace_back(RenderInstanceItem{
     Transform{
@@ -316,7 +361,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .size = {20, 20},
       .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
     },
-    texture_map["KeyboardSUp"], color::white
+    texture_map["KeyboardSUp"],
+    color::setOpacity(color::white, ui_opacity_current_)
   });
   render_items.emplace_back(RenderInstanceItem{
     Transform{
@@ -324,7 +370,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .size = {20, 20},
       .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
     },
-    texture_map["KeyboardDUp"], color::white
+    texture_map["KeyboardDUp"],
+    color::setOpacity(color::white, ui_opacity_current_)
   });
   render_items.emplace_back(RenderInstanceItem{
     Transform{
@@ -332,7 +379,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .size = {40, 20},
       .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
     },
-    texture_map["KeyboardSpaceUp"], color::white
+    texture_map["KeyboardSpaceUp"],
+    color::setOpacity(color::white, ui_opacity_current_)
   });
 
   rr->DrawSpritesInstanced(render_items, texture_id_, {}, true);
@@ -345,7 +393,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                StringSpriteProps{
                  .pixel_size = 14.0f,
                  .letter_spacing = 0.0f,
-                 .line_height = 0.0f
+                 .line_height = 0.0f,
+                 .color = color::setOpacity(color::white, ui_opacity_current_)
                });
 
   // Session: Left Bottom
@@ -364,7 +413,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  }, StringSpriteProps{
                    .pixel_size = 12.0f,
                    .letter_spacing = 0.0f,
-                   .line_height = 22.0f
+                   .line_height = 22.0f,
+                   .color = color::setOpacity(color::white, ui_opacity_current_)
                  });
   }
 
@@ -379,7 +429,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .pixel_size = 32.0f,
                  .letter_spacing = 0.0f,
                  .line_height = 0.0f,
-                 .color = color::white
+                 .color = color::setOpacity(color::white, ui_opacity_current_)
                });
 
   if (is_showing_area_message_) {
@@ -392,7 +442,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                    .pixel_size = 20.0f,
                    .letter_spacing = 0.0f,
                    .line_height = 0.0f,
-                   .color = color::setOpacity(color::white, area_message_opacity_current_)
+                   .color = color::setOpacity(color::white, ui_opacity_current_)
                  });
   }
 
@@ -407,7 +457,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                }, StringSpriteProps{
                  .pixel_size = 12.0f,
                  .letter_spacing = 0.0f,
-                 .line_height = 22.0f
+                 .line_height = 22.0f,
+                 .color = color::setOpacity(color::white, ui_opacity_current_)
                });
 
   // Session: Right Upper
@@ -424,7 +475,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                    .pixel_size = 22.0f,
                    .letter_spacing = 0.0f,
                    .line_height = 0.0f,
-                   .color = color::white
+                   .color = color::setOpacity(color::white, ui_opacity_current_)
                  });
   }
 
@@ -438,7 +489,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .pixel_size = 16.0f,
                  .letter_spacing = 0.0f,
                  .line_height = 0.0f,
-                 .color = color::white
+                 .color = color::setOpacity(color::white, ui_opacity_current_)
                });
   rr->DrawFont(L"移動する", font_key_,
                Transform{
@@ -448,7 +499,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .pixel_size = 16.0f,
                  .letter_spacing = 0.0f,
                  .line_height = 0.0f,
-                 .color = color::white
+                 .color = color::setOpacity(color::white, ui_opacity_current_)
                });
   rr->DrawFont(L"攻撃する", font_key_,
                Transform{
@@ -458,10 +509,20 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .pixel_size = 16.0f,
                  .letter_spacing = 0.0f,
                  .line_height = 0.0f,
-                 .color = color::white
+                 .color = color::setOpacity(color::white, ui_opacity_current_)
                });
 
   RenderDamageText(ctx, scene_ctx, camera);
+
+  rr->DrawSprite(RenderItem{
+                   fade_overlay_texture_id_,
+                   Transform{
+                     {0, 0, 0},
+                     {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height)},
+                   },
+                   {{0, 0}, {8, 8}},
+                   color::setOpacity(color::black, fade_overlay_alpha_current_)
+                 }, {});
 }
 
 void GameUI::RenderDamageText(GameContext* ctx, SceneContext*, Camera* camera) {

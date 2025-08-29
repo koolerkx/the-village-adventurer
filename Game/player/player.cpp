@@ -37,14 +37,14 @@ Player::Player(FixedPoolIndexType texture_id,
   };
 }
 
-void Player::OnUpdate(GameContext*, SceneContext* scene_ctx, float delta_time) {
+void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
   const PlayerIntent it = input_->Intent(delta_time);
   direction_ = {it.move_x, it.move_y};
-  if (direction_.x != 0.f || direction_.y != 0.f) {
+  if (ctx->allow_control && (direction_.x != 0.f || direction_.y != 0.f)) {
     direction_facing_ = direction_;
   }
 
-  if (it.attack.held && attack_throttle_.CanCall()) {
+  if (ctx->allow_control && it.attack.held && attack_throttle_.CanCall()) {
     scene_ctx->skill_manager->PlaySkill(
       SKILL_TYPE::NORMAL_ATTACK,
       {transform_.position.x, transform_.position.y},

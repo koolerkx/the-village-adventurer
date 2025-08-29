@@ -26,7 +26,7 @@ void TitleUI::OnUpdate(GameContext* ctx, float delta_time) {
   uv_horizontal_offset_ += delta_time * uv_offset_speed_;
 
   movement_acc_ += delta_time;
-  
+
   fade_overlay_alpha_current_ = interpolation::UpdateSmoothValue(
     fade_overlay_alpha_current_,
     fade_overlay_alpha_target_,

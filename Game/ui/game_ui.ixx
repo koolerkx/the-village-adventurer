@@ -67,6 +67,7 @@ struct DamageTextProps {
 export class GameUI {
 private:
   FixedPoolIndexType texture_id_;
+  FixedPoolIndexType fade_overlay_texture_id_;
   std::wstring font_key_;
 
   std::vector<std::wstring> text_list_ = {
@@ -97,6 +98,14 @@ private:
   std::wstring area_message_;
   float area_message_opacity_target_ = 0.0f;
   float area_message_opacity_current_ = 0.0f;
+
+  float fade_overlay_alpha_target_ = 1.0f;
+  float fade_overlay_alpha_current_ = 1.0f;
+  COLOR fade_overlay_color_ = color::black;
+  std::function<void()> fade_overlay_callback_ = {};
+
+  float ui_opacity_target_ = 0.0f;
+  float ui_opacity_current_ = 0.0f;
 
   bool is_show_ui_ = true;
 
@@ -159,4 +168,20 @@ public:
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
   void RenderDamageText(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
+  
+  void SetFadeOverlayAlphaTarget(float alpha, COLOR color, std::function<void()> cb = {}) {
+    fade_overlay_alpha_target_ = alpha;
+    fade_overlay_color_ = color;
+
+    if (std::fabs(fade_overlay_alpha_target_ - fade_overlay_alpha_current_) <= 0.01f) {
+      if (cb) cb();
+      fade_overlay_callback_ = {};
+    }
+    else {
+      fade_overlay_callback_ = cb;
+    }
+  }
+  void SetUIOpacity(float alpha) {
+    ui_opacity_target_ = alpha;
+  }
 };
