@@ -23,7 +23,7 @@ void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {
     if ((ctx->input_handler->GetKey(KeyCode::KK_UP) || ctx->input_handler->GetKey(KeyCode::KK_W))
       && input_throttle_.CanCall()) {
       selected_option_++;
-      selected_option_ %= options_count;
+      selected_option_ %= static_cast<uint8_t>(options_count);
       title_ui_->SetSelectedOption(selected_option_);
       am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
     }
@@ -31,8 +31,8 @@ void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {
     if ((ctx->input_handler->GetKey(KeyCode::KK_DOWN) || ctx->input_handler->GetKey(KeyCode::KK_S))
       && input_throttle_.CanCall()) {
       selected_option_--;
-      selected_option_ += options_count;
-      selected_option_ %= options_count;
+      selected_option_ += static_cast<uint8_t>(options_count);
+      selected_option_ %= static_cast<uint8_t>(options_count);
       title_ui_->SetSelectedOption(selected_option_);
       am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
     }

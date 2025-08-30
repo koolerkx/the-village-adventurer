@@ -1,4 +1,6 @@
+#ifndef CI_BUILD
 module;
+
 #include  "GameCueSheet_0.h"
 
 export module game.audio.audio_clip;
@@ -27,3 +29,33 @@ export enum class audio_clip: int {
   bgm_fight_1 = CRI_GAMECUESHEET_0_BGM_FIGHT_1,
   bgm_fight_2 = CRI_GAMECUESHEET_0_BGM_FIGHT_2,
 };
+#else
+
+export module game.audio.audio_clip;
+
+export enum class audio_clip: int {
+  hit_1 = 0,
+  hit_2 = 1,
+  keyboard_click = 2,
+  walk_grass = 3,
+  attack_sword_light = 4,
+  attack_sword_mid = 5,
+  ambient_2 = 6,
+  ambient_3 = 7,
+  dark_ambient_1 = 8,
+  light_ambience_1 = 9,
+  ambient_1 = 10,
+  blood_2 = 11,
+  blood_1 = 12,
+  equip_2 = 13,
+  equip_1 = 14,
+  attack_real_sword = 15,
+  equip_3 = 16,
+  bgm_base = 17,
+  bgm_title = 18,
+  bgm_result = 19,
+  bgm_fight_1 = 20,
+  bgm_fight_2 = 21,
+};
+
+#endif

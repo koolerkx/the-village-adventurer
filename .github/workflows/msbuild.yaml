@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [ opened, reopened, synchronize ]
 
 env:
   SOLUTION_FILE_PATH: ./roguelike-topdown-game.sln
@@ -19,20 +19,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        configuration: [Release, Debug]
-        platform: [x64]
+        configuration: [ Release, Debug ]
+        platform: [ x64 ]
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Restore NuGet packages
-      run: nuget restore ${{ env.SOLUTION_FILE_PATH }}
+      - name: Restore NuGet packages
+        run: nuget restore ${{ env.SOLUTION_FILE_PATH }}
 
-    - name: Create directory
-      run: mkdir -p assets/shaders
+      - name: Create directory
+        run: mkdir -p assets/shaders
 
-    - name: Build (${{ matrix.configuration }}, ${{ matrix.platform }})
-      run: msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
+      - name: Build (${{ matrix.configuration }}, ${{ matrix.platform }})
+        run: msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }} /p:CI_BUILD=true
