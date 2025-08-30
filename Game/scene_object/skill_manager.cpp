@@ -3,6 +3,8 @@ module;
 
 module game.scene_object.skill;
 
+import game.scene_manager;
+
 const std::wstring texture_path = L"assets/attack.png"; // TODO: extract
 
 SkillManager::SkillManager(GameContext* ctx) {
@@ -127,6 +129,8 @@ void SkillManager::PlaySkill(SKILL_TYPE type, Vector2 position, float rotation) 
   if (result == skill_data.end()) { return; }
   auto& data = result->second;
 
+  SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(data.skill_se, position);
+  
   auto transform = data.base_transform;
   transform.position = {position.x, position.y, 0};
   transform.rotation_radian += rotation;

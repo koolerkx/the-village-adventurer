@@ -77,15 +77,7 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
         selected_skill_type_,
         {transform_.position.x, transform_.position.y},
         scene_object::GetPlayerRotationByDirection(direction_facing_) // Right = 0
-      );
-
-      Vector2 audio_pos = {
-        transform_.position.x + (direction_.x * 12.0f),
-        transform_.position.y + (direction_.y * 12.0f)
-      };
-
-      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::attack_sword_light, audio_pos);
-    }
+      );}
   }
   else {
     direction_ = {0, 0};

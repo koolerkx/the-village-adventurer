@@ -278,8 +278,13 @@ void GameScene::HandleMobHitPlayerCollision(float) {
 }
 
 void GameScene::HandleSkillHitWallCollision(float) {
-  auto skill_colliders = skill_manager_->GetColliders();
   auto map_colliders = map_manager_->GetFiledObjectColliders();
+
+  std::vector<Collider<SkillHitbox>> skill_colliders{};
+  for (auto s: skill_manager_->GetColliders()) {
+    if (s.owner->data->is_destroy_by_wall)
+      skill_colliders.push_back(s);
+  }
 
   std::span<Collider<SkillHitbox>> skill_colliders_span{skill_colliders.data(), skill_colliders.size()};
   std::span<Collider<FieldObject>> map_colliders_span{map_colliders.data(), map_colliders.size()};
@@ -287,9 +292,7 @@ void GameScene::HandleSkillHitWallCollision(float) {
   collision::HandleDetection(skill_colliders_span, map_colliders_span,
                              [&skill_manager = skill_manager_](SkillHitbox* skill, FieldObject*,
                                                                collision::CollisionResult) -> void {
-                               if (skill->data->is_destroy_by_wall) {
-                                 skill_manager->HandleDestroyCollision(skill);
-                               }
+                               skill_manager->HandleDestroyCollision(skill);
                              });
 }
 

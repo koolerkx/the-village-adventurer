@@ -11,6 +11,7 @@ import game.scene_object;
 import game.object_pool;
 import game.context;
 import game.scene_object.camera;
+import game.audio.audio_clip;
 
 import std;
 
@@ -39,6 +40,7 @@ export struct SkillData {
   Vector2 moving_speed = {0, 0}; // normalized speed
   SKILL_TYPE spawn_next = SKILL_TYPE::NONE;
   UV icon_uv = {{0, 0}, {100, 100}};
+  audio_clip skill_se = audio_clip::attack_sword_light;
 };
 
 export struct SkillHitbox {
@@ -72,7 +74,8 @@ export const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
       .base_collider_padding = {6, 8, 18, 8},
       .frames = scene_object::MakeFramesVector(5, 128, 128, 10, 960, 4512),
       .frame_durations = scene_object::MakeFramesConstantDuration(0.04f, 10),
-      .icon_uv = {{16, 811}, {16, 16}}
+      .icon_uv = {{16, 811}, {16, 16}},
+      .skill_se = audio_clip::attack_sword_light,
     },
   },
   {
@@ -96,7 +99,8 @@ export const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
       .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 4),
       .moving_speed = {175, 175},
       .spawn_next = SKILL_TYPE::EXPLOSION,
-      .icon_uv = {{48, 779}, {16, 16}}
+      .icon_uv = {{48, 779}, {16, 16}},
+      .skill_se = audio_clip::skill_fireball,
     },
   },
   {
@@ -118,6 +122,7 @@ export const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
       .frames = scene_object::MakeFramesVector(12, 48, 48, 12, 1248, 6096),
       .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 12),
       .moving_speed = {0, 0},
+      .skill_se = audio_clip::skill_explosion,
     },
   }
 };

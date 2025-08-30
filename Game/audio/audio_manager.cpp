@@ -37,6 +37,7 @@ AudioManager::AudioManager() {
   criAtomEx_SetUserAllocator(user_alloc_func, user_free_func, nullptr);
 
   CriAtomExConfig_WASAPI ex_cfg{};
+  ex_cfg.atom_ex.max_virtual_voices = 48;
   criAtomEx_SetDefaultConfig_WASAPI(&ex_cfg);
   criAtomEx_Initialize_WASAPI(&ex_cfg, nullptr, 0);
 
