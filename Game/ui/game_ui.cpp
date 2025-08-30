@@ -55,7 +55,7 @@ void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
       area_message_opacity_target_,
       delta_time,
       interpolation::SmoothType::EaseOut,
-    0.5f
+    0.25f
     );
     if (area_message_opacity_current_ < 0.1) is_showing_area_message_ = false;
   }
@@ -216,11 +216,27 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       .size = {315, 45},
       .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
     },
+    texture_map["Block"], color::setOpacity(color::black, 0.25f * ui_opacity_current_)
+  });
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {-315 / 2, 24, 0},
+      .size = {315, 45},
+      .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
+    },
     texture_map["TimerBackground"],
     color::setOpacity(color::white, ui_opacity_current_)
   });
 
   if (is_showing_area_message_) {
+    render_items.emplace_back(RenderInstanceItem{
+      Transform{
+        .position = {-166 / 2, 129 + 16, 0},
+        .size = {166, 177 - (129 + 16)},
+        .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
+      },
+      texture_map["Block"], color::setOpacity(color::black, 0.1f * area_message_opacity_current_ * ui_opacity_current_)
+    });
     render_items.emplace_back(RenderInstanceItem{
       Transform{
         .position = {-166 / 2, 129, 0},
