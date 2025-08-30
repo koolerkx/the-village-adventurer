@@ -21,6 +21,7 @@ import game.map.map_manager;
 import game.map.linked_map;
 
 void GameScene::OnEnter(GameContext* ctx) {
+  ctx->allow_control = false;
   std::cout << "GameScene> OnEnter" << std::endl;
 
   // Scene
@@ -42,6 +43,11 @@ void GameScene::OnEnter(GameContext* ctx) {
   // UI
   ui_ = std::make_unique<GameUI>(ctx, scene_context.get(), L"assets/ui.png"); // extract path
   ResetTimer();
+
+  ui_->SetFadeOverlayAlphaTarget(0.0f, color::black, [&ui = ui_, ctx]() {
+    ui->SetUIOpacity(1.0f);
+    ctx->allow_control = true;
+  });
 
   // Mob
   mob_manager_ = std::make_unique<MobManager>(ctx);
@@ -79,7 +85,9 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   skill_manager_->OnFixedUpdate(ctx, delta_time);
   mob_manager_->OnFixedUpdate(ctx, scene_context.get(), delta_time, player_->GetCollider());
 
-  SceneManager::GetInstance().GetAudioManager()->UpdateListenerPosition({player_->GetTransform().position.x, player_->GetTransform().position.y});
+  SceneManager::GetInstance().GetAudioManager()->UpdateListenerPosition({
+    player_->GetTransform().position.x, player_->GetTransform().position.y
+  });
 }
 
 void GameScene::OnRender(GameContext* ctx) {

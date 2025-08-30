@@ -44,6 +44,7 @@ AudioManager::AudioManager() {
   CriAtomExStandardVoicePoolConfig vp_cfg{};
   criAtomExVoicePool_SetDefaultConfigForStandardVoicePool(&vp_cfg);
   vp_cfg.num_voices = 128;
+  vp_cfg.player_config.max_sampling_rate = 70000;
   pool_ = criAtomExVoicePool_AllocateStandardVoicePool(&vp_cfg, nullptr, 0);
   
   // 3D Audio
@@ -118,7 +119,7 @@ void AudioManager::UpdateListenerPosition(Vector2 position) {
   criAtomEx3dListener_Update(listener_);
 }
 
-CriAtomExPlaybackId AudioManager::PlayAudioClip(audio_clip clip, Vector2 position) {
+CriAtomExPlaybackId AudioManager::PlayAudioClip(audio_clip clip, Vector2 position, float volume) {
   CriAtomExCueId cue_sheet_id = static_cast<CriAtomExCueId>(clip);
 
   CriAtomExPlaybackId playback_id = CRIATOMEX_INVALID_PLAYBACK_ID;
@@ -139,6 +140,10 @@ CriAtomExPlaybackId AudioManager::PlayAudioClip(audio_clip clip, Vector2 positio
       criAtomExPlayer_Set3dSourceHn(player, source);
 
       criAtomExPlayer_SetCueId(player, acb_hn_, cue_sheet_id);
+      
+      criAtomExPlayer_SetVolume(player, volume);
+      criAtomExPlayer_UpdateAll(player);
+      
       playback_id = criAtomExPlayer_Start(player);
       break;
     }

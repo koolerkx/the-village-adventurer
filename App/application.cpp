@@ -228,6 +228,11 @@ void Application::OnUpdate(float delta_time) {
   debug_manager_->OnRender();
 #endif
   direct3d_->EndDraw();
+
+  if (SceneManager::GetInstance().IsLeave()) {
+    SendMessage(hwnd_, WM_CLOSE, 0, 0);
+    SceneManager::GetInstance().SetLeave(false);
+  }
 }
 
 void Application::OnFixedUpdate(float delta_time) {

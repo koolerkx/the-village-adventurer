@@ -42,7 +42,7 @@ public:
   void OnFixedUpdate();
   void UpdateListenerPosition(Vector2 position = {0, 0});
 
-  CriAtomExPlaybackId PlayAudioClip(audio_clip clip, Vector2 position = {0, 0});
+  CriAtomExPlaybackId PlayAudioClip(audio_clip clip, Vector2 position = {0, 0}, float volume = 1.0f);
   void PlayBGM(audio_clip clip);
 
   void PlayWalking(audio_clip clip = audio_clip::walk_grass);

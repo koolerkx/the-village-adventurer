@@ -10,4 +10,5 @@ export struct GameContext {
   InputHandler* input_handler = nullptr;
   int window_width = 0;
   int window_height = 0;
+  bool allow_control = true;
 };
