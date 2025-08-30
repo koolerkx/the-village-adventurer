@@ -60,6 +60,9 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
       SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::attack_sword_light, audio_pos);
     }
   }
+  else {
+    direction_ = {0, 0};
+  }
 
 #if defined(DEBUG)
   if (it.damage_debug.pressed) Damage(10);
