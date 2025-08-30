@@ -276,8 +276,8 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
 #endif
 }
 
-void MobManager::MakeDamage(MobState& mob_state, int damage,
-                            std::move_only_function<void()> post_action) {
+int MobManager::MakeDamage(MobState& mob_state, int damage,
+                           std::move_only_function<void()> post_action) {
   mob_state.hp -= damage;
   if (mob_state.hp <= 0) {
     switch (mob_state.type) {
@@ -287,7 +287,7 @@ void MobManager::MakeDamage(MobState& mob_state, int damage,
       break;
     }
     post_action();
-    return;
+    return mob_state.hp;
   }
 
   switch (mob_state.type) {
@@ -297,6 +297,8 @@ void MobManager::MakeDamage(MobState& mob_state, int damage,
     break;
   }
   post_action();
+
+  return mob_state.hp;
 }
 
 void MobManager::PushBack(MobState& mob_state, Vector2 direction) {

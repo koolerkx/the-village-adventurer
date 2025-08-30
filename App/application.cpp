@@ -13,7 +13,6 @@ import graphic.direct3D;
 import graphic.utils.types;
 import game.scene;
 import game.title_scene;
-import game.result_scene;
 
 // config
 constexpr const char* config_filepath = "./config.yaml";
@@ -155,8 +154,7 @@ bool Application::Init() {
   initial_context->window_height = win_size_.cy;
 
   SceneManager::Init(std::move(
-                       // std::make_unique<TitleScene>()
-                       std::make_unique<ResultScene>(ResultSceneProps{20, 135.0f})
+                       std::make_unique<TitleScene>()
                      ),
                      std::move(initial_context),
                      std::make_unique<GameConfig>(GameConfig{

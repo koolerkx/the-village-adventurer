@@ -170,7 +170,7 @@ public:
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time, Collider<Player> player_collider);
   void OnRender(GameContext* ctx, Camera* camera);
 
-  void MakeDamage(MobState& mob_state, int damage, const std::move_only_function<void()> post_action);
+  int MakeDamage(MobState& mob_state, int damage, const std::move_only_function<void()> post_action);
   void PushBack(MobState& mob_state, Vector2 direction);
 
   std::vector<Collider<MobState>> GetColliders();

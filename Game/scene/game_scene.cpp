@@ -74,10 +74,9 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   if (is_end_) {
     is_end_ = false;
     ctx->allow_control = false;
-    std::cerr << "SetFadeOverlayAlphaTarget this=" << static_cast<const void*>(this) << "\n";
 
-    ui_->SetFadeOverlayAlphaTarget(1.0f, color::black, [&timer_elapsed = timer_elapsed_]() {
-      SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<ResultScene>(ResultSceneProps{0, static_cast<float>(timer_elapsed)}));
+    ui_->SetFadeOverlayAlphaTarget(1.0f, color::black, [&timer_elapsed = timer_elapsed_, &monster_killed = monster_killed_]() {
+      SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<ResultScene>(ResultSceneProps{monster_killed, static_cast<float>(timer_elapsed)}));
     });
   }
 }
@@ -200,11 +199,11 @@ void GameScene::HandleSkillHitMobCollision(float) {
   std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
   std::span skill_colliders_span{skill_colliders.data(), skill_colliders.size()};
 
-  auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_]
+  auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_, &monster_killed = monster_killed_]
   (MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult) -> void {
     if (!skill_hitbox->hit_mobs.contains(mob_state->id) && !mob::is_death_state(mob_state->state)) {
       skill_hitbox->hit_mobs.insert(mob_state->id);
-      mob_manager->MakeDamage(*mob_state, skill_hitbox->data->damage, [&]() {
+      int remain_hp = mob_manager->MakeDamage(*mob_state, skill_hitbox->data->damage, [&]() {
         Vector2 mob_center = {
           mob_state->transform.position.x + mob_state->transform.size.x,
           mob_state->transform.position.y + mob_state->transform.size.y
@@ -234,6 +233,9 @@ void GameScene::HandleSkillHitMobCollision(float) {
         };
         SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::hit_1, audio_pos);
       });
+      if (remain_hp <= 0) {
+        monster_killed++;
+      }
     }
   };
 
