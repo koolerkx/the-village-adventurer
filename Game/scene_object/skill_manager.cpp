@@ -11,12 +11,12 @@ SkillManager::SkillManager(GameContext* ctx) {
 
 void SkillManager::OnUpdate(GameContext*, float delta_time) {
   hitbox_pool_.RemoveIf([](SkillHitbox& hitbox) {
-    return !hitbox.is_playing;
+    return hitbox.is_destroy_on_next;
   });
 
   hitbox_pool_.ForEach([delta_time](SkillHitbox& hitbox, ObjectPoolIndexType) {
     scene_object::AnimationState state{
-      .is_loop = false,
+      .is_loop = hitbox.data->is_loop,
       .play_on_start = false,
       .is_playing = hitbox.is_playing,
       .frames = hitbox.data->frames,
@@ -30,18 +30,15 @@ void SkillManager::OnUpdate(GameContext*, float delta_time) {
     hitbox.current_frame = state.current_frame;
     hitbox.current_frame_time = state.current_frame_time;
     hitbox.is_playing = state.is_playing;
+
+    if (!hitbox.is_playing) {
+      hitbox.is_destroy_on_next = true;
+    }
   });
 }
 
-void SkillManager::OnFixedUpdate(GameContext*, float) {}
-
-void SkillManager::OnRender(GameContext* ctx, Camera* camera, Transform player_transform) {
-  auto rr = ctx->render_resource_manager->renderer.get();
-
-  std::vector<RenderInstanceItem> render_items;
-  render_items.reserve(hitbox_pool_.Size());
-
-  hitbox_pool_.ForEach([&render_items, player_transform](SkillHitbox& it) {
+void SkillManager::OnFixedUpdate(GameContext*, float delta_time, Transform player_transform) {
+  hitbox_pool_.ForEach([&player_transform, delta_time](SkillHitbox& it) {
     if (it.data->is_stick_to_player) {
       it.transform.position.x = player_transform.position.x;
       it.transform.position.y = player_transform.position.y;
@@ -49,7 +46,26 @@ void SkillManager::OnRender(GameContext* ctx, Camera* camera, Transform player_t
       it.collider.position.x = player_transform.position.x + it.data->base_transform.position_anchor.x;
       it.collider.position.y = player_transform.position.y + it.data->base_transform.position_anchor.y;
     }
+    else {
+      float cos_r = std::cos(it.transform.rotation_radian);
+      float sin_r = std::sin(it.transform.rotation_radian);
 
+      it.transform.position.x += cos_r * it.data->moving_speed.x * delta_time;
+      it.transform.position.y += sin_r * it.data->moving_speed.y * delta_time;
+
+      it.collider.position.x = it.transform.position.x + it.data->base_transform.position_anchor.x;
+      it.collider.position.y = it.transform.position.y + it.data->base_transform.position_anchor.y;
+    }
+  });
+}
+
+void SkillManager::OnRender(GameContext* ctx, Camera* camera) {
+  auto rr = ctx->render_resource_manager->renderer.get();
+
+  std::vector<RenderInstanceItem> render_items;
+  render_items.reserve(hitbox_pool_.Size());
+
+  hitbox_pool_.ForEach([&render_items](SkillHitbox& it) {
     render_items.emplace_back(RenderInstanceItem{
       .transform = it.transform,
       .uv = {
@@ -74,11 +90,13 @@ void SkillManager::OnRender(GameContext* ctx, Camera* camera, Transform player_t
       const auto& shape = std::get<RectCollider>(collider.shape);
 
       std::array<Vector2, 4> rotated = scene_object::GetRotatedPoints({shape.x, shape.y, shape.width, shape.height},
-                                                                 {
-                                                                   shape.base_width / 2 + collider.rotation_pivot.x,
-                                                                   shape.base_height / 2 + collider.rotation_pivot.y
-                                                                 },
-                                                                 collider.rotation);
+                                                                      {
+                                                                        shape.base_width / 2 + collider.rotation_pivot.
+                                                                        x,
+                                                                        shape.base_height / 2 + collider.rotation_pivot.
+                                                                        y
+                                                                      },
+                                                                      collider.rotation);
 
       rect_view.push_back({
         {

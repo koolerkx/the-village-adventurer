@@ -60,7 +60,56 @@ RectOBB MakeRectOBB(const Collider<Owner>& collider) {
 
   return obb;
 }
+
+auto absdot = [](const Vector2& x, const Vector2& y) {
+  return std::fabs(dot(x, y));
+};
 #pragma endregion
+
+
+template <typename A, typename B>
+bool CollideRectRectOBB(const Collider<A>& aCol, const Collider<B>& bCol) {
+  const RectOBB ARect = MakeRectOBB(aCol);
+  const RectOBB BRect = MakeRectOBB(bCol);
+
+  const Vector2 t{BRect.center.x - ARect.center.x, BRect.center.y - ARect.center.y};
+
+  auto separated_on = [&](const Vector2& L, float rA, float rB) {
+    const float dist = std::fabs(dot(t, L));
+    return dist > (rA + rB);
+  };
+
+  // axis A.u
+  {
+    const float rA = ARect.hx;
+    const float rB = BRect.hx * absdot(BRect.u, ARect.u) + BRect.hy * absdot(BRect.v, ARect.u);
+    if (separated_on(ARect.u, rA, rB)) return false;
+  }
+
+  // axis A.v
+  {
+    const float rA = ARect.hy;
+    const float rB = BRect.hx * absdot(BRect.u, ARect.v) + BRect.hy * absdot(BRect.v, ARect.v);
+    if (separated_on(ARect.v, rA, rB)) return false;
+  }
+
+  // axis B.u
+  {
+    const float rA = ARect.hx * absdot(ARect.u, BRect.u) + ARect.hy * absdot(ARect.v, BRect.u);
+    const float rB = BRect.hx;
+    if (separated_on(BRect.u, rA, rB)) return false;
+  }
+
+  // axis B.v
+  {
+    const float rA = ARect.hx * absdot(ARect.u, BRect.v) + ARect.hy * absdot(ARect.v, BRect.v);
+    const float rB = BRect.hy;
+    if (separated_on(BRect.v, rA, rB)) return false;
+  }
+
+  return true;
+}
+
 
 export namespace collision {
   struct CollisionResult {
@@ -184,8 +233,7 @@ export namespace collision {
       for (auto& b : b_pool) {
         bool is_collide = false;
         if (std::holds_alternative<RectCollider>(a.shape) && std::holds_alternative<RectCollider>(b.shape)) {
-          // TODO SAT
-          is_collide = false;
+          is_collide = CollideRectRectOBB(a, b);
         }
         else if (std::holds_alternative<CircleCollider>(a.shape) && std::holds_alternative<RectCollider>(b.shape)) {
           is_collide = CollideCircleRect(a, b);
