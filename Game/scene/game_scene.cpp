@@ -19,10 +19,13 @@ import player.factory;
 import game.math;
 import game.map.map_manager;
 import game.map.linked_map;
+import game.result_scene;
 
 void GameScene::OnEnter(GameContext* ctx) {
   ctx->allow_control = false;
   std::cout << "GameScene> OnEnter" << std::endl;
+
+  SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_base);
 
   // Scene
   scene_context.reset(new SceneContext());
@@ -69,6 +72,15 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
                          });
 
   UpdateUI(ctx, delta_time);
+
+  if (is_end_) {
+    is_end_ = false;
+    ctx->allow_control = false;
+
+    ui_->SetFadeOverlayAlphaTarget(1.0f, color::black, [&timer_elapsed = timer_elapsed_, &monster_killed = monster_killed_]() {
+      SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<ResultScene>(ResultSceneProps{monster_killed, static_cast<float>(timer_elapsed)}));
+    });
+  }
 }
 
 void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
@@ -189,11 +201,11 @@ void GameScene::HandleSkillHitMobCollision(float) {
   std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
   std::span skill_colliders_span{skill_colliders.data(), skill_colliders.size()};
 
-  auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_]
+  auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_, &monster_killed = monster_killed_]
   (MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult) -> void {
     if (!skill_hitbox->hit_mobs.contains(mob_state->id) && !mob::is_death_state(mob_state->state)) {
       skill_hitbox->hit_mobs.insert(mob_state->id);
-      mob_manager->MakeDamage(*mob_state, skill_hitbox->data->damage, [&]() {
+      int remain_hp = mob_manager->MakeDamage(*mob_state, skill_hitbox->data->damage, [&]() {
         Vector2 mob_center = {
           mob_state->transform.position.x + mob_state->transform.size.x,
           mob_state->transform.position.y + mob_state->transform.size.y
@@ -223,6 +235,9 @@ void GameScene::HandleSkillHitMobCollision(float) {
         };
         SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::hit_1, audio_pos);
       });
+      if (remain_hp <= 0) {
+        monster_killed++;
+      }
     }
   };
 
@@ -235,14 +250,18 @@ void GameScene::HandleMobHitPlayerCollision(float) {
   std::span mob_hitbox_collider_span{mob_hitbox_collider.data(), mob_hitbox_collider.size()};
 
   collision::HandleDetection(player_collider, mob_hitbox_collider_span,
-                             [](Player* p, MobHitBox* m, collision::CollisionResult) -> void {
+                             [&is_end = is_end_](Player* p, MobHitBox* m, collision::CollisionResult) -> void {
                                if (m->attack_delay >= 0) return;
                                if (m->hit_player) return;
                                m->hit_player = true;
                                m->timeout = 0;
 
-                               p->Damage(m->damage);
+                               float hp = p->Damage(m->damage);
                                SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::hit_2);
+
+                               if (hp <= 0) {
+                                 is_end = true;
+                               }
                              });
 }
 

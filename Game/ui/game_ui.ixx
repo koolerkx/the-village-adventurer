@@ -181,6 +181,7 @@ public:
       fade_overlay_callback_ = cb;
     }
   }
+  
   void SetUIOpacity(float alpha) {
     ui_opacity_target_ = alpha;
   }

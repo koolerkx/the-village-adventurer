@@ -38,25 +38,30 @@ Player::Player(FixedPoolIndexType texture_id,
 }
 
 void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
-  const PlayerIntent it = input_->Intent(delta_time);
-  direction_ = {it.move_x, it.move_y};
-  if (ctx->allow_control && (direction_.x != 0.f || direction_.y != 0.f)) {
-    direction_facing_ = direction_;
+  if (ctx->allow_control) {
+    const PlayerIntent it = input_->Intent(delta_time);
+    direction_ = {it.move_x, it.move_y};
+    if ((direction_.x != 0.f || direction_.y != 0.f)) {
+      direction_facing_ = direction_;
+    }
+
+    if (it.attack.held && attack_throttle_.CanCall()) {
+      scene_ctx->skill_manager->PlaySkill(
+        SKILL_TYPE::NORMAL_ATTACK,
+        {transform_.position.x, transform_.position.y},
+        scene_object::GetPlayerRotationByDirection(direction_facing_) // Right = 0
+      );
+
+      Vector2 audio_pos = {
+        transform_.position.x + (direction_.x * 12.0f),
+        transform_.position.y + (direction_.y * 12.0f)
+      };
+
+      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::attack_sword_light, audio_pos);
+    }
   }
-
-  if (ctx->allow_control && it.attack.held && attack_throttle_.CanCall()) {
-    scene_ctx->skill_manager->PlaySkill(
-      SKILL_TYPE::NORMAL_ATTACK,
-      {transform_.position.x, transform_.position.y},
-      scene_object::GetPlayerRotationByDirection(direction_facing_) // Right = 0
-    );
-
-    Vector2 audio_pos = {
-      transform_.position.x + (direction_.x * 12.0f),
-      transform_.position.y + (direction_.y * 12.0f)
-    };
-
-    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::attack_sword_light, audio_pos);
+  else {
+    direction_ = {0, 0};
   }
 
 #if defined(DEBUG)

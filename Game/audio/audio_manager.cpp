@@ -153,9 +153,11 @@ CriAtomExPlaybackId AudioManager::PlayAudioClip(audio_clip clip, Vector2 positio
 }
 
 void AudioManager::PlayBGM(audio_clip clip) {
+  CriAtomExCueId cue_sheet_id = static_cast<CriAtomExCueId>(clip);
+  if (cue_sheet_id == bgm_player_.current_playback_cue_id) return;
+  
   std::swap(bgm_player_.current, bgm_player_.other);
 
-  CriAtomExCueId cue_sheet_id = static_cast<CriAtomExCueId>(clip);
   criAtomExPlayer_SetCueId(bgm_player_.current, acb_hn_, cue_sheet_id);
 
   bgm_player_.current_playback_cue_id = cue_sheet_id;

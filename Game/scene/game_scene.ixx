@@ -27,6 +27,9 @@ private:
 
   std::unique_ptr<SceneContext> scene_context = nullptr;
 
+  bool is_end_ = false;
+
+  int monster_killed_ = 0;
   double timer_elapsed_ = 0; // in seconds
 
   void HandlePlayerMovementAndCollisions(float delta_time);

@@ -21,4 +21,9 @@ export enum class audio_clip: int {
   equip_1 = CRI_GAMECUESHEET_0_EQUIP1,
   attack_real_sword = CRI_GAMECUESHEET_0_ATTACK_REAL_SWORD,
   equip_3 = CRI_GAMECUESHEET_0_EQUIP3,
+  bgm_base = CRI_GAMECUESHEET_0_BGM_BASE,
+  bgm_title = CRI_GAMECUESHEET_0_BGM_TITLE,
+  bgm_result = CRI_GAMECUESHEET_0_BGM_RESULT,
+  bgm_fight_1 = CRI_GAMECUESHEET_0_BGM_FIGHT_1,
+  bgm_fight_2 = CRI_GAMECUESHEET_0_BGM_FIGHT_2,
 };
