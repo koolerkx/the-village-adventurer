@@ -67,6 +67,8 @@ export struct MobState {
   float attack_cooldown;
   float moving_cooldown;
 
+  float is_show_hurt_frame_timer = 0.0f;
+  
   Vector2 velocity;
   // mob data
   int hp;
