@@ -61,6 +61,11 @@ export enum class audio_clip: int {
   bgm_result = 19,
   bgm_fight_1 = 20,
   bgm_fight_2 = 21,
+  skill_fireball = 22,
+  skill_heal = 23,
+  katana5 = 24,
+  katana3 = 25,
+  skill_explosion = 26,
 };
 
 #endif
