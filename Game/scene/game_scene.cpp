@@ -19,6 +19,7 @@ import player.factory;
 import game.math;
 import game.map.map_manager;
 import game.map.linked_map;
+import game.result_scene;
 
 void GameScene::OnEnter(GameContext* ctx) {
   ctx->allow_control = false;
@@ -69,6 +70,16 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
                          });
 
   UpdateUI(ctx, delta_time);
+
+  if (is_end_) {
+    is_end_ = false;
+    ctx->allow_control = false;
+    std::cerr << "SetFadeOverlayAlphaTarget this=" << static_cast<const void*>(this) << "\n";
+
+    ui_->SetFadeOverlayAlphaTarget(1.0f, color::black, [&timer_elapsed = timer_elapsed_]() {
+      SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<ResultScene>(ResultSceneProps{0, static_cast<float>(timer_elapsed)}));
+    });
+  }
 }
 
 void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
@@ -235,14 +246,18 @@ void GameScene::HandleMobHitPlayerCollision(float) {
   std::span mob_hitbox_collider_span{mob_hitbox_collider.data(), mob_hitbox_collider.size()};
 
   collision::HandleDetection(player_collider, mob_hitbox_collider_span,
-                             [](Player* p, MobHitBox* m, collision::CollisionResult) -> void {
+                             [&is_end = is_end_](Player* p, MobHitBox* m, collision::CollisionResult) -> void {
                                if (m->attack_delay >= 0) return;
                                if (m->hit_player) return;
                                m->hit_player = true;
                                m->timeout = 0;
 
-                               p->Damage(m->damage);
+                               float hp = p->Damage(m->damage);
                                SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::hit_2);
+
+                               if (hp <= 0) {
+                                 is_end = true;
+                               }
                              });
 }
 

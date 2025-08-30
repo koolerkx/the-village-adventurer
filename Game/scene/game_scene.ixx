@@ -27,6 +27,8 @@ private:
 
   std::unique_ptr<SceneContext> scene_context = nullptr;
 
+  bool is_end_ = false;
+
   double timer_elapsed_ = 0; // in seconds
 
   void HandlePlayerMovementAndCollisions(float delta_time);

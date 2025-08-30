@@ -117,8 +117,14 @@ public:
 
   Vector2 GetVelocity() const;
 
-  void Damage(float amount) { health_ = std::max(health_ - amount, 0.0f); }
-  void Heal(float amount) { health_ = std::min(health_ + amount, max_health_); }
+  float Damage(float amount) {
+    health_ = std::max(health_ - amount, 0.0f);
+    return health_;
+  }
+  float Heal(float amount) {
+    health_ = std::min(health_ + amount, max_health_);
+    return health_;
+  }
   float GetHPPercentage() const { return health_ / max_health_; }
 
   Player(FixedPoolIndexType texture_id, std::unique_ptr<IPlayerInput> input,
