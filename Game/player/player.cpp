@@ -40,14 +40,41 @@ Player::Player(FixedPoolIndexType texture_id,
 void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
   if (ctx->allow_control) {
     const PlayerIntent it = input_->Intent(delta_time);
+
+    // movement
     direction_ = {it.move_x, it.move_y};
     if ((direction_.x != 0.f || direction_.y != 0.f)) {
       direction_facing_ = direction_;
     }
 
+    // skill select
+    if (it.switch_skill_left.pressed && skill_select_throttle_.CanCall()) {
+      selected_skill_id_ = (selected_skill_id_ + 1) % AVAILABLE_SKILLS.size();
+      selected_skill_type_ = AVAILABLE_SKILLS[selected_skill_id_];
+
+      Vector2 audio_pos = {
+        GetPositionVector().x - 6,
+        GetPositionVector().y
+      };
+      
+      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::equip_2, audio_pos, 0.5);
+    }
+    if (it.switch_skill_right.pressed && skill_select_throttle_.CanCall()) {
+      selected_skill_id_ = (selected_skill_id_ - 1 + AVAILABLE_SKILLS.size()) % AVAILABLE_SKILLS.size();
+      selected_skill_type_ = AVAILABLE_SKILLS[selected_skill_id_];
+
+      Vector2 audio_pos = {
+        GetPositionVector().x + 6.0f,
+        GetPositionVector().y
+      };
+      
+      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::equip_2, audio_pos, 0.5);
+    }
+
+    // skill attack
     if (it.attack.held && attack_throttle_.CanCall()) {
       scene_ctx->skill_manager->PlaySkill(
-        SKILL_TYPE::FIREBALL,
+        selected_skill_type_,
         {transform_.position.x, transform_.position.y},
         scene_object::GetPlayerRotationByDirection(direction_facing_) // Right = 0
       );

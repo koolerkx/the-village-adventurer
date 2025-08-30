@@ -28,6 +28,11 @@ export enum class audio_clip: int {
   bgm_result = CRI_GAMECUESHEET_0_BGM_RESULT,
   bgm_fight_1 = CRI_GAMECUESHEET_0_BGM_FIGHT_1,
   bgm_fight_2 = CRI_GAMECUESHEET_0_BGM_FIGHT_2,
+  skill_fireball = CRI_GAMECUESHEET_0_SKILL_FIREBALL,
+  skill_heal = CRI_GAMECUESHEET_0_SKILL_HEAL,
+  katana5 = CRI_GAMECUESHEET_0_KATANA5,
+  katana3 = CRI_GAMECUESHEET_0_KATANA3,
+  skill_explosion = CRI_GAMECUESHEET_0_SKILL_EXPLOSION,
 };
 #else
 

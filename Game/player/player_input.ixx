@@ -16,6 +16,8 @@ export struct PlayerIntent {
 
   // Action
   ButtonState attack;
+  ButtonState switch_skill_left;
+  ButtonState switch_skill_right;
 
 #if defined(DEBUG) || defined(_DEBUG)
   ButtonState damage_debug;

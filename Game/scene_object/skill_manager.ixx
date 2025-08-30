@@ -21,7 +21,7 @@ export enum class SKILL_TYPE: uint8_t {
   NONE
 };
 
-struct SkillData {
+export struct SkillData {
   std::wstring name;
   SKILL_TYPE type;
   float cooldown;
@@ -38,6 +38,7 @@ struct SkillData {
   std::vector<float> frame_durations;
   Vector2 moving_speed = {0, 0}; // normalized speed
   SKILL_TYPE spawn_next = SKILL_TYPE::NONE;
+  UV icon_uv = {{0, 0}, {100, 100}};
 };
 
 export struct SkillHitbox {
@@ -54,7 +55,7 @@ export struct SkillHitbox {
   std::unordered_set<ObjectPoolIndexType> hit_mobs{}; // hit each mob only once
 };
 
-const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
+export const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
   {
     SKILL_TYPE::NORMAL_ATTACK, {
       .name = L"ŽaŒ‚",
@@ -71,6 +72,7 @@ const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
       .base_collider_padding = {6, 8, 18, 8},
       .frames = scene_object::MakeFramesVector(5, 128, 128, 10, 960, 4512),
       .frame_durations = scene_object::MakeFramesConstantDuration(0.04f, 10),
+      .icon_uv = {{16, 811}, {16, 16}}
     },
   },
   {
@@ -94,6 +96,7 @@ const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
       .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 4),
       .moving_speed = {175, 175},
       .spawn_next = SKILL_TYPE::EXPLOSION,
+      .icon_uv = {{48, 779}, {16, 16}}
     },
   },
   {

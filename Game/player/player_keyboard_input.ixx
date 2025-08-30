@@ -15,6 +15,8 @@ export struct PlayerInputConfig {
   Key right = KeyCode::KK_D;
 
   Key attack = KeyCode::KK_SPACE;
+  Key switch_skill_right = KeyCode::KK_E;
+  Key switch_skill_left = KeyCode::KK_Q;
   Key damage_debug = KeyCode::KK_F1;
   Key heal_debug = KeyCode::KK_F2;
 };
@@ -47,6 +49,12 @@ public:
     intent.attack = step_button(props.attack, prev_attack_);
     prev_attack_ = intent.attack.held;
 
+    intent.switch_skill_left = step_button(props.switch_skill_left, prev_skill_switch_left_);
+    prev_skill_switch_left_ = intent.switch_skill_left.held;
+
+    intent.switch_skill_right = step_button(props.switch_skill_right, prev_skill_switch_right_);
+    prev_skill_switch_right_ = intent.switch_skill_right.held;
+
 #if defined(DEBUG) || defined(_DEBUG)
     intent.damage_debug = step_button(props.damage_debug, prev_damage_);
     intent.heal_debug = step_button(props.heal_debug, prev_heal_);
@@ -63,6 +71,8 @@ private:
   PlayerInputConfig props;
 
   bool prev_attack_ = false;
+  bool prev_skill_switch_left_ = false;
+  bool prev_skill_switch_right_ = false;
   bool prev_damage_ = false;
   bool prev_heal_ = false;
 
