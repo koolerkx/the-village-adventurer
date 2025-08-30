@@ -11,231 +11,66 @@
         </ProjectConfiguration>
     </ItemGroup>
     <ItemGroup>
-        <ClCompile Include="audio\audio_clip.ixx" />
-        <ClCompile Include="audio\audio_manager.cpp" />
-        <ClCompile Include="audio\audio_manager.ixx" />
-        <ClCompile Include="collision\collider.ixx" />
-        <ClCompile Include="collision\collision_handler.ixx" />
-        <ClCompile Include="map\linked_map.ixx" />
-        <ClCompile Include="map\map_manager.cpp" />
-        <ClCompile Include="map\map_manager.ixx" />
-        <ClCompile Include="player\player_factory.ixx" />
-        <ClCompile Include="player\player_keyboard_input.ixx" />
-        <ClCompile Include="player\player_input.ixx" />
-        <ClCompile Include="map\tilemap_object_handler.ixx" />
-        <ClCompile Include="mobs\mobs_manager.cpp" />
-        <ClCompile Include="mobs\mobs_manager.ixx" />
-        <ClCompile Include="mobs\slime.ixx" />
-        <ClCompile Include="object_pool.ixx" />
-        <ClCompile Include="game_context.ixx" />
-        <ClCompile Include="map\TileMap.cpp" />
-        <ClCompile Include="map\TileMap.ixx" />
-        <ClCompile Include="player\player_spec.ixx" />
-        <ClCompile Include="scene\game_scene.cpp" />
-        <ClCompile Include="scene\game_scene.ixx" />
-        <ClCompile Include="scene\game_scene_context.ixx" />
-        <ClCompile Include="scene\result_scene.cpp" />
-        <ClCompile Include="scene\result_scene.ixx" />
-        <ClCompile Include="scene\title_scene.cpp" />
-        <ClCompile Include="scene\title_scene.ixx" />
-        <ClCompile Include="scene.ixx" />
-        <ClCompile Include="scene_manager.cpp" />
-        <ClCompile Include="scene_manager.ixx" />
-        <ClCompile Include="map\tile_repository.cpp" />
-        <ClCompile Include="map\tile_repository.ixx" />
-        <ClCompile Include="map\tinyxml\tinyxml2.cpp" />
-        <ClCompile Include="map\tinyxml\tinyxml2.h" />
-        <ClCompile Include="scene_object\skill_manager.cpp" />
-        <ClCompile Include="scene_object\skill_manager.ixx" />
-        <ClCompile Include="scene_object\camera.ixx" />
-        <ClCompile Include="player\player.cpp" />
-        <ClCompile Include="player\player.ixx" />
-        <ClCompile Include="scene_object\scene_object.ixx" />
-        <ClCompile Include="scene_object\field_object.ixx" />
-        <ClCompile Include="types.ixx" />
-        <ClCompile Include="input\input_handler.cpp" />
-        <ClCompile Include="input\input_handler.ixx" />
-        <ClCompile Include="input\keyboard.cpp" />
-        <ClCompile Include="input\key_logger.cpp" />
-        <ClCompile Include="ui\game_ui.cpp" />
-        <ClCompile Include="ui\game_ui.ixx" />
-        <ClCompile Include="ui\interpolation.ixx" />
-        <ClCompile Include="ui\result_ui.cpp">
-          <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-          <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-          <Optimization>Disabled</Optimization>
-          <SupportJustMyCode>true</SupportJustMyCode>
-          <AssemblerOutput>NoListing</AssemblerOutput>
-          <AssemblerListingLocation>x64\Debug\</AssemblerListingLocation>
-          <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
-          <BrowseInformation>false</BrowseInformation>
-          <BrowseInformationFile>x64\Debug\</BrowseInformationFile>
-          <CompileAs>Default</CompileAs>
-          <UseDynamicDebugging>false</UseDynamicDebugging>
-          <ConformanceMode>true</ConformanceMode>
-          <DiagnosticsFormat>Column</DiagnosticsFormat>
-          <DisableLanguageExtensions>false</DisableLanguageExtensions>
-          <ErrorReporting>Prompt</ErrorReporting>
-          <ExpandAttributedSource>false</ExpandAttributedSource>
-          <ExceptionHandling>Sync</ExceptionHandling>
-          <EnableASAN>false</EnableASAN>
-          <EnableFuzzer>false</EnableFuzzer>
-          <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
-          <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
-          <EnableVectorLength>NotSet</EnableVectorLength>
-          <FloatingPointModel>Precise</FloatingPointModel>
-          <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
-          <GenerateModuleDependencies>false</GenerateModuleDependencies>
-          <GenerateSourceDependencies>false</GenerateSourceDependencies>
-          <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-          <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-          <IntrinsicFunctions>false</IntrinsicFunctions>
-          <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
-          <LanguageStandard>stdcpp23</LanguageStandard>
-          <LanguageStandard_C>Default</LanguageStandard_C>
-          <MinimalRebuild>false</MinimalRebuild>
-          <ModuleDependenciesFile>x64\Debug\</ModuleDependenciesFile>
-          <ModuleOutputFile>x64\Debug\</ModuleOutputFile>
-          <OmitDefaultLibName>false</OmitDefaultLibName>
-          <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
-          <WholeProgramOptimization>false</WholeProgramOptimization>
-          <ObjectFileName>x64\Debug\</ObjectFileName>
-          <CallingConvention>Cdecl</CallingConvention>
-          <ProgramDataBaseFileName>D:\Projects\roguelike-topdown-game\x64\Debug\Game.pdb</ProgramDataBaseFileName>
-          <PrecompiledHeader>NotUsing</PrecompiledHeader>
-          <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-          <PrecompiledHeaderOutputFile>x64\Debug\Game.pch</PrecompiledHeaderOutputFile>
-          <PreprocessToFile>false</PreprocessToFile>
-          <PreprocessKeepComments>false</PreprocessKeepComments>
-          <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
-          <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
-          <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
-          <ShowIncludes>false</ShowIncludes>
-          <SourceDependenciesFile>x64\Debug\</SourceDependenciesFile>
-          <SuppressStartupBanner>true</SuppressStartupBanner>
-          <BufferSecurityCheck>true</BufferSecurityCheck>
-          <SmallerTypeCheck>false</SmallerTypeCheck>
-          <SpectreMitigation>false</SpectreMitigation>
-          <StructMemberAlignment>Default</StructMemberAlignment>
-          <TrackerLogDirectory>x64\Debug\Game.tlog\</TrackerLogDirectory>
-          <TranslateIncludes>false</TranslateIncludes>
-          <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
-          <TreatWarningAsError>false</TreatWarningAsError>
-          <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-          <UseFullPaths>true</UseFullPaths>
-          <WarningLevel>Level4</WarningLevel>
-          <XMLDocumentationFileName>x64\Debug\</XMLDocumentationFileName>
-          <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-          <IntelJCCErratum>false</IntelJCCErratum>
-          <BuildStlModules>false</BuildStlModules>
-          <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
-          <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
-          <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
-          <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
-          <PreprocessorDefinitions>_DEBUG;_LIB;_MBCS;</PreprocessorDefinitions>
-          <SDLCheck>true</SDLCheck>
-          <MultiProcessorCompilation>true</MultiProcessorCompilation>
-          <LibCompiled>true</LibCompiled>
-        </ClCompile>
-        <ClCompile Include="ui\result_ui.ixx">
-          <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-          <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-          <Optimization>Disabled</Optimization>
-          <SupportJustMyCode>true</SupportJustMyCode>
-          <AssemblerOutput>NoListing</AssemblerOutput>
-          <AssemblerListingLocation>x64\Debug\</AssemblerListingLocation>
-          <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
-          <BrowseInformation>false</BrowseInformation>
-          <BrowseInformationFile>x64\Debug\</BrowseInformationFile>
-          <CompileAs>Default</CompileAs>
-          <UseDynamicDebugging>false</UseDynamicDebugging>
-          <ConformanceMode>true</ConformanceMode>
-          <DiagnosticsFormat>Column</DiagnosticsFormat>
-          <DisableLanguageExtensions>false</DisableLanguageExtensions>
-          <ErrorReporting>Prompt</ErrorReporting>
-          <ExpandAttributedSource>false</ExpandAttributedSource>
-          <ExceptionHandling>Sync</ExceptionHandling>
-          <EnableASAN>false</EnableASAN>
-          <EnableFuzzer>false</EnableFuzzer>
-          <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
-          <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
-          <EnableVectorLength>NotSet</EnableVectorLength>
-          <FloatingPointModel>Precise</FloatingPointModel>
-          <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
-          <GenerateModuleDependencies>false</GenerateModuleDependencies>
-          <GenerateSourceDependencies>false</GenerateSourceDependencies>
-          <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-          <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-          <IntrinsicFunctions>false</IntrinsicFunctions>
-          <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
-          <LanguageStandard>stdcpp23</LanguageStandard>
-          <LanguageStandard_C>Default</LanguageStandard_C>
-          <MinimalRebuild>false</MinimalRebuild>
-          <ModuleDependenciesFile>x64\Debug\</ModuleDependenciesFile>
-          <ModuleOutputFile>x64\Debug\</ModuleOutputFile>
-          <OmitDefaultLibName>false</OmitDefaultLibName>
-          <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
-          <WholeProgramOptimization>false</WholeProgramOptimization>
-          <ObjectFileName>x64\Debug\</ObjectFileName>
-          <CallingConvention>Cdecl</CallingConvention>
-          <ProgramDataBaseFileName>D:\Projects\roguelike-topdown-game\x64\Debug\Game.pdb</ProgramDataBaseFileName>
-          <PrecompiledHeader>NotUsing</PrecompiledHeader>
-          <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-          <PrecompiledHeaderOutputFile>x64\Debug\Game.pch</PrecompiledHeaderOutputFile>
-          <PreprocessToFile>false</PreprocessToFile>
-          <PreprocessKeepComments>false</PreprocessKeepComments>
-          <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
-          <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
-          <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
-          <ShowIncludes>false</ShowIncludes>
-          <SourceDependenciesFile>x64\Debug\</SourceDependenciesFile>
-          <SuppressStartupBanner>true</SuppressStartupBanner>
-          <BufferSecurityCheck>true</BufferSecurityCheck>
-          <SmallerTypeCheck>false</SmallerTypeCheck>
-          <SpectreMitigation>false</SpectreMitigation>
-          <StructMemberAlignment>Default</StructMemberAlignment>
-          <TrackerLogDirectory>x64\Debug\Game.tlog\</TrackerLogDirectory>
-          <TranslateIncludes>false</TranslateIncludes>
-          <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
-          <TreatWarningAsError>false</TreatWarningAsError>
-          <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-          <UseFullPaths>true</UseFullPaths>
-          <WarningLevel>Level4</WarningLevel>
-          <XMLDocumentationFileName>x64\Debug\</XMLDocumentationFileName>
-          <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-          <IntelJCCErratum>false</IntelJCCErratum>
-          <BuildStlModules>false</BuildStlModules>
-          <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
-          <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
-          <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
-          <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
-          <PreprocessorDefinitions>_DEBUG;_LIB;_MBCS;</PreprocessorDefinitions>
-          <SDLCheck>true</SDLCheck>
-          <MultiProcessorCompilation>true</MultiProcessorCompilation>
-          <LibCompiled>true</LibCompiled>
-        </ClCompile>
-        <ClCompile Include="ui\title_ui.cpp" />
-        <ClCompile Include="ui\title_ui.ixx" />
-        <ClCompile Include="utils\encode.ixx" />
-        <ClCompile Include="utils\math.ixx" />
-        <ClCompile Include="utils\throttle.ixx" />
+        <ClCompile Include="audio\audio_clip.ixx"/>
+        <ClCompile Include="audio\audio_manager.cpp"/>
+        <ClCompile Include="audio\audio_manager.ixx"/>
+        <ClCompile Include="collision\collider.ixx"/>
+        <ClCompile Include="collision\collision_handler.ixx"/>
+        <ClCompile Include="map\linked_map.ixx"/>
+        <ClCompile Include="map\map_manager.cpp"/>
+        <ClCompile Include="map\map_manager.ixx"/>
+        <ClCompile Include="player\player_factory.ixx"/>
+        <ClCompile Include="player\player_keyboard_input.ixx"/>
+        <ClCompile Include="player\player_input.ixx"/>
+        <ClCompile Include="map\tilemap_object_handler.ixx"/>
+        <ClCompile Include="mobs\mobs_manager.cpp"/>
+        <ClCompile Include="mobs\mobs_manager.ixx"/>
+        <ClCompile Include="mobs\slime.ixx"/>
+        <ClCompile Include="object_pool.ixx"/>
+        <ClCompile Include="game_context.ixx"/>
+        <ClCompile Include="map\TileMap.cpp"/>
+        <ClCompile Include="map\TileMap.ixx"/>
+        <ClCompile Include="player\player_spec.ixx"/>
+        <ClCompile Include="scene\game_scene.cpp"/>
+        <ClCompile Include="scene\game_scene.ixx"/>
+        <ClCompile Include="scene\game_scene_context.ixx"/>
+        <ClCompile Include="scene\result_scene.cpp"/>
+        <ClCompile Include="scene\result_scene.ixx"/>
+        <ClCompile Include="scene\title_scene.cpp"/>
+        <ClCompile Include="scene\title_scene.ixx"/>
+        <ClCompile Include="scene.ixx"/>
+        <ClCompile Include="scene_manager.cpp"/>
+        <ClCompile Include="scene_manager.ixx"/>
+        <ClCompile Include="map\tile_repository.cpp"/>
+        <ClCompile Include="map\tile_repository.ixx"/>
+        <ClCompile Include="map\tinyxml\tinyxml2.cpp"/>
+        <ClCompile Include="map\tinyxml\tinyxml2.h"/>
+        <ClCompile Include="scene_object\skill_manager.cpp"/>
+        <ClCompile Include="scene_object\skill_manager.ixx"/>
+        <ClCompile Include="scene_object\camera.ixx"/>
+        <ClCompile Include="player\player.cpp"/>
+        <ClCompile Include="player\player.ixx"/>
+        <ClCompile Include="scene_object\scene_object.ixx"/>
+        <ClCompile Include="scene_object\field_object.ixx"/>
+        <ClCompile Include="types.ixx"/>
+        <ClCompile Include="input\input_handler.cpp"/>
+        <ClCompile Include="input\input_handler.ixx"/>
+        <ClCompile Include="input\keyboard.cpp"/>
+        <ClCompile Include="input\key_logger.cpp"/>
+        <ClCompile Include="ui\game_ui.cpp"/>
+        <ClCompile Include="ui\game_ui.ixx"/>
+        <ClCompile Include="ui\interpolation.ixx"/>
+        <ClCompile Include="ui\result_ui.cpp"/>
+        <ClCompile Include="ui\result_ui.ixx"/>
+        <ClCompile Include="ui\title_ui.cpp"/>
+        <ClCompile Include="ui\title_ui.ixx"/>
+        <ClCompile Include="utils\encode.ixx"/>
+        <ClCompile Include="utils\math.ixx"/>
+        <ClCompile Include="utils\throttle.ixx"/>
     </ItemGroup>
     <ItemGroup>
-        <ClInclude Include="audio\cri\crisoundxr_le_plugin.h" />
-        <ClInclude Include="audio\cri\cri_adx2le.h" />
-        <ClInclude Include="audio\cri\cri_le_atom.h" />
-        <ClInclude Include="audio\cri\cri_le_atom_asr.h" />
-        <ClInclude Include="audio\cri\cri_le_atom_ex.h" />
-        <ClInclude Include="audio\cri\cri_le_atom_ex_monitor.h" />
-        <ClInclude Include="audio\cri\cri_le_atom_pc.h" />
-        <ClInclude Include="audio\cri\cri_le_atom_wasapi.h" />
-        <ClInclude Include="audio\cri\cri_le_error.h" />
-        <ClInclude Include="audio\cri\cri_le_file_system.h" />
-        <ClInclude Include="audio\cri\cri_le_xpt.h" />
-        <ClInclude Include="audio\GameCueSheet_0.h" />
-        <ClInclude Include="audio\top-down-game_acf.h" />
-        <ClInclude Include="input\keyboard.h" />
-        <ClInclude Include="input\key_logger.h" />
+        <ClInclude Include="input\keyboard.h"/>
+        <ClInclude Include="input\key_logger.h"/>
     </ItemGroup>
     <PropertyGroup Label="Globals">
         <VCProjectVersion>15.0</VCProjectVersion>
@@ -244,7 +79,7 @@
         <RootNamespace>Graphic</RootNamespace>
         <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     </PropertyGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
     <PropertyGroup>
         <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     </PropertyGroup>
@@ -261,16 +96,16 @@
         <WholeProgramOptimization>true</WholeProgramOptimization>
         <CharacterSet>MultiByte</CharacterSet>
     </PropertyGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
     <ImportGroup Label="ExtensionSettings">
     </ImportGroup>
     <ImportGroup Label="Shared">
     </ImportGroup>
     <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
     </ImportGroup>
     <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
     </ImportGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
         <LinkIncremental>true</LinkIncremental>
@@ -318,15 +153,39 @@
             <GenerateDebugInformation>true</GenerateDebugInformation>
         </Link>
     </ItemDefinitionGroup>
-    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
     <ImportGroup Label="ExtensionTargets">
     </ImportGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Graphic\Graphic.vcxproj" />
+        <ProjectReference Include="..\Graphic\Graphic.vcxproj"/>
     </ItemGroup>
     <!-- Warning MSB8028 -->
     <PropertyGroup>
         <IntermediateDirectory>$(Platform)\$(Configuration)\$(ProjectName)\Intermediate\</IntermediateDirectory>
         <OutputDirectory>$(Platform)\$(Configuration)\$(ProjectName)\Output\</OutputDirectory>
     </PropertyGroup>
+    <!--CI-->
+    <PropertyGroup>
+        <CI_BUILD>false</CI_BUILD>
+    </PropertyGroup>
+    <ItemDefinitionGroup Condition="'$(CI_BUILD)'=='true'">
+        <ClCompile>
+            <PreprocessorDefinitions>$(PreprocessorDefinitions);CI_BUILD</PreprocessorDefinitions>
+        </ClCompile>
+    </ItemDefinitionGroup>
+    <ItemGroup Condition="'$(CI_BUILD)'!='true'">
+        <ClInclude Include="audio\cri\crisoundxr_le_plugin.h"/>
+        <ClInclude Include="audio\cri\cri_adx2le.h"/>
+        <ClInclude Include="audio\cri\cri_le_atom.h"/>
+        <ClInclude Include="audio\cri\cri_le_atom_asr.h"/>
+        <ClInclude Include="audio\cri\cri_le_atom_ex.h"/>
+        <ClInclude Include="audio\cri\cri_le_atom_ex_monitor.h"/>
+        <ClInclude Include="audio\cri\cri_le_atom_pc.h"/>
+        <ClInclude Include="audio\cri\cri_le_atom_wasapi.h"/>
+        <ClInclude Include="audio\cri\cri_le_error.h"/>
+        <ClInclude Include="audio\cri\cri_le_file_system.h"/>
+        <ClInclude Include="audio\cri\cri_le_xpt.h"/>
+        <ClInclude Include="audio\GameCueSheet_0.h"/>
+        <ClInclude Include="audio\top-down-game_acf.h"/>
+    </ItemGroup>
 </Project>

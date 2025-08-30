@@ -1,4 +1,5 @@
 module;
+#ifndef CI_BUILD
 // CRI Header
 #include "cri/cri_le_atom_ex.h"
 #include "cri/cri_le_atom_wasapi.h"
@@ -48,3 +49,30 @@ public:
   void PlayWalking(audio_clip clip = audio_clip::walk_grass);
   void StopWalking();
 };
+
+#else
+
+export module game.audio.audio_manager;
+export import game.audio.audio_clip;
+
+import game.types;
+
+export class AudioManager {
+private:
+
+public:
+  AudioManager() {};
+  ~AudioManager() {};
+
+  void OnUpdate() {};
+  void OnFixedUpdate() {};
+  void UpdateListenerPosition(Vector2) {};
+
+  int PlayAudioClip(audio_clip, Vector2, [[maybe_unused]] float v=0) { return 0; };
+  void PlayBGM(audio_clip) {};
+
+  void PlayWalking(audio_clip = audio_clip::walk_grass) {};
+  void StopWalking() {};
+};
+
+#endif

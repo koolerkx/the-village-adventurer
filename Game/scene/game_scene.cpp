@@ -257,7 +257,7 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                                m->timeout = 0;
 
                                float hp = p->Damage(m->damage);
-                               SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::hit_2);
+                               SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::hit_2, p->GetPositionVector());
 
                                if (hp <= 0) {
                                  is_end = true;
