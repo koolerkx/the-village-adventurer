@@ -4,6 +4,7 @@ export module game.scene_manager;
 
 import std;
 import graphic.direct3D;
+import game.audio.audio_manager;
 export import game.scene;
 export import game.context;
 
@@ -23,6 +24,7 @@ private:
 
   inline static std::unique_ptr<IScene> current_scene_{};
   inline static std::unique_ptr<IScene> pending_scene_{};
+  inline static std::unique_ptr<AudioManager> audio_manager_{nullptr};
 
   // Map Related
   std::unique_ptr<TileRepository> tile_repository_{};
@@ -42,6 +44,7 @@ public:
   };
 
   GameConfig* GetGameConfig() const { return game_config_.get(); };
+  AudioManager* GetAudioManager() const { return audio_manager_.get(); };
 
   void SetTileRepository(std::unique_ptr<TileRepository> tr) { tile_repository_ = std::move(tr); };
   TileRepository* GetTileRepository() const { return tile_repository_.get(); };

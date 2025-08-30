@@ -11,6 +11,9 @@
         </ProjectConfiguration>
     </ItemGroup>
     <ItemGroup>
+        <ClCompile Include="audio\audio_clip.ixx" />
+        <ClCompile Include="audio\audio_manager.cpp" />
+        <ClCompile Include="audio\audio_manager.ixx" />
         <ClCompile Include="collision\collider.ixx" />
         <ClCompile Include="collision\collision_handler.ixx" />
         <ClCompile Include="map\linked_map.ixx" />
@@ -60,6 +63,19 @@
         <ClCompile Include="utils\throttle.ixx" />
     </ItemGroup>
     <ItemGroup>
+        <ClInclude Include="audio\cri\crisoundxr_le_plugin.h" />
+        <ClInclude Include="audio\cri\cri_adx2le.h" />
+        <ClInclude Include="audio\cri\cri_le_atom.h" />
+        <ClInclude Include="audio\cri\cri_le_atom_asr.h" />
+        <ClInclude Include="audio\cri\cri_le_atom_ex.h" />
+        <ClInclude Include="audio\cri\cri_le_atom_ex_monitor.h" />
+        <ClInclude Include="audio\cri\cri_le_atom_pc.h" />
+        <ClInclude Include="audio\cri\cri_le_atom_wasapi.h" />
+        <ClInclude Include="audio\cri\cri_le_error.h" />
+        <ClInclude Include="audio\cri\cri_le_file_system.h" />
+        <ClInclude Include="audio\cri\cri_le_xpt.h" />
+        <ClInclude Include="audio\GameCueSheet_0.h" />
+        <ClInclude Include="audio\top-down-game_acf.h" />
         <ClInclude Include="input\keyboard.h" />
         <ClInclude Include="input\key_logger.h" />
     </ItemGroup>

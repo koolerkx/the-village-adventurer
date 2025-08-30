@@ -78,6 +78,8 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   ui_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnFixedUpdate(ctx, delta_time);
   mob_manager_->OnFixedUpdate(ctx, scene_context.get(), delta_time, player_->GetCollider());
+
+  SceneManager::GetInstance().GetAudioManager()->UpdateListenerPosition({player_->GetTransform().position.x, player_->GetTransform().position.y});
 }
 
 void GameScene::OnRender(GameContext* ctx) {
@@ -130,7 +132,8 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
 
 void GameScene::HandlePlayerEnterMapCollision(float, SceneContext* scene_ctx) {
   map_manager_->ForEachActiveLinkedMapsNode(
-    [&player = player_, &map_manager = this->map_manager_, &ui = this->ui_, &mob_manager = this->mob_manager_, &scene_ctx
+    [&player = player_, &map_manager = this->map_manager_, &ui = this->ui_, &mob_manager = this->mob_manager_, &
+      scene_ctx
     ](std::shared_ptr<LinkedMapNode> node) -> void {
       auto map = node->data.lock();
       if (!map) return;
@@ -152,7 +155,7 @@ void GameScene::HandlePlayerEnterMapCollision(float, SceneContext* scene_ctx) {
                                    if (state == CollideState::NOT_COLLIDE) {
                                      // OnEnter
                                      ui->PlayEnterAreaMessage(map->GetMapName());
-                                     
+
                                      scene_ctx->active_map_node = node;
                                      map_manager->EnterNewMap(
                                        node, [&mob_manager, &scene_ctx](std::shared_ptr<LinkedMapNode> new_node) {
@@ -206,6 +209,11 @@ void GameScene::HandleSkillHitMobCollision(float) {
         Vector2 dir = math::GetDirection(skill_center, mob_center);
 
         mob_manager->PushBack(*mob_state, {dir.x, dir.y});
+        Vector2 audio_pos = {
+          mob_center.x + (dir.x * 12.0f),
+          mob_center.y + (dir.y * 12.0f)
+        };
+        SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::hit_1, audio_pos);
       });
     }
   };
@@ -226,6 +234,7 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                                m->timeout = 0;
 
                                p->Damage(m->damage);
+                               SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::hit_2);
                              });
 }
 
