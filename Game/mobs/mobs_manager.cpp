@@ -7,6 +7,7 @@ import graphic.utils.types;
 import game.collision_handler;
 import game.map.field_object;
 import game.map.linked_map;
+import game.scene_manager;
 
 void MobManager::Spawn(TileMapObjectProps props) {
   if (props.type == TileMapObjectType::MOB_SLIME) {
@@ -70,6 +71,10 @@ void MobManager::OnUpdate(GameContext*, float delta_time, OnUpdateProps props) {
       active_area_pool.ForEach([mob_id](ActiveArea& area) {
         if (area.mobs.size() <= 0) return;
         std::erase(area.mobs, mob_id);
+
+        if (area.mobs.size() <= 0) {
+          SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_base);
+        }
       });
       return true;
     }
@@ -100,6 +105,7 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
           const auto mob = mobs_pool_.Get(mob_id);
           mob->is_battle = false;
         }
+        SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_base);
       }
       if (active_area_state[id] == ActiveAreaState::COLLIDING)
         active_area_state[id] = ActiveAreaState::COLLIDE_LAST_FRAME;
@@ -108,6 +114,9 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
                                  [&](Player*, ActiveArea*, collision::CollisionResult) -> void {
                                    if (active_area_state[id] == ActiveAreaState::NOT_COLLIDE) {
                                      // OnEnter
+                                     if (it.mobs.size() > 0) {
+                                       SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_fight_2);
+                                     }
                                      for (ObjectPoolIndexType mob_id : it.mobs) {
                                        const auto mob = mobs_pool_.Get(mob_id);
                                        mob->is_battle = true;

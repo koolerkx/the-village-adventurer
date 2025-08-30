@@ -25,6 +25,8 @@ void GameScene::OnEnter(GameContext* ctx) {
   ctx->allow_control = false;
   std::cout << "GameScene> OnEnter" << std::endl;
 
+  SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_base);
+
   // Scene
   scene_context.reset(new SceneContext());
 

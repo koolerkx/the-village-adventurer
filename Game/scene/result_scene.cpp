@@ -16,6 +16,8 @@ ResultScene::ResultScene(ResultSceneProps props) {
 }
 
 void ResultScene::OnEnter(GameContext* ctx) {
+  SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_result);
+
   result_ui_ = std::make_unique<ResultUI>(ctx);
   result_ui_->SetMinutes(minutes_);
   result_ui_->SetSeconds(seconds_);

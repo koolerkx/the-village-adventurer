@@ -11,6 +11,8 @@ import game.audio.audio_clip;
 void TitleScene::OnEnter(GameContext* ctx) {
   std::cout << "TitleScene> OnEnter" << std::endl;
   title_ui_ = std::make_unique<TitleUI>(ctx);
+
+  SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_title);
 }
 
 void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {

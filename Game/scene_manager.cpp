@@ -14,12 +14,11 @@ SceneManager& SceneManager::Init(std::unique_ptr<IScene> initial_scene,
   SceneManager& sm = GetInstance();
   // Load Map
   sm.SetTileRepository(std::make_unique<TileRepository>(game_config_->map_tile_filepath));
-
+  
+  audio_manager_ = std::make_unique<AudioManager>();
+  
   // Enter initial Scene
   sm.ChangeScene(std::move(initial_scene));
-
-  audio_manager_ = std::make_unique<AudioManager>();
-  audio_manager_->PlayBGM(audio_clip::ambient_2);
   
   return sm;
 }
