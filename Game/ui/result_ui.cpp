@@ -21,7 +21,7 @@ ResultUI::ResultUI(GameContext* ctx) {
   overlay_texture_id_ = tm->Load(L"assets/block_white.png");
 }
 
-void ResultUI::OnUpdate(GameContext* ctx, float delta_time) {
+void ResultUI::OnUpdate(GameContext*, float delta_time) {
   uv_horizontal_offset_ += delta_time * uv_offset_speed_;
 
   movement_acc_ += delta_time;
@@ -44,9 +44,9 @@ void ResultUI::OnUpdate(GameContext* ctx, float delta_time) {
   }
 }
 
-void ResultUI::OnFixedUpdate(GameContext* ctx, float delta_time) {}
+void ResultUI::OnFixedUpdate(GameContext*, float) {}
 
-void ResultUI::OnRender(GameContext* ctx, Camera* camera) {
+void ResultUI::OnRender(GameContext* ctx, Camera*) {
   auto& rr = ctx->render_resource_manager->renderer;
 
   rr->DrawSprite(RenderItem{

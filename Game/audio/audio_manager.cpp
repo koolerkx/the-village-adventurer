@@ -15,18 +15,18 @@ constexpr CriAtomExVector TOP = {0.0f, 0.0f, 1.0f};
 constexpr float MAX_ATTENUATION_DISTANCE = 256.0f;
 
 namespace {
-  static void user_error_callback_func(const CriChar8* errid, CriUint32 p1, CriUint32 p2, CriUint32* parray) {
+  static void user_error_callback_func(const CriChar8* errid, CriUint32 p1, CriUint32 p2, CriUint32*) {
     /* エラー文字列の表示 */
     const CriChar8* error_message = criErr_ConvertIdToMessage(errid, p1, p2);
     std::cout << error_message << std::endl;
   }
 
-  void* user_alloc_func(void* obj, const CriUint32 size) {
+  void* user_alloc_func(void*, const CriUint32 size) {
     void* ptr = malloc(size);
     return ptr;
   }
 
-  void user_free_func(void* obj, void* ptr) {
+  void user_free_func(void*, void* ptr) {
     free(ptr);
   }
 }

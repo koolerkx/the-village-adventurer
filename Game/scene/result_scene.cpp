@@ -19,8 +19,8 @@ void ResultScene::OnEnter(GameContext* ctx) {
   SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_result);
 
   result_ui_ = std::make_unique<ResultUI>(ctx);
-  result_ui_->SetMinutes(minutes_);
-  result_ui_->SetSeconds(seconds_);
+  result_ui_->SetMinutes(static_cast<float>(minutes_));
+  result_ui_->SetSeconds(static_cast<float>(seconds_));
   result_ui_->SetMonsterKilled(monster_killed_);
 }
 
@@ -39,8 +39,8 @@ void ResultScene::OnUpdate(GameContext* ctx, float delta_time) {
     if ((ctx->input_handler->GetKey(KeyCode::KK_DOWN) || ctx->input_handler->GetKey(KeyCode::KK_S))
       && input_throttle_.CanCall()) {
       selected_option_--;
-      selected_option_ += options_count;
-      selected_option_ %= options_count;
+      selected_option_ += static_cast<uint8_t>(options_count);
+      selected_option_ %= static_cast<uint8_t>(options_count);
       result_ui_->SetSelectedOption(selected_option_);
       am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
     }
@@ -73,4 +73,4 @@ void ResultScene::OnRender(GameContext* ctx) {
   result_ui_->OnRender(ctx, {});
 }
 
-void ResultScene::OnExit(GameContext* ctx) {}
+void ResultScene::OnExit(GameContext*) {}
