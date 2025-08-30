@@ -16,7 +16,21 @@ config:
     map:
       files:
         - "map/map_data/town.tmx"
+        - "map/map_data/desert1.tmx"
+        - "map/map_data/desert2.tmx"
+        - "map/map_data/earthcave1.tmx"
+        - "map/map_data/earthcave2.tmx"
+        - "map/map_data/earthcave3.tmx"
         - "map/map_data/forest1.tmx"
         - "map/map_data/forest2.tmx"
+        - "map/map_data/forest3.tmx"
+        - "map/map_data/forest4.tmx"
+        - "map/map_data/grassland0.tmx"
+        - "map/map_data/grassland1.tmx"
+        - "map/map_data/grassland2.tmx"
+        - "map/map_data/grassland3.tmx"
+        - "map/map_data/iceland1.tmx"
+        - "map/map_data/iceland2.tmx"
+        - "map/map_data/iceland3.tmx"
       animate_files:
         - "tbd"
