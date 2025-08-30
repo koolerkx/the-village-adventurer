@@ -47,7 +47,7 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
 
     if (it.attack.held && attack_throttle_.CanCall()) {
       scene_ctx->skill_manager->PlaySkill(
-        SKILL_TYPE::LONG_RANGE_ATTACK,
+        SKILL_TYPE::FIREBALL,
         {transform_.position.x, transform_.position.y},
         scene_object::GetPlayerRotationByDirection(direction_facing_) // Right = 0
       );

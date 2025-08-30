@@ -207,7 +207,7 @@ void GameScene::HandleSkillHitMobCollision(float) {
   std::span skill_colliders_span{skill_colliders.data(), skill_colliders.size()};
 
   auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_, &monster_killed =
-      monster_killed_]
+      monster_killed_, &skill_manager = skill_manager_]
   (MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult) -> void {
     if (!skill_hitbox->hit_mobs.contains(mob_state->id) && !mob::is_death_state(mob_state->state)) {
       skill_hitbox->hit_mobs.insert(mob_state->id);
@@ -230,6 +230,10 @@ void GameScene::HandleSkillHitMobCollision(float) {
           skill_hitbox->data->name,
           skill_hitbox->data->damage
         );
+
+        if (skill_hitbox->data->is_destroy_by_mob) {
+          skill_manager->HandleDestroyCollision(skill_hitbox);
+        }
 
         // attack push back
         Vector2 dir = math::GetDirection(skill_center, mob_center);
@@ -280,9 +284,10 @@ void GameScene::HandleSkillHitWallCollision(float) {
   std::span<Collider<FieldObject>> map_colliders_span{map_colliders.data(), map_colliders.size()};
 
   collision::HandleDetection(skill_colliders_span, map_colliders_span,
-                             [](SkillHitbox* skill, FieldObject*, collision::CollisionResult) -> void {
+                             [&skill_manager = skill_manager_](SkillHitbox* skill, FieldObject*,
+                                                               collision::CollisionResult) -> void {
                                if (skill->data->is_destroy_by_wall) {
-                                 skill->is_destroy_on_next = true;
+                                 skill_manager->HandleDestroyCollision(skill);
                                }
                              });
 }
