@@ -25,7 +25,6 @@ config:
         - "map/map_data/forest2.tmx"
         - "map/map_data/forest3.tmx"
         - "map/map_data/forest4.tmx"
-        - "map/map_data/grassland0.tmx"
         - "map/map_data/grassland1.tmx"
         - "map/map_data/grassland2.tmx"
         - "map/map_data/grassland3.tmx"

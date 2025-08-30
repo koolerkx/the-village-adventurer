@@ -65,6 +65,7 @@
         <ClCompile Include="ui\title_ui.cpp"/>
         <ClCompile Include="ui\title_ui.ixx"/>
         <ClCompile Include="utils\encode.ixx"/>
+        <ClCompile Include="utils\helper.ixx" />
         <ClCompile Include="utils\math.ixx"/>
         <ClCompile Include="utils\throttle.ixx"/>
     </ItemGroup>

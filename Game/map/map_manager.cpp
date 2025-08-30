@@ -13,6 +13,7 @@ import game.collision.collider;
 import game.scene_manager;
 
 import game.utils.encode;
+import game.utils.helper;
 
 import std;
 
@@ -283,8 +284,7 @@ std::vector<std::shared_ptr<LinkedMapNode>> MapManager::ExpandMap(std::shared_pt
   std::shared_ptr<TileMap> current_map = map->data.lock();
   Vector2 map_position = {current_map->GetTransform().position.x, current_map->GetTransform().position.y};
 
-  const std::string type = "forest";
-  MapData* map_data = map_data_preloaded_[type][0].get();
+  std::vector<std::string> keys = helper::GetKeysFromMap(map_data_preloaded_);
 
   std::vector<std::shared_ptr<LinkedMapNode>> new_added_nodes;
   new_added_nodes.reserve(9);
@@ -292,6 +292,8 @@ std::vector<std::shared_ptr<LinkedMapNode>> MapManager::ExpandMap(std::shared_pt
   tile_maps.reserve(tile_maps.size() + 8);
 
   if (map->up.expired()) {
+    std::string key = helper::GetRandomElement(keys);
+    MapData* map_data = helper::GetRandomElement(map_data_preloaded_[key]).get();
     std::shared_ptr<LinkedMapNode> up_map = std::make_shared<LinkedMapNode>();
     up_map->x = map->x;
     up_map->y = map->y - 1;
@@ -307,6 +309,8 @@ std::vector<std::shared_ptr<LinkedMapNode>> MapManager::ExpandMap(std::shared_pt
     up_map->down = map;
   }
   if (map->down.expired()) {
+    std::string key = helper::GetRandomElement(keys);
+    MapData* map_data = helper::GetRandomElement(map_data_preloaded_[key]).get();
     std::shared_ptr<LinkedMapNode> down_map = std::make_shared<LinkedMapNode>();
     down_map->x = map->x;
     down_map->y = map->y + 1;
@@ -322,6 +326,8 @@ std::vector<std::shared_ptr<LinkedMapNode>> MapManager::ExpandMap(std::shared_pt
     down_map->up = map;
   }
   if (map->left.expired()) {
+    std::string key = helper::GetRandomElement(keys);
+    MapData* map_data = helper::GetRandomElement(map_data_preloaded_[key]).get();
     std::shared_ptr<LinkedMapNode> left_map = std::make_shared<LinkedMapNode>();
     left_map->x = map->x - 1;
     left_map->y = map->y;
@@ -337,6 +343,8 @@ std::vector<std::shared_ptr<LinkedMapNode>> MapManager::ExpandMap(std::shared_pt
     left_map->right = map;
   }
   if (map->right.expired()) {
+    std::string key = helper::GetRandomElement(keys);
+    MapData* map_data = helper::GetRandomElement(map_data_preloaded_[key]).get();
     std::shared_ptr<LinkedMapNode> right_map = std::make_shared<LinkedMapNode>();
     right_map->x = map->x + 1;
     right_map->y = map->y;
@@ -357,6 +365,8 @@ std::vector<std::shared_ptr<LinkedMapNode>> MapManager::ExpandMap(std::shared_pt
   auto down = map->down.lock();
   if (up && left && right && down) {
     if (up->left.expired()) {
+      std::string key = helper::GetRandomElement(keys);
+      MapData* map_data = helper::GetRandomElement(map_data_preloaded_[key]).get();
       std::shared_ptr<LinkedMapNode> new_map = std::make_shared<LinkedMapNode>();
       new_map->x = map->x - 1;
       new_map->y = map->y - 1;
@@ -374,6 +384,8 @@ std::vector<std::shared_ptr<LinkedMapNode>> MapManager::ExpandMap(std::shared_pt
       new_map->down = left;
     }
     if (up->right.expired()) {
+      std::string key = helper::GetRandomElement(keys);
+      MapData* map_data = helper::GetRandomElement(map_data_preloaded_[key]).get();
       std::shared_ptr<LinkedMapNode> new_map = std::make_shared<LinkedMapNode>();
       new_map->x = map->x + 1;
       new_map->y = map->y - 1;
@@ -391,6 +403,8 @@ std::vector<std::shared_ptr<LinkedMapNode>> MapManager::ExpandMap(std::shared_pt
       new_map->down = right;
     }
     if (down->left.expired()) {
+      std::string key = helper::GetRandomElement(keys);
+      MapData* map_data = helper::GetRandomElement(map_data_preloaded_[key]).get();
       std::shared_ptr<LinkedMapNode> new_map = std::make_shared<LinkedMapNode>();
       new_map->x = map->x - 1;
       new_map->y = map->y + 1;
@@ -408,6 +422,8 @@ std::vector<std::shared_ptr<LinkedMapNode>> MapManager::ExpandMap(std::shared_pt
       new_map->up = left;
     }
     if (down->right.expired()) {
+      std::string key = helper::GetRandomElement(keys);
+      MapData* map_data = helper::GetRandomElement(map_data_preloaded_[key]).get();
       std::shared_ptr<LinkedMapNode> new_map = std::make_shared<LinkedMapNode>();
       new_map->x = map->x + 1;
       new_map->y = map->y + 1;
@@ -456,6 +472,8 @@ MapManager::MapManager(GameContext* ctx) {
 
   size_t map_idx = tile_maps.size();
   tile_maps.emplace_back(std::make_shared<TileMap>(map_data, texture_id_, base_position));
+
+  map_data_preloaded_.erase(default_map);
 
   std::shared_ptr<LinkedMapNode> base_map_node = std::make_shared<LinkedMapNode>();
   base_map_node->x = 0;
