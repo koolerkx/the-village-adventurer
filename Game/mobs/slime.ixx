@@ -217,7 +217,7 @@ export namespace mob {
     }
 
     void HandleMovement(MobState& state, Vector2 destination) {
-      constexpr float SPEED = 25.0f; // todo: extract as config
+      constexpr float SPEED = 40.0f; // todo: extract as config
       state.velocity.x = 0;
 
       Vector2 mob_center = {
@@ -264,8 +264,8 @@ export namespace mob {
             .x = 0, .y = 0, .radius = 8
           }
         },
-        .damage = 10,
-        .attack_delay = 0.2f,
+        .damage = 5,
+        .attack_delay = 0.5f,
         .timeout = 0.8f,
         .is_animated = false,
         .hit_player = false,
