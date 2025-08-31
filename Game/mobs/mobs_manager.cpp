@@ -3,6 +3,8 @@ module;
 module game.mobs_manager;
 
 import game.mobs.slime;
+import game.mobs.dummy;
+
 import graphic.utils.types;
 import game.collision_handler;
 import game.map.field_object;
@@ -12,6 +14,13 @@ import game.scene_manager;
 void MobManager::Spawn(TileMapObjectProps props) {
   if (props.type == TileMapObjectType::MOB_SLIME) {
     const auto insert_result = mobs_pool_.Insert(mob::slime::MakeMob(props));
+    const auto inserted = mobs_pool_.Get(insert_result.value());
+    inserted->collider.owner = inserted;              // HACK: workaround handle the object lifecycle
+    inserted->attack_range_collider.owner = inserted; // HACK: workaround handle the object lifecycle
+    inserted->id = insert_result.value();
+  }
+  if (props.type == TileMapObjectType::MOB_DUMMY) {
+    const auto insert_result = mobs_pool_.Insert(mob::dummy::MakeMob(props));
     const auto inserted = mobs_pool_.Get(insert_result.value());
     inserted->collider.owner = inserted;              // HACK: workaround handle the object lifecycle
     inserted->attack_range_collider.owner = inserted; // HACK: workaround handle the object lifecycle
@@ -59,6 +68,10 @@ void MobManager::OnUpdate(GameContext*, float delta_time, OnUpdateProps props) {
     switch (it.type) {
     case MobType::SLIME:
       mob::slime::UpdateMob(it, delta_time, props.player_position);
+      break;
+    case MobType::DUMMY:
+      mob::dummy::UpdateMob(it, delta_time, props.player_position);
+      break;
     default:
       break;
     }
@@ -189,6 +202,9 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
                                      inserted->collider.owner = inserted;
                                      break;
                                    }
+                                   case MobType::DUMMY: {
+                                     break;
+                                   }
                                    default:
                                      break;
                                    }
@@ -208,6 +224,9 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
     switch (it.type) {
     case MobType::SLIME:
       item = mob::slime::GetRenderInstanceItem(it);
+      break;
+    case MobType::DUMMY:
+      item = mob::dummy::GetRenderInstanceItem(it);
       break;
     default:
       break;
@@ -300,6 +319,7 @@ int MobManager::MakeDamage(MobState& mob_state, int damage,
     switch (mob_state.type) {
     case MobType::SLIME:
       mob::slime::HandleDeath(mob_state);
+      break;
     default:
       break;
     }
@@ -311,6 +331,8 @@ int MobManager::MakeDamage(MobState& mob_state, int damage,
   // Mob get hurt
   case MobType::SLIME:
     mob::slime::HandleHurt(mob_state);
+  case MobType::DUMMY:
+    mob::dummy::HandleHurt(mob_state);
   default:
     break;
   }
@@ -321,6 +343,8 @@ int MobManager::MakeDamage(MobState& mob_state, int damage,
 }
 
 void MobManager::PushBack(MobState& mob_state, Vector2 direction) {
+  if (mob_state.type == MobType::DUMMY) return;
+
   constexpr float speed = 75;
 
   // give impulse velocity
@@ -366,6 +390,9 @@ void MobManager::SyncCollider(MobState& mob_state) {
   switch (mob_state.type) {
   case MobType::SLIME:
     mob::slime::SyncCollider(mob_state);
+    break;
+  case MobType::DUMMY:
+    mob::dummy::SyncCollider(mob_state);
     break;
   default:
     break;

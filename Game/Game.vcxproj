@@ -19,6 +19,7 @@
         <ClCompile Include="map\linked_map.ixx"/>
         <ClCompile Include="map\map_manager.cpp"/>
         <ClCompile Include="map\map_manager.ixx"/>
+        <ClCompile Include="mobs\dummy.ixx" />
         <ClCompile Include="player\player_factory.ixx"/>
         <ClCompile Include="player\player_keyboard_input.ixx"/>
         <ClCompile Include="player\player_input.ixx"/>
