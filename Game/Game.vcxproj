@@ -70,6 +70,7 @@
         <ClCompile Include="utils\helper.ixx"/>
         <ClCompile Include="utils\math.ixx"/>
         <ClCompile Include="utils\throttle.ixx"/>
+        <ClCompile Include="mobs\slime_fire.ixx" />
     </ItemGroup>
     <ItemGroup>
         <ClInclude Include="input\keyboard.h"/>

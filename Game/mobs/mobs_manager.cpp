@@ -5,6 +5,7 @@ module game.mobs_manager;
 import game.mobs.slime;
 import game.mobs.slime_green;
 import game.mobs.dummy;
+import game.mobs.slime_fire;
 
 import graphic.utils.types;
 import game.collision_handler;
@@ -22,6 +23,13 @@ void MobManager::Spawn(TileMapObjectProps props) {
   }
   if (props.type == TileMapObjectType::MOB_SLIME_GREEN) {
     const auto insert_result = mobs_pool_.Insert(mob::slime_green::MakeMob(props));
+    const auto inserted = mobs_pool_.Get(insert_result.value());
+    inserted->collider.owner = inserted;              // HACK: workaround handle the object lifecycle
+    inserted->attack_range_collider.owner = inserted; // HACK: workaround handle the object lifecycle
+    inserted->id = insert_result.value();
+  }
+  if (props.type == TileMapObjectType::MOB_SLIME_FIRE) {
+    const auto insert_result = mobs_pool_.Insert(mob::slime_fire::MakeMob(props));
     const auto inserted = mobs_pool_.Get(insert_result.value());
     inserted->collider.owner = inserted;              // HACK: workaround handle the object lifecycle
     inserted->attack_range_collider.owner = inserted; // HACK: workaround handle the object lifecycle
@@ -80,6 +88,9 @@ void MobManager::OnUpdate(GameContext*, float delta_time, OnUpdateProps props) {
     case MobType::SLIME_GREEN:
       mob::slime_green::UpdateMob(it, delta_time, props.player_position);
       break;
+    case MobType::SLIME_FIRE:
+      mob::slime_fire::UpdateMob(it, delta_time, props.player_position);
+      break;
     case MobType::DUMMY:
       mob::dummy::UpdateMob(it, delta_time, props.player_position);
       break;
@@ -113,10 +124,15 @@ void MobManager::OnUpdate(GameContext*, float delta_time, OnUpdateProps props) {
   mob_hitbox_pool_.ForEach([delta_time](MobHitBox& it) {
     it.timeout -= delta_time;
     it.attack_delay -= delta_time;
+
+    it.transform.position.x += it.velocity.x * delta_time;
+    it.transform.position.y += it.velocity.y * delta_time;
+    it.collider.position.x += it.velocity.x * delta_time;
+    it.collider.position.y += it.velocity.y * delta_time;
   });
 
   mob_hitbox_pool_.RemoveIf([](MobHitBox& it) {
-    return !it.is_playing && it.timeout <= 0;
+    return (!it.is_playing && it.timeout <= 0) || it.is_destroy_on_next;
   });
 }
 
@@ -158,6 +174,22 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
     });
 
   auto map_colliders = scene_ctx->active_map_node->data.lock()->GetFiledObjectColliders();
+
+  std::vector<Collider<MobHitBox>> hit_boxes{};
+  mob_hitbox_pool_.ForEach([&hit_boxes](MobHitBox& m) {
+    if (m.is_destroy_by_wall) {
+      hit_boxes.push_back(m.collider);
+    }
+  });
+  
+  std::span<Collider<MobHitBox>> mob_hitbox_colliders_span{hit_boxes.data(), hit_boxes.size()};
+  std::span<Collider<FieldObject>> map_colliders_span{map_colliders.data(), map_colliders.size()};
+  
+  collision::HandleDetection(mob_hitbox_colliders_span, map_colliders_span, [](MobHitBox* mob_hit_box, FieldObject*,
+                                                                               collision::CollisionResult) -> void {
+    mob_hit_box->is_destroy_on_next = true;
+  });
+
   mobs_pool_.ForEach([delta_time, map_colliders, player_collider, this](MobState& it) {
     if (mob::is_death_state(it.state)) return;
     static constexpr float active_range_radius = 512.0f;
@@ -197,7 +229,7 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
     // XXX: Note that attack state will overwrite moving state, the state will jump between two state when its in cooldown
     if (!mob::is_attack_state(it.state) && it.attack_cooldown <= 0) {
       collision::HandleDetection(player_collider, std::span(&it.attack_range_collider, 1),
-                                 [this](Player*, MobState* m, collision::CollisionResult) -> void {
+                                 [this](Player* p, MobState* m, collision::CollisionResult) -> void {
                                    m->attack_cooldown = 2.0f;
 
                                    m->state = MobActionState::ATTACK_DOWN;
@@ -210,6 +242,17 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
                                    case
                                    MobType::SLIME: {
                                      auto insert_result = mob_hitbox_pool_.Insert(mob::slime::GetHitBox(*m));
+                                     const auto inserted = mob_hitbox_pool_.Get(insert_result.value());
+                                     inserted->collider.owner = inserted;
+                                     break;
+                                   }
+                                   case MobType::SLIME_FIRE: {
+                                     auto dir = math::GetDirection(
+                                       {m->collider.position.x, m->collider.position.y},
+                                       p->GetPositionVector()
+                                     );
+
+                                     auto insert_result = mob_hitbox_pool_.Insert(mob::slime_fire::GetHitBox(*m, dir));
                                      const auto inserted = mob_hitbox_pool_.Get(insert_result.value());
                                      inserted->collider.owner = inserted;
                                      break;
@@ -246,6 +289,9 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
     case MobType::SLIME_GREEN:
       item = mob::slime_green::GetRenderInstanceItem(it);
       break;
+    case MobType::SLIME_FIRE:
+      item = mob::slime_fire::GetRenderInstanceItem(it);
+      break;
     case MobType::DUMMY:
       item = mob::dummy::GetRenderInstanceItem(it);
       break;
@@ -256,6 +302,20 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
       item.color = color::red;
     }
 
+    render_items.emplace_back(item);
+  });
+
+  mob_hitbox_pool_.ForEach([&render_items](MobHitBox& it) {
+    if (!it.is_show_sprite) return;
+
+    RenderInstanceItem item = {
+      .transform = it.transform,
+      .uv = {
+        {it.uv.position.x, it.uv.position.y},
+        {it.uv.size.x, it.uv.size.y},
+      },
+      .color = it.color,
+    };
     render_items.emplace_back(item);
   });
 
@@ -344,6 +404,9 @@ int MobManager::MakeDamage(MobState& mob_state, int damage,
     case MobType::SLIME_GREEN:
       mob::slime_green::HandleDeath(mob_state);
       break;
+    case MobType::SLIME_FIRE:
+      mob::slime_fire::HandleDeath(mob_state);
+      break;
     default:
       break;
     }
@@ -357,6 +420,8 @@ int MobManager::MakeDamage(MobState& mob_state, int damage,
     mob::slime::HandleHurt(mob_state);
   case MobType::SLIME_GREEN:
     mob::slime_green::HandleHurt(mob_state);
+  case MobType::SLIME_FIRE:
+    mob::slime_fire::HandleHurt(mob_state);
   case MobType::DUMMY:
     mob::dummy::HandleHurt(mob_state);
   default:
@@ -419,6 +484,9 @@ void MobManager::SyncCollider(MobState& mob_state) {
     break;
   case MobType::SLIME_GREEN:
     mob::slime_green::SyncCollider(mob_state);
+    break;
+  case MobType::SLIME_FIRE:
+    mob::slime_fire::SyncCollider(mob_state);
     break;
   case MobType::DUMMY:
     mob::dummy::SyncCollider(mob_state);

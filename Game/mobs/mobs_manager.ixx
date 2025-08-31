@@ -13,6 +13,7 @@ import game.types;
 import game.scene_game.context;
 import game.player;
 import game.math;
+
 export enum class MobActionState: char {
   IDLE_LEFT,
   IDLE_RIGHT,
@@ -46,6 +47,7 @@ export enum class MobType: char {
   NONE,
   SLIME,
   SLIME_GREEN,
+  SLIME_FIRE,
   DUMMY,
 };
 
@@ -146,6 +148,14 @@ export struct MobHitBox {
   bool is_animated = false;
 
   bool hit_player; // hit player only once
+
+  bool is_destroy_by_wall = false;
+  bool is_destroy_on_next = false;
+  bool is_show_sprite = false;
+  float moving_speed = 0;
+  Vector2 velocity = {0, 0};
+  float rotation_radian = 0;
+  COLOR color = color::white;
 };
 
 export struct OnUpdateProps {
