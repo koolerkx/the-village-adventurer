@@ -62,6 +62,10 @@ void MobManager::OnUpdate(GameContext*, float delta_time, OnUpdateProps props) {
     default:
       break;
     }
+
+    if (it.is_show_hurt_frame_timer >= 0) {
+      it.is_show_hurt_frame_timer -= delta_time;
+    }
   });
 
   // Remove inactive, dead mobs
@@ -208,6 +212,9 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
     default:
       break;
     }
+    if (it.is_show_hurt_frame_timer >= 0) {
+      item.color = color::red;
+    }
 
     render_items.emplace_back(item);
   });
@@ -289,6 +296,7 @@ int MobManager::MakeDamage(MobState& mob_state, int damage,
                            std::move_only_function<void()> post_action) {
   mob_state.hp -= damage;
   if (mob_state.hp <= 0) {
+    // Mob die
     switch (mob_state.type) {
     case MobType::SLIME:
       mob::slime::HandleDeath(mob_state);
@@ -300,11 +308,13 @@ int MobManager::MakeDamage(MobState& mob_state, int damage,
   }
 
   switch (mob_state.type) {
+  // Mob get hurt
   case MobType::SLIME:
     mob::slime::HandleHurt(mob_state);
   default:
     break;
   }
+  mob_state.is_show_hurt_frame_timer = 0.1f;
   post_action();
 
   return mob_state.hp;

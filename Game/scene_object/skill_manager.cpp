@@ -6,7 +6,7 @@ module game.scene_object.skill;
 const std::wstring texture_path = L"assets/attack.png"; // TODO: extract
 
 SkillManager::SkillManager(GameContext* ctx) {
-  scene_object::LoadTexture(texture_id, texture_path, ctx->render_resource_manager->texture_manager.get());\
+  scene_object::LoadTexture(texture_id, texture_path, ctx->render_resource_manager->texture_manager.get());
 }
 
 void SkillManager::OnUpdate(GameContext*, float delta_time) {
