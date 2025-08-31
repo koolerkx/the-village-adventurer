@@ -293,7 +293,7 @@ export namespace mob {
       // Change the state to moving if needed
       mob_state.moving_cooldown = mob_state.moving_cooldown >= 0.0f ? mob_state.moving_cooldown - delta_time : -1;
       if (is_idle_state(mob_state.state) && mob_state.moving_cooldown < 0.0f) {
-        constexpr float MOVING_COOLDOWN = 2.0;
+        constexpr float MOVING_COOLDOWN = 0.0;
         mob_state.moving_cooldown += MOVING_COOLDOWN;
         if (mob_state.is_battle) {
           mob_state.state = MobActionState::MOVING_DOWN;
