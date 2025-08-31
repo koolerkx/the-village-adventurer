@@ -45,6 +45,7 @@ export enum class MobActionState: char {
 export enum class MobType: char {
   NONE,
   SLIME,
+  DUMMY,
 };
 
 export struct MobState {

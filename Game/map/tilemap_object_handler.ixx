@@ -7,6 +7,7 @@ import game.types;
 
 export enum class TileMapObjectType: char {
   MOB_SLIME,
+  MOB_DUMMY,
   TRIGGER_ACTIVE_AREA,
   NONE
 };
@@ -29,12 +30,17 @@ export namespace tilemap_object_handler {
     if (type == "slime") {
       return TileMapObjectType::MOB_SLIME;
     }
+    if (type == "dummy") {
+      return TileMapObjectType::MOB_DUMMY;
+    }
     return TileMapObjectType::NONE;
   }
 
   std::vector<TileMapObjectProps> GetMobProps(std::vector<TileMapObjectProps> props, Vector2 offset_position) {
     return props
-      | std::views::filter([](const auto& it) { return it.type == TileMapObjectType::MOB_SLIME; })
+      | std::views::filter([](const auto& it) {
+        return it.type == TileMapObjectType::MOB_SLIME || it.type == TileMapObjectType::MOB_DUMMY;
+      })
       | std::views::transform([offset_position](auto& it) {
         it.x += offset_position.x;
         it.y += offset_position.y;
