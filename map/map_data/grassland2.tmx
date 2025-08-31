@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" class="１" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="22">
+<map version="1.10" tiledversion="1.11.2" class="無邊原野" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="22">
  <tileset firstgid="1" source="../assets/field.tsx"/>
  <layer id="1" name="Ground" width="32" height="32">
   <data encoding="csv">
@@ -150,16 +150,7 @@
   <object id="2" name="Slime1" type="slime" x="176" y="176">
    <point/>
   </object>
-  <object id="5" name="Slime4" type="slime" x="176" y="320">
-   <point/>
-  </object>
-  <object id="8" name="Slime1" type="slime" x="176" y="112">
-   <point/>
-  </object>
   <object id="9" name="Slime1" type="slime" x="96" y="112">
-   <point/>
-  </object>
-  <object id="10" name="Slime1" type="slime" x="96" y="176">
    <point/>
   </object>
   <object id="11" name="Slime1" type="slime" x="176" y="384">
@@ -168,31 +159,16 @@
   <object id="12" name="Slime1" type="slime" x="96" y="320">
    <point/>
   </object>
-  <object id="13" name="Slime1" type="slime" x="96" y="384">
-   <point/>
-  </object>
   <object id="14" name="Slime1" type="slime" x="416" y="176">
-   <point/>
-  </object>
-  <object id="15" name="Slime1" type="slime" x="416" y="112">
    <point/>
   </object>
   <object id="16" name="Slime1" type="slime" x="336" y="112">
    <point/>
   </object>
-  <object id="17" name="Slime1" type="slime" x="336" y="176">
-   <point/>
-  </object>
   <object id="18" name="Slime1" type="slime" x="416" y="384">
    <point/>
   </object>
-  <object id="19" name="Slime1" type="slime" x="416" y="320">
-   <point/>
-  </object>
   <object id="20" name="Slime1" type="slime" x="336" y="320">
-   <point/>
-  </object>
-  <object id="21" name="Slime1" type="slime" x="336" y="384">
    <point/>
   </object>
  </objectgroup>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" class="森１" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="12">
+<map version="1.10" tiledversion="1.11.2" class="旅人小道" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="13">
  <tileset firstgid="1" source="../assets/field.tsx"/>
  <layer id="1" name="Ground" width="32" height="32">
   <data encoding="csv">
@@ -147,28 +147,19 @@
  </layer>
  <objectgroup id="6" name="Object">
   <object id="1" name="active_area" type="trigger_area" x="64" y="64" width="384" height="384"/>
-  <object id="2" name="Slime1" type="slime" x="176" y="176">
+  <object id="2" name="Slime1" type="slime" x="163.44" y="183.707">
    <point/>
   </object>
-  <object id="3" name="Slime2" type="slime" x="320" y="176">
+  <object id="3" name="Slime2" type="slime" x="361.677" y="179.711">
    <point/>
   </object>
-  <object id="4" name="Slime3" type="slime" x="320" y="304">
+  <object id="4" name="Slime3" type="slime" x="369.099" y="266.605">
    <point/>
   </object>
-  <object id="5" name="Slime4" type="slime" x="176" y="304">
+  <object id="8" name="Slime1" type="slime" x="250.833" y="155.761">
    <point/>
   </object>
-  <object id="8" name="Slime1" type="slime" x="224" y="208">
-   <point/>
-  </object>
-  <object id="9" name="Slime1" type="slime" x="288" y="208">
-   <point/>
-  </object>
-  <object id="10" name="Slime1" type="slime" x="224" y="256">
-   <point/>
-  </object>
-  <object id="11" name="Slime1" type="slime" x="288" y="256">
+  <object id="10" name="Slime1" type="slime" x="188.032" y="282.548">
    <point/>
   </object>
  </objectgroup>
