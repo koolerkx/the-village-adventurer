@@ -159,7 +159,7 @@
   <object id="8" name="Slime1" type="slime_green" x="250.833" y="155.761">
    <point/>
   </object>
-  <object id="10" name="Slime1" type="slime" x="188.032" y="282.548">
+  <object id="10" name="Slime1" type="slime_fire" x="188.032" y="282.548">
    <point/>
   </object>
  </objectgroup>

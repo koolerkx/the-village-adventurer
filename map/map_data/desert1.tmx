@@ -150,10 +150,10 @@
   <object id="2" name="Slime1" type="slime" x="176" y="176">
    <point/>
   </object>
-  <object id="3" name="Slime2" type="slime" x="320" y="176">
+  <object id="3" name="Slime2" type="slime_fire" x="320" y="176">
    <point/>
   </object>
-  <object id="4" name="Slime3" type="slime" x="320" y="320">
+  <object id="4" name="Slime3" type="slime_fire" x="320" y="320">
    <point/>
   </object>
   <object id="5" name="Slime4" type="slime" x="176" y="320">

@@ -153,19 +153,19 @@
   <object id="3" name="Slime2" type="slime" x="256" y="96">
    <point/>
   </object>
-  <object id="4" name="Slime3" type="slime" x="240" y="336">
+  <object id="4" name="Slime3" type="slime_fire" x="240" y="336">
    <point/>
   </object>
   <object id="5" name="Slime4" type="slime" x="192" y="304">
    <point/>
   </object>
-  <object id="10" name="Slime4" type="slime" x="368" y="240">
+  <object id="10" name="Slime4" type="slime_fire" x="368" y="240">
    <point/>
   </object>
   <object id="11" name="Slime4" type="slime" x="320" y="256">
    <point/>
   </object>
-  <object id="12" name="Slime1" type="slime" x="96" y="240">
+  <object id="12" name="Slime1" type="slime_fire" x="96" y="240">
    <point/>
   </object>
   <object id="13" name="Slime1" type="slime" x="208" y="384">
