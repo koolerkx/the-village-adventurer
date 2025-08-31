@@ -13,7 +13,7 @@ import game.audio.audio_clip;
 constexpr CriAtomExVector FRONT = {0.0f, 1.0f, 0.0f};
 constexpr CriAtomExVector TOP = {0.0f, 0.0f, 1.0f};
 constexpr float MAX_ATTENUATION_DISTANCE = 256.0f;
-constexpr float SOUND_SPREAD = 0.35;
+constexpr float SOUND_SPREAD = 0.35f;
 
 namespace {
   static void user_error_callback_func(const CriChar8* errid, CriUint32 p1, CriUint32 p2, CriUint32*) {
@@ -46,7 +46,7 @@ AudioManager::AudioManager() {
 
   CriAtomExStandardVoicePoolConfig vp_cfg{};
   criAtomExVoicePool_SetDefaultConfigForStandardVoicePool(&vp_cfg);
-  vp_cfg.num_voices = 128;
+  vp_cfg.num_voices = 256;
   vp_cfg.player_config.max_sampling_rate = 70000;
   pool_ = criAtomExVoicePool_AllocateStandardVoicePool(&vp_cfg, nullptr, 0);
 

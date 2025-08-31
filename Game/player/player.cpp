@@ -60,7 +60,7 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
       SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::equip_2, audio_pos, 0.5);
     }
     if (it.switch_skill_right.pressed && skill_select_throttle_.CanCall()) {
-      selected_skill_id_ = (selected_skill_id_ - 1 + AVAILABLE_SKILLS.size()) % AVAILABLE_SKILLS.size();
+      selected_skill_id_ = (selected_skill_id_ - 1 + AVAILABLE_SKILLS.size()) % static_cast<int>(AVAILABLE_SKILLS.size());
       selected_skill_type_ = AVAILABLE_SKILLS[selected_skill_id_];
 
       Vector2 audio_pos = {
