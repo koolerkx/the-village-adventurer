@@ -150,7 +150,7 @@
   <object id="2" name="Slime1" type="slime" x="224" y="96">
    <point/>
   </object>
-  <object id="3" name="Slime2" type="slime" x="400" y="192">
+  <object id="3" name="Slime2" type="slime_green" x="400" y="192">
    <point/>
   </object>
   <object id="4" name="Slime3" type="slime" x="320" y="320">
@@ -162,7 +162,7 @@
   <object id="8" name="Slime3" type="slime" x="176" y="320">
    <point/>
   </object>
-  <object id="9" name="Slime2" type="slime" x="240" y="368">
+  <object id="9" name="Slime2" type="slime_green" x="240" y="368">
    <point/>
   </object>
  </objectgroup>

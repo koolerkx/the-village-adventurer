@@ -147,10 +147,10 @@
  </layer>
  <objectgroup id="6" name="Object">
   <object id="1" name="active_area" type="trigger_area" x="64" y="64" width="384" height="384"/>
-  <object id="2" name="Slime1" type="slime" x="176" y="176">
+  <object id="2" name="Slime1" type="slime_green" x="176" y="176">
    <point/>
   </object>
-  <object id="9" name="Slime1" type="slime" x="96" y="112">
+  <object id="9" name="Slime1" type="slime_green" x="96" y="112">
    <point/>
   </object>
   <object id="11" name="Slime1" type="slime" x="176" y="384">
@@ -165,7 +165,7 @@
   <object id="16" name="Slime1" type="slime" x="336" y="112">
    <point/>
   </object>
-  <object id="18" name="Slime1" type="slime" x="416" y="384">
+  <object id="18" name="Slime1" type="slime_green" x="416" y="384">
    <point/>
   </object>
   <object id="20" name="Slime1" type="slime" x="336" y="320">

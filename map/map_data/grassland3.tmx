@@ -153,10 +153,10 @@
   <object id="3" name="Slime2" type="slime" x="361.677" y="179.711">
    <point/>
   </object>
-  <object id="4" name="Slime3" type="slime" x="369.099" y="266.605">
+  <object id="4" name="Slime3" type="slime_green" x="369.099" y="266.605">
    <point/>
   </object>
-  <object id="8" name="Slime1" type="slime" x="250.833" y="155.761">
+  <object id="8" name="Slime1" type="slime_green" x="250.833" y="155.761">
    <point/>
   </object>
   <object id="10" name="Slime1" type="slime" x="188.032" y="282.548">

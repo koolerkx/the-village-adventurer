@@ -296,8 +296,5 @@
   <object id="9" name="Dummy" type="dummy" x="400" y="80">
    <point/>
   </object>
-  <object id="10" name="Dummy" type="slime_green" x="249.636" y="186.727">
-   <point/>
-  </object>
  </objectgroup>
 </map>
