@@ -3,6 +3,7 @@ module;
 module game.mobs_manager;
 
 import game.mobs.slime;
+import game.mobs.slime_green;
 import game.mobs.dummy;
 
 import graphic.utils.types;
@@ -14,6 +15,13 @@ import game.scene_manager;
 void MobManager::Spawn(TileMapObjectProps props) {
   if (props.type == TileMapObjectType::MOB_SLIME) {
     const auto insert_result = mobs_pool_.Insert(mob::slime::MakeMob(props));
+    const auto inserted = mobs_pool_.Get(insert_result.value());
+    inserted->collider.owner = inserted;              // HACK: workaround handle the object lifecycle
+    inserted->attack_range_collider.owner = inserted; // HACK: workaround handle the object lifecycle
+    inserted->id = insert_result.value();
+  }
+  if (props.type == TileMapObjectType::MOB_SLIME_GREEN) {
+    const auto insert_result = mobs_pool_.Insert(mob::slime_green::MakeMob(props));
     const auto inserted = mobs_pool_.Get(insert_result.value());
     inserted->collider.owner = inserted;              // HACK: workaround handle the object lifecycle
     inserted->attack_range_collider.owner = inserted; // HACK: workaround handle the object lifecycle
@@ -68,6 +76,9 @@ void MobManager::OnUpdate(GameContext*, float delta_time, OnUpdateProps props) {
     switch (it.type) {
     case MobType::SLIME:
       mob::slime::UpdateMob(it, delta_time, props.player_position);
+      break;
+    case MobType::SLIME_GREEN:
+      mob::slime_green::UpdateMob(it, delta_time, props.player_position);
       break;
     case MobType::DUMMY:
       mob::dummy::UpdateMob(it, delta_time, props.player_position);
@@ -196,8 +207,15 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
                                    m->is_loop = false;
 
                                    switch (m->type) {
-                                   case MobType::SLIME: {
+                                   case
+                                   MobType::SLIME: {
                                      auto insert_result = mob_hitbox_pool_.Insert(mob::slime::GetHitBox(*m));
+                                     const auto inserted = mob_hitbox_pool_.Get(insert_result.value());
+                                     inserted->collider.owner = inserted;
+                                     break;
+                                   }
+                                   case MobType::SLIME_GREEN: {
+                                     auto insert_result = mob_hitbox_pool_.Insert(mob::slime_green::GetHitBox(*m));
                                      const auto inserted = mob_hitbox_pool_.Get(insert_result.value());
                                      inserted->collider.owner = inserted;
                                      break;
@@ -224,6 +242,9 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
     switch (it.type) {
     case MobType::SLIME:
       item = mob::slime::GetRenderInstanceItem(it);
+      break;
+    case MobType::SLIME_GREEN:
+      item = mob::slime_green::GetRenderInstanceItem(it);
       break;
     case MobType::DUMMY:
       item = mob::dummy::GetRenderInstanceItem(it);
@@ -320,6 +341,9 @@ int MobManager::MakeDamage(MobState& mob_state, int damage,
     case MobType::SLIME:
       mob::slime::HandleDeath(mob_state);
       break;
+    case MobType::SLIME_GREEN:
+      mob::slime_green::HandleDeath(mob_state);
+      break;
     default:
       break;
     }
@@ -331,6 +355,8 @@ int MobManager::MakeDamage(MobState& mob_state, int damage,
   // Mob get hurt
   case MobType::SLIME:
     mob::slime::HandleHurt(mob_state);
+  case MobType::SLIME_GREEN:
+    mob::slime_green::HandleHurt(mob_state);
   case MobType::DUMMY:
     mob::dummy::HandleHurt(mob_state);
   default:
@@ -390,6 +416,9 @@ void MobManager::SyncCollider(MobState& mob_state) {
   switch (mob_state.type) {
   case MobType::SLIME:
     mob::slime::SyncCollider(mob_state);
+    break;
+  case MobType::SLIME_GREEN:
+    mob::slime_green::SyncCollider(mob_state);
     break;
   case MobType::DUMMY:
     mob::dummy::SyncCollider(mob_state);

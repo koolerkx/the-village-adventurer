@@ -19,7 +19,8 @@
         <ClCompile Include="map\linked_map.ixx"/>
         <ClCompile Include="map\map_manager.cpp"/>
         <ClCompile Include="map\map_manager.ixx"/>
-        <ClCompile Include="mobs\dummy.ixx" />
+        <ClCompile Include="mobs\dummy.ixx"/>
+        <ClCompile Include="mobs\slime_green.ixx"/>
         <ClCompile Include="player\player_factory.ixx"/>
         <ClCompile Include="player\player_keyboard_input.ixx"/>
         <ClCompile Include="player\player_input.ixx"/>
@@ -66,7 +67,7 @@
         <ClCompile Include="ui\title_ui.cpp"/>
         <ClCompile Include="ui\title_ui.ixx"/>
         <ClCompile Include="utils\encode.ixx"/>
-        <ClCompile Include="utils\helper.ixx" />
+        <ClCompile Include="utils\helper.ixx"/>
         <ClCompile Include="utils\math.ixx"/>
         <ClCompile Include="utils\throttle.ixx"/>
     </ItemGroup>
