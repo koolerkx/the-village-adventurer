@@ -45,11 +45,12 @@ void GameScene::OnEnter(GameContext* ctx) {
 
   // UI
   ui_ = std::make_unique<GameUI>(ctx, scene_context.get(), L"assets/ui.png"); // extract path
-  ResetTimer();
+  ui_->InitSkillData(AVAILABLE_SKILLS);
 
-  ui_->SetFadeOverlayAlphaTarget(0.0f, color::black, [&ui = ui_, ctx]() {
+  ui_->SetFadeOverlayAlphaTarget(0.0f, color::black, [&ui = ui_, ctx, this]() {
     ui->SetUIOpacity(1.0f);
     ctx->allow_control = true;
+    this->ResetTimer();
   });
 
   // Mob
@@ -77,9 +78,13 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
     is_end_ = false;
     ctx->allow_control = false;
 
-    ui_->SetFadeOverlayAlphaTarget(1.0f, color::black, [&timer_elapsed = timer_elapsed_, &monster_killed = monster_killed_]() {
-      SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<ResultScene>(ResultSceneProps{monster_killed, static_cast<float>(timer_elapsed)}));
-    });
+    ui_->SetFadeOverlayAlphaTarget(1.0f, color::black,
+                                   [&timer_elapsed = timer_elapsed_, &monster_killed = monster_killed_]() {
+                                     SceneManager::GetInstance().ChangeSceneDelayed(
+                                       std::make_unique<ResultScene>(ResultSceneProps{
+                                         monster_killed, static_cast<float>(timer_elapsed)
+                                       }));
+                                   });
   }
 }
 
@@ -92,9 +97,10 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
 
   HandleSkillHitMobCollision(delta_time);
   HandleMobHitPlayerCollision(delta_time);
+  HandleSkillHitWallCollision(delta_time);
 
   ui_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
-  skill_manager_->OnFixedUpdate(ctx, delta_time);
+  skill_manager_->OnFixedUpdate(ctx, delta_time, player_->GetTransform());
   mob_manager_->OnFixedUpdate(ctx, scene_context.get(), delta_time, player_->GetCollider());
 
   SceneManager::GetInstance().GetAudioManager()->UpdateListenerPosition({
@@ -107,7 +113,7 @@ void GameScene::OnRender(GameContext* ctx) {
   map_manager_->OnRender(ctx, camera_.get());
   mob_manager_->OnRender(ctx, camera_.get());
   player_->OnRender(ctx, scene_context.get(), camera_.get());
-  skill_manager_->OnRender(ctx, camera_.get(), player_->GetTransform());
+  skill_manager_->OnRender(ctx, camera_.get());
 
   ui_->OnRender(ctx, scene_context.get(), camera_.get());
 }
@@ -201,7 +207,8 @@ void GameScene::HandleSkillHitMobCollision(float) {
   std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
   std::span skill_colliders_span{skill_colliders.data(), skill_colliders.size()};
 
-  auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_, &monster_killed = monster_killed_]
+  auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_, &monster_killed =
+      monster_killed_, &skill_manager = skill_manager_]
   (MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult) -> void {
     if (!skill_hitbox->hit_mobs.contains(mob_state->id) && !mob::is_death_state(mob_state->state)) {
       skill_hitbox->hit_mobs.insert(mob_state->id);
@@ -224,6 +231,10 @@ void GameScene::HandleSkillHitMobCollision(float) {
           skill_hitbox->data->name,
           skill_hitbox->data->damage
         );
+
+        if (skill_hitbox->data->is_destroy_by_mob) {
+          skill_manager->HandleDestroyCollision(skill_hitbox);
+        }
 
         // attack push back
         Vector2 dir = math::GetDirection(skill_center, mob_center);
@@ -257,11 +268,31 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                                m->timeout = 0;
 
                                float hp = p->Damage(m->damage);
-                               SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::hit_2, p->GetPositionVector());
+                               SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(
+                                 audio_clip::hit_2, p->GetPositionVector());
 
                                if (hp <= 0) {
                                  is_end = true;
                                }
+                             });
+}
+
+void GameScene::HandleSkillHitWallCollision(float) {
+  auto map_colliders = map_manager_->GetFiledObjectColliders();
+
+  std::vector<Collider<SkillHitbox>> skill_colliders{};
+  for (auto s: skill_manager_->GetColliders()) {
+    if (s.owner->data->is_destroy_by_wall)
+      skill_colliders.push_back(s);
+  }
+
+  std::span<Collider<SkillHitbox>> skill_colliders_span{skill_colliders.data(), skill_colliders.size()};
+  std::span<Collider<FieldObject>> map_colliders_span{map_colliders.data(), map_colliders.size()};
+
+  collision::HandleDetection(skill_colliders_span, map_colliders_span,
+                             [&skill_manager = skill_manager_](SkillHitbox* skill, FieldObject*,
+                                                               collision::CollisionResult) -> void {
+                               skill_manager->HandleDestroyCollision(skill);
                              });
 }
 
@@ -274,6 +305,8 @@ void GameScene::UpdateUI(GameContext* ctx, float delta_time) {
 
   timer_elapsed_ += delta_time;
   ui_->SetTimerText(timer_elapsed_);
+
+  ui_->SetSkillSelected(player_->GetSelectedSkillId());
 
   ui_->OnUpdate(ctx, scene_context.get(), delta_time);
 }

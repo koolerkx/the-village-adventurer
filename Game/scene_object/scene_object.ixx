@@ -89,6 +89,14 @@ export namespace scene_object {
       }) | std::ranges::to<std::vector>();
   }
 
+  constexpr std::vector<Vector2> MakeFramesConstantDisplacement(
+    Vector2 displacement_per_frame, int frame_count) {
+    return std::views::iota(0, frame_count)
+      | std::views::transform([=](int) -> Vector2 {
+        return displacement_per_frame;
+      }) | std::ranges::to<std::vector>();
+  }
+
   float GetPlayerRotationByDirection(Vector2 direction) {
     if (direction.x == 0.0f && direction.y == 0.0f)
       return 0.0f;

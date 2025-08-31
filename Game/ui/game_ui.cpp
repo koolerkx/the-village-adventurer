@@ -266,15 +266,25 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   if (is_show_skill_) {
     float skill_slot_width = static_cast<float>(48 * skill_count_ + (skill_count_ - 1) * 10);
     for (int i = 0; i < skill_count_; ++i) {
+      POSITION skill_slot_position = {-skill_slot_width / 2 + i * (48 + 10), -24 - 48, 0};
       render_items.emplace_back(RenderInstanceItem{
         Transform{
-          .position = {-skill_slot_width / 2 + i * (48 + 10), -24 - 48, 0},
+          .position = skill_slot_position,
           .size = {48, 48},
           .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
         },
         texture_map["SkillSlot"],
         color::setOpacity(color::white, ui_opacity_current_)
+      });
 
+      render_items.emplace_back(RenderInstanceItem{
+        Transform{
+          .position = {skill_slot_position.x + 2, skill_slot_position.y + 2, 0},
+          .size = {44, 44},
+          .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
+        },
+        skill_uvs_[i],
+        color::setOpacity(color::white, ui_opacity_current_)
       });
 
       if (skill_selected_ != i) continue;
@@ -287,7 +297,6 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
         },
         texture_map["SkillSelected"],
         color::setOpacity(color::white, ui_opacity_current_)
-
       });
     }
   }

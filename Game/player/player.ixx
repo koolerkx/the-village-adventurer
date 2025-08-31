@@ -17,6 +17,7 @@ import game.scene_game.context;
 import game.map.field_object;
 import game.player.input;
 import game.utils.throttle;
+import game.scene_object.skill;
 
 export enum class PlayerState: unsigned char {
   IDLE_LEFT,
@@ -27,6 +28,11 @@ export enum class PlayerState: unsigned char {
   MOVE_RIGHT,
   MOVE_UP,
   MOVE_DOWN
+};
+
+export const std::vector<SKILL_TYPE> AVAILABLE_SKILLS = {
+  SKILL_TYPE::NORMAL_ATTACK,
+  SKILL_TYPE::FIREBALL
 };
 
 export class Player {
@@ -78,7 +84,11 @@ private:
 
   std::unique_ptr<IPlayerInput> input_;
   Throttle attack_throttle_{0.3f};
+  Throttle skill_select_throttle_{0.3f};
   Throttle function_key_throttle_{0.3f};
+
+  int selected_skill_id_ = 0;
+  SKILL_TYPE selected_skill_type_ = AVAILABLE_SKILLS[selected_skill_id_];
 
   // Game data
   float health_ = 100.0f;
@@ -132,4 +142,6 @@ public:
   void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
+
+  int GetSelectedSkillId() const { return selected_skill_id_; }
 };

@@ -36,6 +36,7 @@ private:
   void HandlePlayerEnterMapCollision(float delta_time, SceneContext* scene_ctx);
   void HandleSkillHitMobCollision(float delta_time);
   void HandleMobHitPlayerCollision(float delta_time);
+  void HandleSkillHitWallCollision(float delta_time);
 
   void ResetTimer();
 

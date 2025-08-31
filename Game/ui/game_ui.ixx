@@ -10,6 +10,7 @@ import graphic.utils.fixed_pool;
 import graphic.utils.font;
 import graphic.utils.types;
 import game.types;
+import game.scene_object.skill;
 
 std::unordered_map<std::string, UV> texture_map = {
   // HP Bar
@@ -50,7 +51,7 @@ std::unordered_map<std::string, UV> texture_map = {
   // Area Message
   {"MessageUpper", UV{{96, 289}, {83, 8}}},
   {"MessageLower", UV{{179, 289}, {83, 8}}},
-  
+
 
   // full screen overlay
   {"DamageOverlay", UV{{128, 323}, {320, 180}}},
@@ -82,6 +83,8 @@ private:
 
   int skill_count_ = 3;
   int skill_selected_ = 0;
+  std::vector<UV> skill_uvs_ = {};
+
   float hp_percentage_target_ = 1.0f;
   float hp_percentage_current_ = 1.0f;
 
@@ -110,7 +113,7 @@ private:
   bool is_show_ui_ = true;
 
   // constant flags
-  const bool is_show_skill_ = false;
+  const bool is_show_skill_ = true;
   const bool is_show_coin_ = false;
   const bool is_show_event_log_ = false;
 
@@ -168,7 +171,7 @@ public:
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
   void RenderDamageText(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
-  
+
   void SetFadeOverlayAlphaTarget(float alpha, COLOR color, std::function<void()> cb = {}) {
     fade_overlay_alpha_target_ = alpha;
     fade_overlay_color_ = color;
@@ -181,7 +184,20 @@ public:
       fade_overlay_callback_ = cb;
     }
   }
-  
+
+  void InitSkillData(const std::vector<SKILL_TYPE> data) {
+    skill_count_ = data.size();
+    skill_selected_ = 0;
+    skill_uvs_.clear();
+    
+    for (auto d : data) {
+      auto it = skill_data.find(d);
+      if (it != skill_data.end()) {
+        skill_uvs_.push_back(it->second.icon_uv);
+      }
+    }
+  }
+
   void SetUIOpacity(float alpha) {
     ui_opacity_target_ = alpha;
   }

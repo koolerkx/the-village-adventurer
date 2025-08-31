@@ -13,6 +13,7 @@ import game.audio.audio_clip;
 constexpr CriAtomExVector FRONT = {0.0f, 1.0f, 0.0f};
 constexpr CriAtomExVector TOP = {0.0f, 0.0f, 1.0f};
 constexpr float MAX_ATTENUATION_DISTANCE = 256.0f;
+constexpr float SOUND_SPREAD = 0.35;
 
 namespace {
   static void user_error_callback_func(const CriChar8* errid, CriUint32 p1, CriUint32 p2, CriUint32*) {
@@ -36,6 +37,7 @@ AudioManager::AudioManager() {
   criAtomEx_SetUserAllocator(user_alloc_func, user_free_func, nullptr);
 
   CriAtomExConfig_WASAPI ex_cfg{};
+  ex_cfg.atom_ex.max_virtual_voices = 48;
   criAtomEx_SetDefaultConfig_WASAPI(&ex_cfg);
   criAtomEx_Initialize_WASAPI(&ex_cfg, nullptr, 0);
 
@@ -143,6 +145,7 @@ CriAtomExPlaybackId AudioManager::PlayAudioClip(audio_clip clip, Vector2 positio
       criAtomExPlayer_SetCueId(player, acb_hn_, cue_sheet_id);
 
       criAtomExPlayer_SetVolume(player, volume);
+      criAtomExPlayer_SetSpread(player, SOUND_SPREAD);
       criAtomExPlayer_UpdateAll(player);
 
       playback_id = criAtomExPlayer_Start(player);
