@@ -101,6 +101,9 @@ void MobManager::OnUpdate(GameContext*, float delta_time, OnUpdateProps props) {
     if (it.is_show_hurt_frame_timer >= 0) {
       it.is_show_hurt_frame_timer -= delta_time;
     }
+    if (it.is_show_hp_bar_timer >= 0) {
+      it.is_show_hp_bar_timer -= delta_time;
+    }
   });
 
   // Remove inactive, dead mobs
@@ -181,10 +184,10 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
       hit_boxes.push_back(m.collider);
     }
   });
-  
+
   std::span<Collider<MobHitBox>> mob_hitbox_colliders_span{hit_boxes.data(), hit_boxes.size()};
   std::span<Collider<FieldObject>> map_colliders_span{map_colliders.data(), map_colliders.size()};
-  
+
   collision::HandleDetection(mob_hitbox_colliders_span, map_colliders_span, [](MobHitBox* mob_hit_box, FieldObject*,
                                                                                collision::CollisionResult) -> void {
     mob_hit_box->is_destroy_on_next = true;
@@ -303,6 +306,32 @@ void MobManager::OnRender(GameContext* ctx, Camera* camera) {
     }
 
     render_items.emplace_back(item);
+
+    // HP BAR
+    if (it.is_show_hp_bar_timer >= 0) {
+      Vector2 mob_center = {
+        it.transform.position.x + it.transform.size.x / 2,
+        it.transform.position.y + it.transform.size.y / 2
+      };
+      constexpr int hp_bar_width = 15;
+      Vector2 hp_bar_position = {
+        mob_center.x - hp_bar_width / 2,
+        mob_center.y - hp_bar_width / 2 + 16
+      };
+      float hp_bar_width_percent = static_cast<float>(it.hp) / static_cast<float>(it.max_hp);
+
+      render_items.emplace_back(RenderInstanceItem{
+        .transform = {
+          .position = {hp_bar_position.x, hp_bar_position.y, 0},
+          .size = {hp_bar_width * hp_bar_width_percent, 2}
+        },
+        .uv = {
+          {0, 32},
+          {32, 32},
+        },
+        .color = color::red,
+      });
+    }
   });
 
   mob_hitbox_pool_.ForEach([&render_items](MobHitBox& it) {
@@ -428,6 +457,7 @@ int MobManager::MakeDamage(MobState& mob_state, int damage,
     break;
   }
   mob_state.is_show_hurt_frame_timer = 0.1f;
+  mob_state.is_show_hp_bar_timer = 1.0f;
   post_action();
 
   return mob_state.hp;

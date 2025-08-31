@@ -94,7 +94,8 @@ export namespace mob {
         .is_battle = false, // TODO: change the flag trigger by active area
         .is_loop = true,
         .is_playing = true,
-        .hp = DEFAULT_HP
+        .hp = DEFAULT_HP,
+        .max_hp = DEFAULT_HP
       };
     };
 

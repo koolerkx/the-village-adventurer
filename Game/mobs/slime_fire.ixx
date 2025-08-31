@@ -185,6 +185,7 @@ export namespace mob {
         .is_loop = true,
         .is_playing = true,
         .hp = DEFAULT_HP,
+        .max_hp = DEFAULT_HP
       };
     };
 
