@@ -72,10 +72,12 @@ export struct MobState {
   float moving_cooldown;
 
   float is_show_hurt_frame_timer = 0.0f;
+  float is_show_hp_bar_timer = 0.0f;
   
   Vector2 velocity;
   // mob data
   int hp;
+  int max_hp = 1;
 };
 
 export struct ActiveArea {
