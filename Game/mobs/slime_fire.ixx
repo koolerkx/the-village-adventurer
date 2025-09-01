@@ -1,6 +1,6 @@
 module;
 
-export module game.mobs.slime;
+export module game.mobs.slime_fire;
 import std;
 import game.mobs_manager;
 import game.map.tilemap_object_handler;
@@ -11,126 +11,126 @@ import game.types;
 import game.math;
 
 export namespace mob {
-  namespace slime {
+  namespace slime_fire {
     std::unordered_map<MobActionState, scene_object::AnimationFrameData> animation_data{
 #pragma region SLIME_ANIMATION_DATA
       {
         MobActionState::IDLE_DOWN, {
-          .frames = scene_object::MakeFramesVector(6, 64, 64, 6, 1152, 896),
+          .frames = scene_object::MakeFramesVector(6, 64, 64, 6, 1856, 896),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 6),
         }
       },
       {
         MobActionState::IDLE_UP, {
-          .frames = scene_object::MakeFramesVector(6, 64, 64, 6, 1152, 960),
+          .frames = scene_object::MakeFramesVector(6, 64, 64, 6, 1856, 960),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 6),
         }
       },
       {
         MobActionState::IDLE_LEFT, {
-          .frames = scene_object::MakeFramesVector(6, 64, 64, 6, 1152, 1024),
+          .frames = scene_object::MakeFramesVector(6, 64, 64, 6, 1856, 1024),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 6),
         }
       },
       {
         MobActionState::IDLE_RIGHT, {
-          .frames = scene_object::MakeFramesVector(6, 64, 64, 6, 1152, 1088),
+          .frames = scene_object::MakeFramesVector(6, 64, 64, 6, 1856, 1088),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 6),
         }
       },
       {
         MobActionState::ATTACK_DOWN, {
-          .frames = scene_object::MakeFramesVector(11, 64, 64, 11, 1152, 32),
-          .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 11),
+          .frames = scene_object::MakeFramesVector(9, 64, 64, 9, 1856, 32),
+          .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 9),
         }
       },
       {
         MobActionState::ATTACK_UP, {
-          .frames = scene_object::MakeFramesVector(11, 64, 64, 11, 1152, 96),
-          .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 11),
+          .frames = scene_object::MakeFramesVector(9, 64, 64, 9, 1856, 96),
+          .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 9),
         }
       },
       {
         MobActionState::ATTACK_LEFT, {
-          .frames = scene_object::MakeFramesVector(11, 64, 64, 11, 1152, 160),
-          .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 11),
+          .frames = scene_object::MakeFramesVector(9, 64, 64, 9, 1856, 160),
+          .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 9),
         }
       },
       {
         MobActionState::ATTACK_RIGHT, {
-          .frames = scene_object::MakeFramesVector(11, 64, 64, 11, 1152, 224),
-          .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 11),
+          .frames = scene_object::MakeFramesVector(9, 64, 64, 9, 1856, 224),
+          .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 9),
         }
       },
       {
         MobActionState::HURT_DOWN, {
-          .frames = scene_object::MakeFramesVector(5, 64, 64, 5, 1152, 608),
+          .frames = scene_object::MakeFramesVector(5, 64, 64, 5, 1856, 608),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 5),
         }
       },
       {
         MobActionState::HURT_UP, {
-          .frames = scene_object::MakeFramesVector(5, 64, 64, 5, 1152, 672),
+          .frames = scene_object::MakeFramesVector(5, 64, 64, 5, 1856, 672),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 5),
         }
       },
       {
         MobActionState::HURT_LEFT, {
-          .frames = scene_object::MakeFramesVector(5, 64, 64, 5, 1152, 736),
+          .frames = scene_object::MakeFramesVector(5, 64, 64, 5, 1856, 736),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 5),
         }
       },
       {
         MobActionState::HURT_RIGHT, {
-          .frames = scene_object::MakeFramesVector(5, 64, 64, 5, 1152, 800),
+          .frames = scene_object::MakeFramesVector(5, 64, 64, 5, 1856, 800),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 5),
         }
       },
       {
         MobActionState::DEATH_DOWN, {
-          .frames = scene_object::MakeFramesVector(10, 64, 64, 10, 1152, 320),
+          .frames = scene_object::MakeFramesVector(10, 64, 64, 10, 1856, 320),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 10),
         }
       },
       {
         MobActionState::DEATH_UP, {
-          .frames = scene_object::MakeFramesVector(10, 64, 64, 10, 1152, 384),
+          .frames = scene_object::MakeFramesVector(10, 64, 64, 10, 1856, 384),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 10),
         }
       },
       {
         MobActionState::DEATH_LEFT, {
-          .frames = scene_object::MakeFramesVector(10, 64, 64, 10, 1152, 448),
+          .frames = scene_object::MakeFramesVector(10, 64, 64, 10, 1856, 448),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 10),
         }
       },
       {
         MobActionState::DEATH_RIGHT, {
-          .frames = scene_object::MakeFramesVector(10, 64, 64, 10, 1152, 512),
+          .frames = scene_object::MakeFramesVector(10, 64, 64, 10, 1856, 512),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 10),
         }
       },
       {
         MobActionState::MOVING_DOWN, {
-          .frames = scene_object::MakeFramesVector(8, 64, 64, 8, 1152, 1472),
+          .frames = scene_object::MakeFramesVector(8, 64, 64, 8, 1856, 1472),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 8),
         }
       },
       {
         MobActionState::MOVING_UP, {
-          .frames = scene_object::MakeFramesVector(8, 64, 64, 8, 1152, 1536),
+          .frames = scene_object::MakeFramesVector(8, 64, 64, 8, 1856, 1536),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 8),
         }
       },
       {
         MobActionState::MOVING_LEFT, {
-          .frames = scene_object::MakeFramesVector(8, 64, 64, 8, 1152, 1600),
+          .frames = scene_object::MakeFramesVector(8, 64, 64, 8, 1856, 1600),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 8),
         }
       },
       {
         MobActionState::MOVING_RIGHT, {
-          .frames = scene_object::MakeFramesVector(8, 64, 64, 8, 1152, 1664),
+          .frames = scene_object::MakeFramesVector(8, 64, 64, 8, 1856, 1664),
           .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 8),
         }
       },
@@ -150,7 +150,7 @@ export namespace mob {
       };
 
       const UV uv = {
-        {1152, 896},
+        {1856, 896},
         {64, 64}
       };
 
@@ -169,7 +169,7 @@ export namespace mob {
         .position = {props.x + t.size.x / 2, props.y + t.size.x / 2},
         .owner = nullptr, // handle outside
         .shape = CircleCollider{
-          .x = 0, .y = 0, .radius = 12
+          .x = 0, .y = 0, .radius = 96
         }
       };
 
@@ -178,13 +178,13 @@ export namespace mob {
         .uv = uv,
         .collider = c,
         .attack_range_collider = atk_c,
-        .type = MobType::SLIME,
+        .type = MobType::SLIME_FIRE,
         .state = MobActionState::IDLE_DOWN,
         .inactive_position = {props.x + t.size.x / 2, props.y + t.size.x / 2},
         .is_battle = false, // TODO: change the flag trigger by active area
         .is_loop = true,
         .is_playing = true,
-        .hp = DEFAULT_HP
+        .hp = DEFAULT_HP,
       };
     };
 
@@ -217,7 +217,7 @@ export namespace mob {
     }
 
     void HandleMovement(MobState& state, Vector2 destination) {
-      constexpr float SPEED = 40.0f; // todo: extract as config
+      constexpr float SPEED = 25.0f; // todo: extract as config
       state.velocity.x = 0;
 
       Vector2 mob_center = {
@@ -245,13 +245,19 @@ export namespace mob {
       };
     }
 
-    MobHitBox GetHitBox(MobState state) {
+    MobHitBox GetHitBox(MobState state, Vector2 dir) {
+      constexpr float moving_speed = 75;
       return MobHitBox{
         .transform = {
-          {
-            state.transform.position.x + state.transform.size.x / 2,
-            state.transform.position.y + state.transform.size.y / 2, 0
-          }
+          .position = {
+            state.transform.position.x + 12,
+            state.transform.position.y + 12,
+            0
+          },
+          .size = {8, 8}
+        },
+        .uv = {
+          {0, 1408}, {32, 32}
         },
         .collider = Collider<MobHitBox>{
           .is_trigger = true,
@@ -261,14 +267,23 @@ export namespace mob {
           },
           .owner = nullptr, // handle outside
           .shape = CircleCollider{
-            .x = 0, .y = 0, .radius = 8
+            .x = 0,
+            .y = 0,
+            .radius = 4
           }
         },
-        .damage = 5,
-        .attack_delay = 0.5f,
-        .timeout = 0.8f,
+        .damage = 20,
+        .attack_delay = 0.0f,
+        .timeout = 20.0f,
         .is_animated = false,
         .hit_player = false,
+
+        .is_destroy_by_wall = true,
+        .is_show_sprite = true,
+        .moving_speed = moving_speed,
+        .velocity = {dir.x * moving_speed, dir.y * moving_speed},
+        .rotation_radian = 0,
+        .color = color::white,
       };
     }
 

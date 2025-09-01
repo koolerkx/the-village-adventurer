@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" class="森１" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="12">
+<map version="1.10" tiledversion="1.11.2" class="嘆息之地" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="12">
  <tileset firstgid="1" source="../assets/field.tsx"/>
  <layer id="1" name="Ground" width="32" height="32">
   <data encoding="csv">
@@ -90,8 +90,8 @@
 0,0,0,0,0,0,0,12679,12680,0,0,0,0,0,0,0,0,0,0,0,12609,12802,12674,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12673,12674,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12609,12610,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12613,12614,0,0,0,0,0,0,0,12673,12801,12610,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12677,12678,0,0,0,0,0,0,0,0,12673,12674,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12673,12801,12610,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12673,12674,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -153,16 +153,13 @@
   <object id="3" name="Slime2" type="slime" x="288" y="128">
    <point/>
   </object>
-  <object id="4" name="Slime3" type="slime" x="272" y="352">
-   <point/>
-  </object>
-  <object id="5" name="Slime4" type="slime" x="176" y="320">
+  <object id="4" name="Slime3" type="slime" x="224" y="352">
    <point/>
   </object>
   <object id="8" name="Slime4" type="slime" x="112" y="256">
    <point/>
   </object>
-  <object id="11" name="Slime3" type="slime" x="352" y="272">
+  <object id="11" name="Slime3" type="slime" x="352" y="288">
    <point/>
   </object>
  </objectgroup>

@@ -186,7 +186,7 @@ public:
   }
 
   void InitSkillData(const std::vector<SKILL_TYPE> data) {
-    skill_count_ = data.size();
+    skill_count_ = static_cast<int>(data.size());
     skill_selected_ = 0;
     skill_uvs_.clear();
     
