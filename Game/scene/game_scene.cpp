@@ -176,6 +176,8 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
     case chest::RewardType::BUFF_MOVING_SPEED: {
       PlayerBuff pb;
       pb.type = BuffType::MOVING_SPEED;
+      pb.duration = 5.0f;
+      pb.multiplier = 1.25f;
       player_->AddBuff(pb);
       break;
     }

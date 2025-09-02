@@ -101,9 +101,12 @@ void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {
   }
   else {
     float len = std::sqrt(direction_.x * direction_.x + direction_.y * direction_.y);
+
+    float move_speed = move_speed_ * GetBuffMultiplier(buffs_, BuffType::MOVING_SPEED);
+    
     velocity_ = {
-      (direction_.x / len) * move_speed_,
-      (direction_.y / len) * move_speed_
+      (direction_.x / len) * move_speed,
+      (direction_.y / len) * move_speed
     };
 
     // play walking
