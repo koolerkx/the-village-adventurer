@@ -11,7 +11,8 @@ namespace chest {
     RewardType::BUFF_ATTACK_POWER,
     // RewardType::BUFF_ATTACK_SPEED,
     RewardType::BUFF_MOVING_SPEED,
-    RewardType::HEAL
+    RewardType::HEAL,
+    RewardType::INVINCIBLE,
   };
 
   RewardType GetRandomRewardType() {

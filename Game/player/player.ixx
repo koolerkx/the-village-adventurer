@@ -73,6 +73,15 @@ private:
   std::unordered_map<PlayerState, scene_object::AnimationFrameData> animation_data_;
 
   COLOR color_ = color::white;
+  float invincible_timer_ = 10.0f;
+  int invincible_color_idx_ = 0;
+  float invincible_color_switch_timer_ = 0.0f;
+  const std::vector<COLOR> invincible_color_lists_ = {
+    color::red300, color::pink300, color::purple300, color::deepPurple300, color::indigo300, color::blue300,
+    color::lightBlue300, color::cyan300, color::teal300, color::green300, color::lightGreen300, color::lime300,
+    color::yellow300, color::amber300, color::orange300, color::deepOrange300, color::brown300, color::grey300,
+    color::blueGrey300
+  };
 
   Vector2 direction_;
   Vector2 direction_facing_ = {0, 1}; // default facing down
@@ -102,6 +111,7 @@ public:
   void SetState(PlayerState state);
 
   Vector2 GetPositionVector() const { return {transform_.position.x, transform_.position.y}; }
+  Vector2 GetSizeVector() const { return {transform_.size.x, transform_.size.y}; }
 
   Collider<Player> GetCollider() const {
     return collider_;
@@ -151,6 +161,18 @@ public:
 
   int GetSelectedSkillId() const { return selected_skill_id_; }
 
-  void AddBuff(PlayerBuff pb) { buffs_.push_back(pb); }
+  void AddBuff(PlayerBuff pb) {
+    if (pb.type == BuffType::INVINCIBLE) {
+      std::erase_if(buffs_, [](const PlayerBuff b) { return b.type == BuffType::INVINCIBLE; });
+    }
+    buffs_.push_back(pb);
+  }
   std::vector<PlayerBuff> GetBuffs() { return buffs_; }
+
+  bool GetIsInvincible() const {
+    for (auto b : buffs_) {
+      if (b.type == BuffType::INVINCIBLE) return true;
+    }
+    return false;
+  }
 };

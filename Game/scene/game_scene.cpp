@@ -181,8 +181,15 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
       player_->AddBuff(pb);
       break;
     }
-    default:
+    case chest::RewardType::INVINCIBLE: {
+      PlayerBuff pb;
+      pb.type = BuffType::INVINCIBLE;
+      pb.duration = 10.0f;
+      player_->AddBuff(pb);
       break;
+    }
+  default:
+    break;
     }
   };
 
@@ -304,6 +311,8 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                              [&is_end = is_end_](Player* p, MobHitBox* m, collision::CollisionResult) -> void {
                                if (m->attack_delay >= 0) return;
                                if (m->hit_player) return;
+                               if (p->GetIsInvincible()) return;
+
                                m->hit_player = true;
                                m->timeout = 0;
 
@@ -315,6 +324,35 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                                  is_end = true;
                                }
                              });
+
+  // handle invincible
+  if (player_->GetIsInvincible()) {
+    std::vector<Collider<MobState>> mob_colliders = mob_manager_->GetColliders();
+    std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
+    collision::HandleDetection(player_collider, mob_colliders_span,
+                               [&mob_manager = mob_manager_, &ui = ui_, &monster_killed = monster_killed_](
+                               Player* p, MobState* mob_state, collision::CollisionResult) -> void {
+                                 if (mob_state->hp <= 0) return;
+                                 if (mob::is_death_state(mob_state->state)) return;
+
+                                 mob_manager->MakeDamage(*mob_state, 999, [&]() {
+                                   // make damage text
+                                   ui->AddDamageText(
+                                     {
+                                       mob_state->transform.position.x + mob_state->transform.size.x / 2,
+                                       mob_state->transform.position.y + mob_state->transform.size.y / 2
+                                     },
+                                     L"無敵",
+                                     999
+                                   );
+
+                                   SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(
+                                     audio_clip::hit_1, p->GetPositionVector());
+                                 });
+                                 monster_killed++;
+                               }
+    );
+  }
 }
 
 void GameScene::HandleSkillHitWallCollision(float) {

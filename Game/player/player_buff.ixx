@@ -9,7 +9,8 @@ import graphic.utils.types;
 export enum class BuffType: uint8_t {
   ATTACK_POWER,
   // ATTACK_SPEED,
-  MOVING_SPEED
+  MOVING_SPEED,
+  INVINCIBLE,
 };
 
 export struct PlayerBuff {
@@ -44,6 +45,8 @@ export UV GetBuffIconUV(BuffType t) {
   //   return {{32, 827}, {16, 16}};
   case BuffType::MOVING_SPEED:
     return {{0, 811}, {16, 16}};
+  case BuffType::INVINCIBLE:
+    return {{80, 827}, {16, 16}};
   }
   return {};
 }
@@ -56,6 +59,8 @@ export std::wstring GetBuffDisplayText(BuffType t) {
   //   return L"çUåÇë¨ìxUP";
   case BuffType::MOVING_SPEED:
     return L"à⁄ìÆë¨ìxUP";
+  case BuffType::INVINCIBLE:
+    return L"ñ≥ìGèÛë‘  ";
   }
   return {};
 }

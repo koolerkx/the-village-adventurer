@@ -56,18 +56,19 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
         GetPositionVector().x - 6,
         GetPositionVector().y
       };
-      
+
       SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::equip_2, audio_pos, 0.5);
     }
     if (it.switch_skill_right.pressed && skill_select_throttle_.CanCall()) {
-      selected_skill_id_ = (selected_skill_id_ - 1 + AVAILABLE_SKILLS.size()) % static_cast<int>(AVAILABLE_SKILLS.size());
+      selected_skill_id_ = (selected_skill_id_ - 1 + AVAILABLE_SKILLS.size()) % static_cast<int>(AVAILABLE_SKILLS.
+        size());
       selected_skill_type_ = AVAILABLE_SKILLS[selected_skill_id_];
 
       Vector2 audio_pos = {
         GetPositionVector().x + 6.0f,
         GetPositionVector().y
       };
-      
+
       SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::equip_2, audio_pos, 0.5);
     }
 
@@ -77,7 +78,8 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
         selected_skill_type_,
         {transform_.position.x, transform_.position.y},
         scene_object::GetPlayerRotationByDirection(direction_facing_) // Right = 0
-      );}
+      );
+    }
   }
   else {
     direction_ = {0, 0};
@@ -90,6 +92,13 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
 
   UpdateAnimation(delta_time);
   UpdateActiveBuffs(buffs_, delta_time);
+
+  // Update invincible
+  if (GetIsInvincible() && invincible_color_switch_timer_ <= 0) {
+    invincible_color_idx_ = (invincible_color_idx_ + 1) % invincible_color_lists_.size();
+    invincible_color_switch_timer_ += 0.05f;
+  }
+  invincible_color_switch_timer_ -= delta_time;
 }
 
 void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {
@@ -103,7 +112,7 @@ void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {
     float len = std::sqrt(direction_.x * direction_.x + direction_.y * direction_.y);
 
     float move_speed = move_speed_ * GetBuffMultiplier(buffs_, BuffType::MOVING_SPEED);
-    
+
     velocity_ = {
       (direction_.x / len) * move_speed,
       (direction_.y / len) * move_speed
@@ -119,13 +128,18 @@ void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {
 void Player::OnRender(GameContext* ctx, SceneContext*, Camera* camera) {
   auto rr = ctx->render_resource_manager->renderer.get();
 
+  COLOR color = color_;
+  if (GetIsInvincible()) {
+    color = invincible_color_lists_[invincible_color_idx_];
+  }
+
   CameraProps props = camera->GetCameraProps();
   // props.algin_pivot = AlginPivot::CENTER_CENTER;
   rr->DrawSprite(RenderItem{
                    texture_id_,
                    transform_,
                    uv_,
-                   color_
+                   color
                  }, props);
 
   // DEBUG: draw collider

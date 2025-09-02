@@ -9,7 +9,8 @@ export namespace chest {
     BUFF_ATTACK_POWER,
     // BUFF_ATTACK_SPEED,
     BUFF_MOVING_SPEED,
-    HEAL
+    HEAL,
+    INVINCIBLE
   };
 
   RewardType GetRandomRewardType();
