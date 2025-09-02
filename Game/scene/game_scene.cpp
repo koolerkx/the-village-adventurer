@@ -20,6 +20,8 @@ import game.math;
 import game.map.map_manager;
 import game.map.linked_map;
 import game.result_scene;
+import game.utils.helper;
+import game.player.buff;
 
 void GameScene::OnEnter(GameContext* ctx) {
   ctx->allow_control = false;
@@ -150,10 +152,42 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
   const auto [x, y] = player_->GetVelocity();
   auto colliders = map_manager_->GetFiledObjectColliders();
 
+  std::function<void(FieldObject&)> on_chest_open = [&](FieldObject& fo) {
+    std::cout << fo.metadata.tile_class << std::endl;
+
+    chest::RewardType reward_type = chest::GetRandomRewardType();
+
+    switch (reward_type) {
+    case chest::RewardType::HEAL:
+      player_->Heal(helper::GetRandomNumberByOffset(10.0f, 5.0f));
+      break;
+    case chest::RewardType::BUFF_ATTACK_POWER: {
+      PlayerBuff pb;
+      pb.type = BuffType::ATTACK_POWER;
+      player_->AddBuff(pb);
+      break;
+    }
+    case chest::RewardType::BUFF_ATTACK_SPEED: {
+      PlayerBuff pb;
+      pb.type = BuffType::ATTACK_SPEED;
+      player_->AddBuff(pb);
+      break;
+    }
+    case chest::RewardType::BUFF_MOVING_SPEED: {
+      PlayerBuff pb;
+      pb.type = BuffType::MOVING_SPEED;
+      player_->AddBuff(pb);
+      break;
+    }
+    default:
+      break;
+    }
+  };
+
   MoveAndCollideAxis(*player_, delta_time, x, colliders, Axis::X,
-                     [&](FieldObject* fo) { OnPlayerEnterFieldObject(fo); });
+                     [on_chest_open](FieldObject* fo) { OnPlayerEnterFieldObject(fo, on_chest_open); });
   MoveAndCollideAxis(*player_, delta_time, y, colliders, Axis::Y,
-                     [&](FieldObject* fo) { OnPlayerEnterFieldObject(fo); });
+                     [on_chest_open](FieldObject* fo) { OnPlayerEnterFieldObject(fo, on_chest_open); });
 }
 
 void GameScene::HandlePlayerEnterMapCollision(float, SceneContext* scene_ctx) {
@@ -281,7 +315,7 @@ void GameScene::HandleSkillHitWallCollision(float) {
   auto map_colliders = map_manager_->GetFiledObjectColliders();
 
   std::vector<Collider<SkillHitbox>> skill_colliders{};
-  for (auto s: skill_manager_->GetColliders()) {
+  for (auto s : skill_manager_->GetColliders()) {
     if (s.owner->data->is_destroy_by_wall)
       skill_colliders.push_back(s);
   }
@@ -307,6 +341,7 @@ void GameScene::UpdateUI(GameContext* ctx, float delta_time) {
   ui_->SetTimerText(timer_elapsed_);
 
   ui_->SetSkillSelected(player_->GetSelectedSkillId());
+  ui_->UpdatePlayerBuffs(player_->GetBuffs());
 
   ui_->OnUpdate(ctx, scene_context.get(), delta_time);
 }
