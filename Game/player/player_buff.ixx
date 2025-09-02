@@ -8,7 +8,7 @@ import graphic.utils.types;
 
 export enum class BuffType: uint8_t {
   ATTACK_POWER,
-  ATTACK_SPEED,
+  // ATTACK_SPEED,
   MOVING_SPEED
 };
 
@@ -40,8 +40,8 @@ export UV GetBuffIconUV(BuffType t) {
   switch (t) {
   case BuffType::ATTACK_POWER:
     return {{48, 827}, {16, 16}};
-  case BuffType::ATTACK_SPEED:
-    return {{32, 827}, {16, 16}};
+  // case BuffType::ATTACK_SPEED:
+  //   return {{32, 827}, {16, 16}};
   case BuffType::MOVING_SPEED:
     return {{0, 811}, {16, 16}};
   }
@@ -52,8 +52,8 @@ export std::wstring GetBuffDisplayText(BuffType t) {
   switch (t) {
   case BuffType::ATTACK_POWER:
     return L"çUåÇóÕUPÅ@";
-  case BuffType::ATTACK_SPEED:
-    return L"çUåÇë¨ìxUP";
+  // case BuffType::ATTACK_SPEED:
+  //   return L"çUåÇë¨ìxUP";
   case BuffType::MOVING_SPEED:
     return L"à⁄ìÆë¨ìxUP";
   }

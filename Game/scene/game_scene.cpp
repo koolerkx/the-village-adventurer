@@ -167,12 +167,12 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
       player_->AddBuff(pb);
       break;
     }
-    case chest::RewardType::BUFF_ATTACK_SPEED: {
-      PlayerBuff pb;
-      pb.type = BuffType::ATTACK_SPEED;
-      player_->AddBuff(pb);
-      break;
-    }
+    // case chest::RewardType::BUFF_ATTACK_SPEED: {
+    //   PlayerBuff pb;
+    //   pb.type = BuffType::ATTACK_SPEED;
+    //   player_->AddBuff(pb);
+    //   break;
+    // }
     case chest::RewardType::BUFF_MOVING_SPEED: {
       PlayerBuff pb;
       pb.type = BuffType::MOVING_SPEED;
@@ -243,12 +243,16 @@ void GameScene::HandleSkillHitMobCollision(float) {
   std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
   std::span skill_colliders_span{skill_colliders.data(), skill_colliders.size()};
 
+  float damage_multiplier = GetBuffMultiplier(player_->GetBuffs(), BuffType::ATTACK_POWER);
+
   auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_, &monster_killed =
-      monster_killed_, &skill_manager = skill_manager_]
+      monster_killed_, &skill_manager = skill_manager_, damage_multiplier]
   (MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult) -> void {
     if (!skill_hitbox->hit_mobs.contains(mob_state->id) && !mob::is_death_state(mob_state->state)) {
+      float damage = skill_hitbox->data->damage * damage_multiplier;
+
       skill_hitbox->hit_mobs.insert(mob_state->id);
-      int remain_hp = mob_manager->MakeDamage(*mob_state, skill_hitbox->data->damage, [&]() {
+      int remain_hp = mob_manager->MakeDamage(*mob_state, damage, [&]() {
         Vector2 mob_center = {
           mob_state->transform.position.x + mob_state->transform.size.x,
           mob_state->transform.position.y + mob_state->transform.size.y
@@ -265,7 +269,7 @@ void GameScene::HandleSkillHitMobCollision(float) {
             mob_state->transform.position.y + mob_state->transform.size.y / 2
           },
           skill_hitbox->data->name,
-          skill_hitbox->data->damage
+          damage
         );
 
         if (skill_hitbox->data->is_destroy_by_mob) {

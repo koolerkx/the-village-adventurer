@@ -41,8 +41,9 @@ void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {
       && enter_throttle_.CanCall()) {
       if (static_cast<SelectedOption>(selected_option_) == SelectedOption::START_GAME) {
         am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
-        title_ui_->SetFadeOverlayAlphaTarget(1.0f, color::black, []() -> void {
-          SceneManager::GetInstance().ChangeScene(std::make_unique<GameScene>());
+        title_ui_->SetFadeOverlayAlphaTarget(1.0f, color::black, [&is_allow_control = is_allow_control_]() -> void {
+          SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<GameScene>());
+          is_allow_control = false;
         });
       }
       else if (static_cast<SelectedOption>(selected_option_) == SelectedOption::END_GAME) {
