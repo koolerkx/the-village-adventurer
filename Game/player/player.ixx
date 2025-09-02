@@ -18,6 +18,7 @@ import game.map.field_object;
 import game.player.input;
 import game.utils.throttle;
 import game.scene_object.skill;
+import game.player.buff;
 
 export enum class PlayerState: unsigned char {
   IDLE_LEFT,
@@ -94,6 +95,9 @@ private:
   float health_ = 100.0f;
   float max_health_ = 100.0f;
 
+  // buffs
+  std::vector<PlayerBuff> buffs_;
+
 public:
   void SetState(PlayerState state);
 
@@ -131,10 +135,12 @@ public:
     health_ = std::max(health_ - amount, 0.0f);
     return health_;
   }
+
   float Heal(float amount) {
     health_ = std::min(health_ + amount, max_health_);
     return health_;
   }
+
   float GetHPPercentage() const { return health_ / max_health_; }
 
   Player(FixedPoolIndexType texture_id, std::unique_ptr<IPlayerInput> input,
@@ -144,4 +150,7 @@ public:
   void OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
 
   int GetSelectedSkillId() const { return selected_skill_id_; }
+
+  void AddBuff(PlayerBuff pb) { buffs_.push_back(pb); }
+  std::vector<PlayerBuff> GetBuffs() { return buffs_; }
 };

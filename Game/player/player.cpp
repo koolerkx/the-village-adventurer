@@ -89,6 +89,7 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
 #endif
 
   UpdateAnimation(delta_time);
+  UpdateActiveBuffs(buffs_, delta_time);
 }
 
 void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {

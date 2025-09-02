@@ -21,6 +21,7 @@
         <ClCompile Include="map\map_manager.ixx"/>
         <ClCompile Include="mobs\dummy.ixx"/>
         <ClCompile Include="mobs\slime_green.ixx"/>
+        <ClCompile Include="player\player_buff.ixx" />
         <ClCompile Include="player\player_factory.ixx"/>
         <ClCompile Include="player\player_keyboard_input.ixx"/>
         <ClCompile Include="player\player_input.ixx"/>
@@ -47,6 +48,8 @@
         <ClCompile Include="map\tile_repository.ixx"/>
         <ClCompile Include="map\tinyxml\tinyxml2.cpp"/>
         <ClCompile Include="map\tinyxml\tinyxml2.h"/>
+        <ClCompile Include="scene_object\chest.cpp" />
+        <ClCompile Include="scene_object\chest.ixx" />
         <ClCompile Include="scene_object\skill_manager.cpp"/>
         <ClCompile Include="scene_object\skill_manager.ixx"/>
         <ClCompile Include="scene_object\camera.ixx"/>
