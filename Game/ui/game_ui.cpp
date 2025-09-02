@@ -30,7 +30,7 @@ void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
     hp_percentage_target_,
     delta_time,
     interpolation::SmoothType::EaseOut,
-    0.5f
+    1.0f 
   );
 
   heal_flash_opacity_current_ = interpolation::UpdateSmoothValue(
@@ -200,25 +200,27 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   constexpr float buff_box_padding = 10.0f;
   constexpr float buff_item_gap = 10.0f;
   int item_count = player_buffs_.size();
-  float buff_box_height = item_count * 32 + (item_count - 1) * buff_item_gap + buff_box_padding * 2;
-  render_items.emplace_back(RenderInstanceItem{
-    Transform{
-      .position = {24, 108, 0},
-      .size = {164, buff_box_height},
-    },
-    texture_map["Block"], color::setOpacity(color::black, 0.25f * ui_opacity_current_)
-  });
-  float buff_item_y = 118;
-  for (auto b : player_buffs_) {
+  if (item_count > 0) {
+    float buff_box_height = item_count * 32 + (item_count - 1) * buff_item_gap + buff_box_padding * 2;
     render_items.emplace_back(RenderInstanceItem{
       Transform{
-        .position = {34, buff_item_y, 0},
-        .size = {32, 32},
+        .position = {24, 108, 0},
+        .size = {164, buff_box_height},
       },
-      GetBuffIconUV(b.type), color::setOpacity(color::white, ui_opacity_current_)
+      texture_map["Block"], color::setOpacity(color::black, 0.25f * ui_opacity_current_)
     });
+    float buff_item_y = 118;
+    for (auto b : player_buffs_) {
+      render_items.emplace_back(RenderInstanceItem{
+        Transform{
+          .position = {34, buff_item_y, 0},
+          .size = {32, 32},
+        },
+        GetBuffIconUV(b.type), color::setOpacity(color::white, ui_opacity_current_)
+      });
 
-    buff_item_y += (32 + buff_item_gap);
+      buff_item_y += (32 + buff_item_gap);
+    }
   }
 
   // Session: Left Bottom
