@@ -565,7 +565,8 @@ void Renderer::DrawPolygon(const std::array<POSITION, 4>& points,
   DrawLines(lines, camera_props, is_half_pixel_offset_correction);
 }
 
-void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props, CameraProps camera_props) {
+void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props,
+                        CameraProps camera_props) {
   Font* font = Font::GetFont(font_key);
 
   if (props.is_draw_rect) {
@@ -664,4 +665,24 @@ void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_i
   device_context_->DrawIndexedInstanced(index_count_per_quad,
                                         static_cast<UINT>(render_items.size()),
                                         0, 0, 0);
+}
+
+void Renderer::SetScissorRect(float left, float top, float right, float bottom) const {
+  D3D11_RECT scissor_rect = {
+    .left = static_cast<LONG>(left),
+    .top = static_cast<LONG>(top),
+    .right = static_cast<LONG>(right),
+    .bottom = static_cast<LONG>(bottom)
+  };
+  device_context_->RSSetScissorRects(1, &scissor_rect);
+}
+
+void Renderer::ResetScissorRect() const {
+  D3D11_RECT scissor_rect = {
+    .left = 0,
+    .top = 0,
+    .right = window_size_.cx,
+    .bottom = window_size_.cy
+  };
+  device_context_->RSSetScissorRects(1, &scissor_rect);
 }

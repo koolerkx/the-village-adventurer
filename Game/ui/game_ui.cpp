@@ -30,7 +30,7 @@ void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
     hp_percentage_target_,
     delta_time,
     interpolation::SmoothType::EaseOut,
-    1.0f 
+    1.0f
   );
 
   heal_flash_opacity_current_ = interpolation::UpdateSmoothValue(
@@ -112,7 +112,7 @@ void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
                                     [](DamageTextProps text) { return text.opacity <= 0.05; }),
                      damage_texts.end());
 
-  
+
   for (auto& text : event_texts) {
     text.opacity = interpolation::UpdateSmoothValue(
       text.opacity,
@@ -125,8 +125,8 @@ void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
   }
 
   event_texts.erase(std::remove_if(event_texts.begin(), event_texts.end(),
-                                    [](EventTextProps text) { return text.opacity <= 0.05; }),
-                     event_texts.end());
+                                   [](EventTextProps text) { return text.opacity <= 0.05; }),
+                    event_texts.end());
 }
 
 void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera) {
@@ -244,8 +244,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   if (is_show_event_log_) {
     render_items.emplace_back(RenderInstanceItem{
       Transform{
-        .position = {24, -204, 0},
-        .size = {320, 180},
+        .position = {24, -194, 0},
+        .size = {320, 170},
         .position_anchor = {0, static_cast<float>(ctx->window_height), 0}
       },
       texture_map["Block"], color::setOpacity(color::black, 0.25f * ui_opacity_current_)
@@ -324,7 +324,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
 
   // Skill Slot
   // Center
-  constexpr float skill_slot_gap =10.0f;
+  constexpr float skill_slot_gap = 10.0f;
   if (is_show_skill_) {
     float skill_slot_width = static_cast<float>(48 * skill_count_ + (skill_count_ - 1) * skill_slot_gap);
     for (int i = 0; i < skill_count_; ++i) {
@@ -414,7 +414,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   // Session: Right Bottom
   // Input Hint: Background
   constexpr float hint_box_margin = 24;
-  
+
   constexpr float hint_box_width = 224;
   constexpr float hint_box_height = 122;
   constexpr float hint_box_x = -hint_box_margin - hint_box_width;
@@ -450,13 +450,12 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     texture_map["KeyboardDUp"],
   };
 
-  for (int i=0; i<moving_keys.size(); i++)
-  {
+  for (int i = 0; i < moving_keys.size(); i++) {
     constexpr float moving_keys_y = -hint_box_margin - hint_box_height + 50;
-    
+
     render_items.emplace_back(RenderInstanceItem{
       Transform{
-          .position = {-hint_box_margin - hint_box_width + key_left_padding + i * (key_size + key_gap), moving_keys_y, 0},
+        .position = {-hint_box_margin - hint_box_width + key_left_padding + i * (key_size + key_gap), moving_keys_y, 0},
         .size = {20, 20},
         .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
       },
@@ -480,13 +479,12 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     texture_map["KeyboardE"],
   };
 
-  for (int i=0; i<skill_switch.size(); i++)
-  {
+  for (int i = 0; i < skill_switch.size(); i++) {
     constexpr float skill_switch_y = -hint_box_margin - hint_box_height + 98;
-    
+
     render_items.emplace_back(RenderInstanceItem{
       Transform{
-          .position = {-hint_box_margin - hint_box_width + 122 + i * (key_size + key_gap), skill_switch_y, 0},
+        .position = {-hint_box_margin - hint_box_width + 122 + i * (key_size + key_gap), skill_switch_y, 0},
         .size = {20, 20},
         .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
       },
@@ -536,18 +534,30 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     wss.str(L"");
     wss.clear();
     for (auto text : text_list_) {
-      wss << text << "\n";
+      wss << text.text << "\n";
     }
+    const auto text_props = StringSpriteProps{
+      .pixel_size = 12.0f,
+      .letter_spacing = 0.0f,
+      .line_height = 22.0f,
+      .color = color::setOpacity(color::white, ui_opacity_current_)
+    };
+
+    float box_margin = 24;
+    float text_start_y = -box_margin - text_props.line_height * text_list_.size();
+
+    constexpr float text_box_x = 22;
+    float text_box_y = static_cast<float>(ctx->window_height) - 170 - box_margin;
+    constexpr float text_box_height = 170;
+    constexpr float text_box_width = 320;
+
+    rr->SetScissorRect(text_box_x, text_box_y, text_box_x + text_box_width, text_box_y + text_box_height);
     rr->DrawFont(wss.str(), font_key_,
                  Transform{
-                   .position = {34, -194, 0},
+                   .position = {34, text_start_y, 0},
                    .position_anchor = {0, static_cast<float>(ctx->window_height), 0}
-                 }, StringSpriteProps{
-                   .pixel_size = 12.0f,
-                   .letter_spacing = 0.0f,
-                   .line_height = 22.0f,
-                   .color = color::setOpacity(color::white, ui_opacity_current_)
-                 });
+                 }, text_props);
+    rr->ResetScissorRect();
   }
 
   // Session: Center Upper
@@ -625,20 +635,22 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     L"スキル選択",
   };
 
-  for (int i = 0; i < instruction_texts.size(); i++)
-  {
+  for (int i = 0; i < instruction_texts.size(); i++) {
     rr->DrawFont(instruction_texts[i], font_key_,
-               Transform{
-                  .position = {hint_box_x + hint_box_left_padding, hint_box_y + (line_size * i) + (line_gap * i) + hint_box_top_padding, 0},
-                 .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
-               }, StringSpriteProps{
-                 .pixel_size = line_size,
-                 .letter_spacing = 0.0f,
-                 .line_height = 0.0f,
-                 .color = color::setOpacity(color::white, ui_opacity_current_)
-               });
+                 Transform{
+                   .position = {
+                     hint_box_x + hint_box_left_padding,
+                     hint_box_y + (line_size * i) + (line_gap * i) + hint_box_top_padding, 0
+                   },
+                   .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
+                 }, StringSpriteProps{
+                   .pixel_size = line_size,
+                   .letter_spacing = 0.0f,
+                   .line_height = 0.0f,
+                   .color = color::setOpacity(color::white, ui_opacity_current_)
+                 });
   }
-  
+
   RenderDamageText(ctx, scene_ctx, camera);
 
   // Draw Event texts
@@ -667,7 +679,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
         .position = {
           event_text_base_position.x + event_text.position.x - size.width / 2,
           event_text_base_position.y + event_text.position.y - size.height / 2,
-          0}
+          0
+        }
       }, text_props
     );
   }

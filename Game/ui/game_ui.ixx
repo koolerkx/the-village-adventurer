@@ -67,12 +67,16 @@ struct DamageTextProps {
   float opacity = 1;
 };
 
-struct EventTextProps
-{
+struct EventTextProps {
   POSITION position;
   std::wstring text;
   COLOR color;
   float opacity = 1;
+};
+
+struct EventLogText {
+  std::wstring text;
+  COLOR color;
 };
 
 export class GameUI {
@@ -81,13 +85,7 @@ private:
   FixedPoolIndexType fade_overlay_texture_id_;
   std::wstring font_key_;
 
-  std::vector<std::wstring> text_list_ = {
-    L"プレイヤーが200ダメージ受けた",
-    L"プレイヤーが斬撃を出した",
-    L"スライムが200ダメージ受けた",
-    L"プレイヤーが200HP回復した",
-    L"プレイヤーが200ゴールドもらった",
-  };
+  std::deque<EventLogText> text_list_;
   std::wstring timer_text_ = L"99:99";
   Font* default_font_;
 
@@ -125,10 +123,10 @@ private:
   // constant flags
   const bool is_show_skill_ = true;
   const bool is_show_coin_ = false;
-  const bool is_show_event_log_ = false;
+  const bool is_show_event_log_ = true;
 
   std::vector<DamageTextProps> damage_texts;
-  
+
   std::vector<EventTextProps> event_texts = {};
 
   std::vector<PlayerBuff> player_buffs_ = {};
@@ -158,8 +156,11 @@ public:
     timer_text_ = wss.str();
   }
 
-  void SetLogText(std::wstring text) {
-    text_list_ = {text};
+  void AddLogText(std::wstring text, COLOR color) {
+    text_list_.emplace_back(EventLogText{
+      .text = text,
+      .color = color
+    });
   }
 
   void SetSkillSelected(int i) {
@@ -203,7 +204,7 @@ public:
     skill_count_ = static_cast<int>(data.size());
     skill_selected_ = 0;
     skill_uvs_.clear();
-    
+
     for (auto d : data) {
       auto it = skill_data.find(d);
       if (it != skill_data.end()) {
@@ -220,9 +221,8 @@ public:
     player_buffs_ = pb;
   }
 
-  void AddEventText(const std::wstring& text, const COLOR& color)
-  {
-    event_texts.push_back(EventTextProps{
+  void AddEventText(const std::wstring& text, const COLOR& color) {
+    event_texts.emplace_back(EventTextProps{
       .text = text,
       .color = color
     });

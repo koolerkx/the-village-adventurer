@@ -53,6 +53,9 @@ export class Dx11Wrapper {
 
   D3D11_VIEWPORT viewport_{};
 
+  // Rasterize
+  ComPtr<ID3D11RasterizerState> rasterizer_state_ = nullptr;
+
   HRESULT CreateSwapChain(HWND hwnd);
   HRESULT InitializeDXGIDevice();
   HRESULT CreateFinalRenderTargets();
@@ -60,6 +63,7 @@ export class Dx11Wrapper {
   void CreateBlendState();
   void CreateDepthStencilState();
   void CreateViewport();
+  void CreateRasterizerState();
 
   std::unique_ptr<ResourceManager> resource_manager_ = nullptr;
 
