@@ -27,12 +27,14 @@ std::unordered_map<std::string, UV> texture_map = {
 
   // Attack Hint
   {"RoundBackground", UV{{224, 146}, {64, 16}}},
-  {"KeyboardSpaceUp", UV{{96, 563}, {32, 16}}},
-  {"KeyboardSpaceDown", UV{{96, 627}, {32, 16}}},
+  {"KeyboardSpaceUp", UV{{64, 579}, {32, 16}}},
+  {"KeyboardSpaceDown", UV{{64, 643}, {32, 16}}},
 
   // Skill
   {"SkillSlot", UV{{384, 82}, {34, 34}}},
   {"SkillSelected", UV{{384, 140}, {26, 26}}},
+  {"KeyboardQ", UV{{0, 387}, {16, 16}}},
+  {"KeyboardE", UV{{64, 355}, {16, 16}}},
 
   // Coin
   {"CoinWithoutStroke", UV{{476, 41}, {16, 18}}},
