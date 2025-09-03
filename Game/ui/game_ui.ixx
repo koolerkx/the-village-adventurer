@@ -33,6 +33,8 @@ std::unordered_map<std::string, UV> texture_map = {
   // Skill
   {"SkillSlot", UV{{384, 82}, {34, 34}}},
   {"SkillSelected", UV{{384, 140}, {26, 26}}},
+  {"KeyboardQ", UV{{0, 387}, {16, 16}}},
+  {"KeyboardE", UV{{64, 355}, {16, 16}}},
 
   // Coin
   {"CoinWithoutStroke", UV{{476, 41}, {16, 18}}},

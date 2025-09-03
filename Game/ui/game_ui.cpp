@@ -308,10 +308,11 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
 
   // Skill Slot
   // Center
+  constexpr float skill_slot_gap =10.0f;
   if (is_show_skill_) {
-    float skill_slot_width = static_cast<float>(48 * skill_count_ + (skill_count_ - 1) * 10);
+    float skill_slot_width = static_cast<float>(48 * skill_count_ + (skill_count_ - 1) * skill_slot_gap);
     for (int i = 0; i < skill_count_; ++i) {
-      POSITION skill_slot_position = {-skill_slot_width / 2 + i * (48 + 10), -24 - 48, 0};
+      POSITION skill_slot_position = {-skill_slot_width / 2 + i * (48 + skill_slot_gap), -24 - 48, 0};
       render_items.emplace_back(RenderInstanceItem{
         Transform{
           .position = skill_slot_position,
@@ -336,7 +337,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
 
       render_items.emplace_back(RenderInstanceItem{
         Transform{
-          .position = {-skill_slot_width / 2 + i * (48 + 10), -24 - 48, 0},
+          .position = {-skill_slot_width / 2 + i * (48 + skill_slot_gap), -24 - 48, 0},
           .size = {48, 48},
           .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
         },
@@ -344,6 +345,30 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
         color::setOpacity(color::white, ui_opacity_current_)
       });
     }
+
+    // Skill switch hint
+    constexpr float skill_hint_size = 24.0f;
+    float left_skill_hint_x = -skill_slot_width / 2 - skill_slot_gap - skill_hint_size;
+    render_items.emplace_back(RenderInstanceItem{
+      Transform{
+        .position = {left_skill_hint_x, -36 - skill_hint_size, 0},
+        .size = {24, 24},
+        .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
+      },
+      texture_map["KeyboardQ"],
+      color::setOpacity(color::white, ui_opacity_current_)
+    });
+
+    float right_skill_hint_x = skill_slot_width / 2 + skill_slot_gap;
+    render_items.emplace_back(RenderInstanceItem{
+      Transform{
+        .position = {right_skill_hint_x, -36 - skill_hint_size, 0},
+        .size = {24, 24},
+        .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
+      },
+      texture_map["KeyboardE"],
+      color::setOpacity(color::white, ui_opacity_current_)
+    });
   }
 
   // Session: Right Upper
