@@ -536,7 +536,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     for (auto text : text_list_) {
       wss << text.text << "\n";
     }
-    const auto text_props = StringSpriteProps{
+    auto text_props = StringSpriteProps{
       .pixel_size = 12.0f,
       .letter_spacing = 0.0f,
       .line_height = 22.0f,
@@ -552,11 +552,17 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     constexpr float text_box_width = 320;
 
     rr->SetScissorRect(text_box_x, text_box_y, text_box_x + text_box_width, text_box_y + text_box_height);
-    rr->DrawFont(wss.str(), font_key_,
-                 Transform{
-                   .position = {34, text_start_y, 0},
-                   .position_anchor = {0, static_cast<float>(ctx->window_height), 0}
-                 }, text_props);
+    for (int i = 0; i < text_list_.size(); i++) {
+      auto& text = text_list_[i];
+
+      float text_y = text_start_y + i * text_props.line_height;
+      text_props.color = color::setOpacity(text.color, ui_opacity_current_);
+      rr->DrawFont(text.text, font_key_,
+                   Transform{
+                     .position = {34, text_y, 0},
+                     .position_anchor = {0, static_cast<float>(ctx->window_height), 0}
+                   }, text_props);
+    }
     rr->ResetScissorRect();
   }
 

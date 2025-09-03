@@ -308,7 +308,7 @@ void GameScene::HandleSkillHitMobCollision(float) {
         std::wstringstream wss;
         wss << skill_hitbox->data->name << L" で " << mob::GetMobName(mob_state->type) << L" に " << damage <<
           L" ダメージを与えた";
-        ui->AddLogText(wss.str(), color::blueA400);
+        ui->AddLogText(wss.str(), color::cyanA400);
 
         if (skill_hitbox->data->is_destroy_by_mob) {
           skill_manager->HandleDestroyCollision(skill_hitbox);
@@ -354,7 +354,7 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                                  << L" ダメージを受けた！";
 
                                ui->AddLogText(wss.str(),
-                                              color::blueA400);
+                                              color::redA700);
 
                                float hp = p->Damage(m->damage);
                                SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(
@@ -386,7 +386,7 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                                      999
                                    );
                                    ui->AddLogText(L"無敵状態の力で " + mob::GetMobName(mob_state->type) + L" を一撃で倒した！",
-                                                  color::blueA400);
+                                                  color::cyanA400);
 
                                    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(
                                      audio_clip::hit_1, p->GetPositionVector());
