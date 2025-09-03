@@ -217,6 +217,7 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
     }
 
     ui_->AddEventText(chest::GetChestRewardEventText(reward_type), chest::GetChestRewardEventColor(reward_type));
+    ui_->AddLogText(chest::GetChestLogText(reward_type), color::lightGreenA400);
   };
 
   MoveAndCollideAxis(*player_, delta_time, x, colliders, Axis::X,
