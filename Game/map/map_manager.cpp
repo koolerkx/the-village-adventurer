@@ -183,6 +183,14 @@ MapData MapManager::Load(std::string_view filepath, TileRepository* tr) {
         std::optional<TileMetaData> tile_metadata = tr->GetTileMetadata(tile_ids[i]);
         if (tile_metadata.has_value()) {
           obj.metadata = tile_metadata.value();
+
+          // do random test
+          if (obj.metadata.probability < 1.0f) {
+            float prob_test = helper::GetRandomNumberByRange(0.0f, 1.0f);
+            if (prob_test > obj.metadata.probability) {
+              continue;
+            }
+          }
         }
 
         if (obj.metadata.tile_class == "Chest") {

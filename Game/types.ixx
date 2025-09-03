@@ -37,6 +37,7 @@ export struct TileAnimationState {
 
 export struct TileMetaData {
   std::string tile_class;
+  float probability;
 };
 
 export struct CollisionData {
