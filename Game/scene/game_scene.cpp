@@ -339,13 +339,22 @@ void GameScene::HandleMobHitPlayerCollision(float) {
   std::span mob_hitbox_collider_span{mob_hitbox_collider.data(), mob_hitbox_collider.size()};
 
   collision::HandleDetection(player_collider, mob_hitbox_collider_span,
-                             [&is_end = is_end_](Player* p, MobHitBox* m, collision::CollisionResult) -> void {
+                             [&is_end = is_end_, &ui = ui_
+                             ](Player* p, MobHitBox* m, collision::CollisionResult) -> void {
                                if (m->attack_delay >= 0) return;
                                if (m->hit_player) return;
                                if (p->GetIsInvincible()) return;
 
                                m->hit_player = true;
                                m->timeout = 0;
+
+                               std::wstringstream wss;
+                               wss << L"プレイヤーが "
+                                 << std::fixed << std::setprecision(2) << m->damage
+                                 << L" ダメージを受けた！";
+
+                               ui->AddLogText(wss.str(),
+                                              color::blueA400);
 
                                float hp = p->Damage(m->damage);
                                SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(
@@ -376,7 +385,8 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                                      L"無敵",
                                      999
                                    );
-                                   ui->AddLogText(L"無敵状態の力で " + mob::GetMobName(mob_state->type) + L" を一撃で倒した！", color::blueA400);
+                                   ui->AddLogText(L"無敵状態の力で " + mob::GetMobName(mob_state->type) + L" を一撃で倒した！",
+                                                  color::blueA400);
 
                                    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(
                                      audio_clip::hit_1, p->GetPositionVector());
