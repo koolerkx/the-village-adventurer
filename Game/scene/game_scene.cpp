@@ -75,7 +75,7 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
     pause_menu_ui_->Reset();
     is_pause_ = !is_pause_;
   }
-  
+
   if (is_pause_) {
     HandlePauseMenu(ctx, delta_time);
   }
@@ -305,6 +305,10 @@ void GameScene::HandleSkillHitMobCollision(float) {
           skill_hitbox->data->name,
           damage
         );
+        std::wstringstream wss;
+        wss << skill_hitbox->data->name << L" で " << mob::GetMobName(mob_state->type) << L" に " << damage <<
+          L" ダメージを与えた";
+        ui->AddLogText(wss.str(), color::blueA400);
 
         if (skill_hitbox->data->is_destroy_by_mob) {
           skill_manager->HandleDestroyCollision(skill_hitbox);
@@ -372,6 +376,7 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                                      L"無敵",
                                      999
                                    );
+                                   ui->AddLogText(L"無敵状態の力で " + mob::GetMobName(mob_state->type) + L" を一撃で倒した！", color::blueA400);
 
                                    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(
                                      audio_clip::hit_1, p->GetPositionVector());
