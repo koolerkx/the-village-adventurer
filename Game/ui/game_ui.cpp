@@ -111,6 +111,22 @@ void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
   damage_texts.erase(std::remove_if(damage_texts.begin(), damage_texts.end(),
                                     [](DamageTextProps text) { return text.opacity <= 0.05; }),
                      damage_texts.end());
+
+  
+  for (auto& text : event_texts) {
+    text.opacity = interpolation::UpdateSmoothValue(
+      text.opacity,
+      0,
+      delta_time,
+      interpolation::SmoothType::EaseOut,
+      0.25f
+    );
+    text.position.y -= 0.2f;
+  }
+
+  event_texts.erase(std::remove_if(event_texts.begin(), event_texts.end(),
+                                    [](EventTextProps text) { return text.opacity <= 0.05; }),
+                     event_texts.end());
 }
 
 void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera) {
@@ -624,6 +640,38 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   }
   
   RenderDamageText(ctx, scene_ctx, camera);
+
+  // Draw Event texts
+  for (auto event_text : event_texts) {
+    wss.str(L"");
+    wss << event_text.text;
+
+    auto text_props = StringSpriteProps{
+      .pixel_size = 20.0f,
+      .letter_spacing = 0.0f,
+      .line_height = 0.0f,
+      .color = color::setOpacity(event_text.color, event_text.opacity)
+    };
+
+    auto size = default_font_->GetStringSize(wss.str(), {}, text_props);
+
+    Vector2 event_text_base_position = {
+      static_cast<float>(ctx->window_width) / 2,
+      static_cast<float>(ctx->window_height) - 250
+    };
+
+    rr->DrawFont(
+      wss.str(),
+      font_key_,
+      Transform{
+        .position = {
+          event_text_base_position.x + event_text.position.x - size.width / 2,
+          event_text_base_position.y + event_text.position.y - size.height / 2,
+          0}
+      }, text_props
+    );
+  }
+
 
   rr->DrawSprite(RenderItem{
                    fade_overlay_texture_id_,

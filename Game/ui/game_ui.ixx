@@ -67,6 +67,14 @@ struct DamageTextProps {
   float opacity = 1;
 };
 
+struct EventTextProps
+{
+  POSITION position;
+  std::wstring text;
+  COLOR color;
+  float opacity = 1;
+};
+
 export class GameUI {
 private:
   FixedPoolIndexType texture_id_;
@@ -120,6 +128,8 @@ private:
   const bool is_show_event_log_ = false;
 
   std::vector<DamageTextProps> damage_texts;
+  
+  std::vector<EventTextProps> event_texts = {};
 
   std::vector<PlayerBuff> player_buffs_ = {};
 
@@ -208,5 +218,13 @@ public:
 
   void UpdatePlayerBuffs(const std::vector<PlayerBuff>& pb) {
     player_buffs_ = pb;
+  }
+
+  void AddEventText(const std::wstring& text, const COLOR& color)
+  {
+    event_texts.push_back(EventTextProps{
+      .text = text,
+      .color = color
+    });
   }
 };

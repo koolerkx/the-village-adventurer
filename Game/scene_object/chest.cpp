@@ -5,6 +5,7 @@ module game.field_object.chest;
 import std;
 import game.player.buff;
 import game.utils.helper;
+import graphic.utils.color;
 
 namespace chest {
   const std::vector<RewardType> rewards{
@@ -18,4 +19,35 @@ namespace chest {
   RewardType GetRandomRewardType() {
     return helper::GetRandomElement(rewards);
   }
+
+  std::wstring GetChestRewardEventText(RewardType t)
+  {
+      switch (t) {
+      case RewardType::BUFF_ATTACK_POWER:
+        return L"宝箱：攻撃力UP";
+      case RewardType::BUFF_MOVING_SPEED:
+        return L"宝箱：移動速度UP";
+      case RewardType::HEAL:
+        return L"宝箱：HP回復１０％";
+      case RewardType::INVINCIBLE:
+        return L"宝箱：無敵状態";
+      }
+      return {};
+  }
+
+  COLOR GetChestRewardEventColor(RewardType t)
+  {
+    switch (t) {
+    case RewardType::BUFF_ATTACK_POWER:
+      return color::redA400;
+    case RewardType::BUFF_MOVING_SPEED:
+      return color::yellowA400;
+    case RewardType::HEAL:
+      return color::lightGreenA400;
+    case RewardType::INVINCIBLE:
+      return color::purpleA400;
+    }
+    return {};
+  }
+
 }
