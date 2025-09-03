@@ -40,6 +40,7 @@ private:
   void HandleSkillHitMobCollision(float delta_time);
   void HandleMobHitPlayerCollision(float delta_time);
   void HandleSkillHitWallCollision(float delta_time);
+  void HandlePauseMenu(GameContext* ctx, float delta_time);
 
   void ResetTimer();
 

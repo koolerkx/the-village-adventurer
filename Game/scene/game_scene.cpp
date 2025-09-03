@@ -75,37 +75,9 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
     pause_menu_ui_->Reset();
     is_pause_ = !is_pause_;
   }
-
+  
   if (is_pause_) {
-    constexpr int options_count = 2;
-    if (ctx->input_handler->IsKeyDown(KeyCode::KK_W) || ctx->input_handler->IsKeyDown(KeyCode::KK_UP)) {
-      pause_menu_selected_option_ = (pause_menu_selected_option_ + 1) % options_count;
-    }
-    if (ctx->input_handler->IsKeyDown(KeyCode::KK_S) || ctx->input_handler->IsKeyDown(KeyCode::KK_DOWN)) {
-      pause_menu_selected_option_ = (pause_menu_selected_option_ - 1 + options_count) % options_count;
-    }
-    pause_menu_ui_->SetSelectedOption(pause_menu_selected_option_);
-
-    if (ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE)) {
-      if (pause_menu_selected_option_ == 0) {
-        // back to game
-        is_pause_ = false;
-      }
-      else {
-        // back to title
-        is_pause_ = false;
-        is_allow_pause_ = false;
-        ctx->allow_control = false;
-
-        ui_->SetFadeOverlayAlphaTarget(1.0f, color::white, []() {
-          SceneManager::GetInstance().ChangeSceneDelayed(
-            std::make_unique<TitleScene>());
-        });
-      }
-    }
-
-    pause_menu_ui_->OnUpdate(ctx, delta_time);
-    return;
+    HandlePauseMenu(ctx, delta_time);
   }
 
   // std::cout << "GameScene> OnUpdate: " << delta_time << std::endl;
@@ -426,6 +398,37 @@ void GameScene::HandleSkillHitWallCollision(float) {
                                                                collision::CollisionResult) -> void {
                                skill_manager->HandleDestroyCollision(skill);
                              });
+}
+
+void GameScene::HandlePauseMenu(GameContext* ctx, float delta_time) {
+  constexpr int options_count = 2;
+  if (ctx->input_handler->IsKeyDown(KeyCode::KK_W) || ctx->input_handler->IsKeyDown(KeyCode::KK_UP)) {
+    pause_menu_selected_option_ = (pause_menu_selected_option_ + 1) % options_count;
+  }
+  if (ctx->input_handler->IsKeyDown(KeyCode::KK_S) || ctx->input_handler->IsKeyDown(KeyCode::KK_DOWN)) {
+    pause_menu_selected_option_ = (pause_menu_selected_option_ - 1 + options_count) % options_count;
+  }
+  pause_menu_ui_->SetSelectedOption(pause_menu_selected_option_);
+
+  if (ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE)) {
+    if (pause_menu_selected_option_ == 0) {
+      // back to game
+      is_pause_ = false;
+    }
+    else {
+      // back to title
+      is_pause_ = false;
+      is_allow_pause_ = false;
+      ctx->allow_control = false;
+
+      ui_->SetFadeOverlayAlphaTarget(1.0f, color::white, []() {
+        SceneManager::GetInstance().ChangeSceneDelayed(
+          std::make_unique<TitleScene>());
+      });
+    }
+  }
+
+  pause_menu_ui_->OnUpdate(ctx, delta_time);
 }
 
 void GameScene::ResetTimer() {
