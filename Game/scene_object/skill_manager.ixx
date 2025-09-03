@@ -94,7 +94,7 @@ export const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
         .rotation_pivot = {0, 0, 0},
         .position_anchor = {-12, -12, 0}, // FIXME: position calculation offset
       },
-      .base_collider_padding = {12, 0, 5, 2},
+      .base_collider_padding = {8, 0, 8, 3},
       .frames = scene_object::MakeFramesVector(4, 48, 48, 4, 960, 6048),
       .frame_durations = scene_object::MakeFramesConstantDuration(0.1f, 4),
       .moving_speed = {175, 175},
