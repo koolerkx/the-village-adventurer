@@ -12,6 +12,7 @@ import game.scene_object.camera;
 import game.scene_game.context;
 import game.scene_object.skill;
 import game.ui.game_ui;
+import game.ui.pause_ui;
 import game.mobs_manager;
 
 export class GameScene : public IScene {
@@ -24,6 +25,7 @@ private:
   std::unique_ptr<Player> player_ = nullptr;
   std::unique_ptr<Camera> camera_ = nullptr;
   std::unique_ptr<GameUI> ui_ = nullptr;
+  std::unique_ptr<PauseMenuUI> pause_menu_ui_ = nullptr;
 
   std::unique_ptr<SceneContext> scene_context = nullptr;
 
@@ -41,6 +43,8 @@ private:
   void ResetTimer();
 
   void UpdateUI(GameContext* ctx, float delta_time);
+
+  bool is_pause_ = false;
 
 public:
   void OnEnter(GameContext* ctx) override;

@@ -55,6 +55,9 @@ void GameScene::OnEnter(GameContext* ctx) {
     this->ResetTimer();
   });
 
+  // Pause Menu
+  pause_menu_ui_ = std::make_unique<PauseMenuUI>(ctx); // extract path
+
   // Mob
   mob_manager_ = std::make_unique<MobManager>(ctx);
   for (const auto& mob_props : map_manager_->GetMobProps()) {
@@ -66,6 +69,17 @@ void GameScene::OnEnter(GameContext* ctx) {
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
+  if(ctx->input_handler->IsKeyDown(KeyCode::KK_F3))
+  {
+    is_pause_ = !is_pause_;
+  }
+  
+  if (is_pause_)
+  {
+    pause_menu_ui_->OnUpdate(ctx, delta_time);
+    return;
+  }
+    
   // std::cout << "GameScene> OnUpdate: " << delta_time << std::endl;
   map_manager_->OnUpdate(ctx, delta_time);
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
@@ -91,6 +105,13 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
 }
 
 void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
+  if (is_pause_)
+  {
+    SceneManager::GetInstance().GetAudioManager()->StopWalking();
+    pause_menu_ui_->OnFixedUpdate(ctx, delta_time);
+    return;
+  }
+
   player_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
   HandlePlayerMovementAndCollisions(delta_time);
   camera_->UpdatePosition(player_->GetPositionVector(), delta_time);
@@ -111,13 +132,18 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
 }
 
 void GameScene::OnRender(GameContext* ctx) {
-  // std::cout << "GameScene> OnRender" << std::endl;
   map_manager_->OnRender(ctx, camera_.get());
   mob_manager_->OnRender(ctx, camera_.get());
   player_->OnRender(ctx, scene_context.get(), camera_.get());
   skill_manager_->OnRender(ctx, camera_.get());
 
   ui_->OnRender(ctx, scene_context.get(), camera_.get());
+
+  // Pause menu overlay
+  if (is_pause_)
+  {
+    pause_menu_ui_->OnRender(ctx, camera_.get());
+  }
 }
 
 void GameScene::OnExit(GameContext*) {
