@@ -285,10 +285,11 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
 
   // Session: Center Bottom
   // Attack Hint: Background
+  constexpr float atk_hint_background_width = 122;
   render_items.emplace_back(RenderInstanceItem{
     Transform{
-      .position = {-122 / 2, -82 - 32, 0},
-      .size = {122, 32},
+      .position = {-atk_hint_background_width / 2, -82 - 32, 0},
+      .size = {atk_hint_background_width, 32},
       .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
     },
     texture_map["RoundBackground"],
@@ -297,8 +298,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   // Attack Hint: Space bar
   render_items.emplace_back(RenderInstanceItem{
     Transform{
-      .position = {-122 / 2 + 73, -82 - 24, 0},
-      .size = {32, 16},
+      .position = {-atk_hint_background_width / 2 + 72, -82 - 18 - 7, 0},
+      .size = {36, 18},
       .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
     },
     texture_map["KeyboardSpaceUp"],
