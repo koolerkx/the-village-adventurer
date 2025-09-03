@@ -119,7 +119,7 @@ void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
       0,
       delta_time,
       interpolation::SmoothType::EaseOut,
-      0.5f
+      0.25f
     );
     text.position.y -= 0.2f;
   }
@@ -655,11 +655,19 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
 
     auto size = default_font_->GetStringSize(wss.str(), {}, text_props);
 
+    Vector2 event_text_base_position = {
+      static_cast<float>(ctx->window_width) / 2,
+      static_cast<float>(ctx->window_height) - 250
+    };
+
     rr->DrawFont(
       wss.str(),
       font_key_,
       Transform{
-        .position = {event_text.position.x - size.width / 2, event_text.position.y - size.height / 2, 0}
+        .position = {
+          event_text_base_position.x + event_text.position.x - size.width / 2,
+          event_text_base_position.y + event_text.position.y - size.height / 2,
+          0}
       }, text_props
     );
   }

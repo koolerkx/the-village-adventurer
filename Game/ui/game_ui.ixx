@@ -129,13 +129,7 @@ private:
 
   std::vector<DamageTextProps> damage_texts;
   
-  std::vector<EventTextProps> event_texts = {
-    EventTextProps {
-      .position = {640, 520, 0},
-      .text = L"ïÛî†ÅFHPâÒïúÇPÇOÅì",
-      .color = color::lightGreenA400,
-    }
-  };
+  std::vector<EventTextProps> event_texts = {};
 
   std::vector<PlayerBuff> player_buffs_ = {};
 
@@ -224,5 +218,13 @@ public:
 
   void UpdatePlayerBuffs(const std::vector<PlayerBuff>& pb) {
     player_buffs_ = pb;
+  }
+
+  void AddEventText(const std::wstring& text, const COLOR& color)
+  {
+    event_texts.push_back(EventTextProps{
+      .text = text,
+      .color = color
+    });
   }
 };
