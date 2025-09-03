@@ -24,6 +24,7 @@ private:
   FixedPoolIndexType background_4_texture_id_;
   FixedPoolIndexType ui_texture_id_;
   FixedPoolIndexType overlay_texture_id_;
+  FixedPoolIndexType criware_logo_texture_id_;
 
   const Vector2 frame_uv_pos_ = {224, 146};
   const Vector2 frame_uv_size_ = {64, 16};

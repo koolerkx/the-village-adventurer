@@ -20,6 +20,7 @@ TitleUI::TitleUI(GameContext* ctx) {
   background_4_texture_id_ = tm->Load(L"assets/title_bg_4.png");
   ui_texture_id_ = tm->Load(L"assets/ui.png");
   overlay_texture_id_ = tm->Load(L"assets/block_white.png");
+  criware_logo_texture_id_ = tm->Load(L"assets/criware_logo01.png");
 }
 
 void TitleUI::OnUpdate(GameContext*, float delta_time) {
