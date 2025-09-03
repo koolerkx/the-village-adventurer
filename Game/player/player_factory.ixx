@@ -9,8 +9,6 @@ import game.types;
 import graphic.utils.types;
 import game.collision.collider;
 
-static constexpr std::wstring_view texture_path = L"assets/character_01.png"; // TODO: extract
-
 std::unordered_map<PlayerState, scene_object::AnimationFrameData> animation_data{
   {
     PlayerState::IDLE_LEFT, {
@@ -67,8 +65,9 @@ public:
   std::unique_ptr<Player> Create(GameContext* ctx) {
     std::unique_ptr<KeyboardPlayerInput> player_keyboard_input_ = std::make_unique<KeyboardPlayerInput>(ctx);
     const auto tm = ctx->render_resource_manager->texture_manager.get();
-
-    FixedPoolIndexType texture_id_ = tm->Load(texture_path.data());
+    
+    static const std::wstring texture_path = L"assets/character_01.png";
+    FixedPoolIndexType texture_id_ = tm->Load(texture_path);
 
     auto player = std::make_unique<Player>(texture_id_, std::move(player_keyboard_input_), animation_data);
 
