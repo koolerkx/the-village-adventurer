@@ -11,6 +11,7 @@ import graphic.utils.font;
 import graphic.utils.types;
 import game.types;
 import game.scene_object.skill;
+import game.player.buff;
 
 std::unordered_map<std::string, UV> texture_map = {
   // HP Bar
@@ -51,7 +52,6 @@ std::unordered_map<std::string, UV> texture_map = {
   // Area Message
   {"MessageUpper", UV{{96, 289}, {83, 8}}},
   {"MessageLower", UV{{179, 289}, {83, 8}}},
-
 
   // full screen overlay
   {"DamageOverlay", UV{{128, 323}, {320, 180}}},
@@ -118,6 +118,8 @@ private:
   const bool is_show_event_log_ = false;
 
   std::vector<DamageTextProps> damage_texts;
+
+  std::vector<PlayerBuff> player_buffs_ = {};
 
 public:
   void SetHpPercentage(float percentage) {
@@ -200,5 +202,9 @@ public:
 
   void SetUIOpacity(float alpha) {
     ui_opacity_target_ = alpha;
+  }
+
+  void UpdatePlayerBuffs(const std::vector<PlayerBuff>& pb) {
+    player_buffs_ = pb;
   }
 };

@@ -30,7 +30,7 @@ void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
     hp_percentage_target_,
     delta_time,
     interpolation::SmoothType::EaseOut,
-    0.5f
+    1.0f 
   );
 
   heal_flash_opacity_current_ = interpolation::UpdateSmoothValue(
@@ -55,7 +55,7 @@ void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
       area_message_opacity_target_,
       delta_time,
       interpolation::SmoothType::EaseOut,
-    0.25f
+      0.25f
     );
     if (area_message_opacity_current_ < 0.1) is_showing_area_message_ = false;
   }
@@ -194,6 +194,34 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     texture_map["HPBarFrame"],
     color::setOpacity(color::white, ui_opacity_current_)
   });
+
+  // Session: Left Upper
+  // Buff list: Background
+  constexpr float buff_box_padding = 10.0f;
+  constexpr float buff_item_gap = 10.0f;
+  int item_count = player_buffs_.size();
+  if (item_count > 0) {
+    float buff_box_height = item_count * 32 + (item_count - 1) * buff_item_gap + buff_box_padding * 2;
+    render_items.emplace_back(RenderInstanceItem{
+      Transform{
+        .position = {24, 108, 0},
+        .size = {164, buff_box_height},
+      },
+      texture_map["Block"], color::setOpacity(color::black, 0.25f * ui_opacity_current_)
+    });
+    float buff_item_y = 118;
+    for (auto b : player_buffs_) {
+      render_items.emplace_back(RenderInstanceItem{
+        Transform{
+          .position = {34, buff_item_y, 0},
+          .size = {32, 32},
+        },
+        GetBuffIconUV(b.type), color::setOpacity(color::white, ui_opacity_current_)
+      });
+
+      buff_item_y += (32 + buff_item_gap);
+    }
+  }
 
   // Session: Left Bottom
   // Event log: Background
@@ -421,6 +449,26 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .line_height = 0.0f,
                  .color = color::setOpacity(color::white, ui_opacity_current_)
                });
+
+  // Session: Left Upper
+  // Buff
+  float buff_text_y = 126;
+  for (auto b : player_buffs_) {
+    wss.str(L"");
+    wss << GetBuffDisplayText(b.type);
+    wss << std::fixed << std::setprecision(1) << (b.duration - b.elapsed);
+    rr->DrawFont(wss.str(), font_key_,
+                 Transform{.position = {70, buff_text_y, 0}},
+                 StringSpriteProps{
+                   .pixel_size = 16.0f,
+                   .letter_spacing = 0.0f,
+                   .line_height = 0.0f,
+                   .color = color::setOpacity(color::white, ui_opacity_current_)
+                 });
+
+    constexpr float buff_text_gap = 26;
+    buff_text_y += 16 + buff_text_gap;
+  }
 
   // Session: Left Bottom
   // Event log: log text

@@ -20,6 +20,8 @@ import game.math;
 import game.map.map_manager;
 import game.map.linked_map;
 import game.result_scene;
+import game.utils.helper;
+import game.player.buff;
 
 void GameScene::OnEnter(GameContext* ctx) {
   ctx->allow_control = false;
@@ -150,10 +152,51 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
   const auto [x, y] = player_->GetVelocity();
   auto colliders = map_manager_->GetFiledObjectColliders();
 
+  std::function<void(FieldObject&)> on_chest_open = [&](FieldObject& fo) {
+    std::cout << fo.metadata.tile_class << std::endl;
+
+    chest::RewardType reward_type = chest::GetRandomRewardType();
+
+    switch (reward_type) {
+    case chest::RewardType::HEAL:
+      player_->Heal(helper::GetRandomNumberByOffset(10.0f, 5.0f));
+      break;
+    case chest::RewardType::BUFF_ATTACK_POWER: {
+      PlayerBuff pb;
+      pb.type = BuffType::ATTACK_POWER;
+      player_->AddBuff(pb);
+      break;
+    }
+    // case chest::RewardType::BUFF_ATTACK_SPEED: {
+    //   PlayerBuff pb;
+    //   pb.type = BuffType::ATTACK_SPEED;
+    //   player_->AddBuff(pb);
+    //   break;
+    // }
+    case chest::RewardType::BUFF_MOVING_SPEED: {
+      PlayerBuff pb;
+      pb.type = BuffType::MOVING_SPEED;
+      pb.duration = 5.0f;
+      pb.multiplier = 1.25f;
+      player_->AddBuff(pb);
+      break;
+    }
+    case chest::RewardType::INVINCIBLE: {
+      PlayerBuff pb;
+      pb.type = BuffType::INVINCIBLE;
+      pb.duration = 10.0f;
+      player_->AddBuff(pb);
+      break;
+    }
+  default:
+    break;
+    }
+  };
+
   MoveAndCollideAxis(*player_, delta_time, x, colliders, Axis::X,
-                     [&](FieldObject* fo) { OnPlayerEnterFieldObject(fo); });
+                     [on_chest_open](FieldObject* fo) { OnPlayerEnterFieldObject(fo, on_chest_open); });
   MoveAndCollideAxis(*player_, delta_time, y, colliders, Axis::Y,
-                     [&](FieldObject* fo) { OnPlayerEnterFieldObject(fo); });
+                     [on_chest_open](FieldObject* fo) { OnPlayerEnterFieldObject(fo, on_chest_open); });
 }
 
 void GameScene::HandlePlayerEnterMapCollision(float, SceneContext* scene_ctx) {
@@ -207,12 +250,16 @@ void GameScene::HandleSkillHitMobCollision(float) {
   std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
   std::span skill_colliders_span{skill_colliders.data(), skill_colliders.size()};
 
+  float damage_multiplier = GetBuffMultiplier(player_->GetBuffs(), BuffType::ATTACK_POWER);
+
   auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_, &monster_killed =
-      monster_killed_, &skill_manager = skill_manager_]
+      monster_killed_, &skill_manager = skill_manager_, damage_multiplier]
   (MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult) -> void {
     if (!skill_hitbox->hit_mobs.contains(mob_state->id) && !mob::is_death_state(mob_state->state)) {
+      float damage = skill_hitbox->data->damage * damage_multiplier;
+
       skill_hitbox->hit_mobs.insert(mob_state->id);
-      int remain_hp = mob_manager->MakeDamage(*mob_state, skill_hitbox->data->damage, [&]() {
+      int remain_hp = mob_manager->MakeDamage(*mob_state, damage, [&]() {
         Vector2 mob_center = {
           mob_state->transform.position.x + mob_state->transform.size.x,
           mob_state->transform.position.y + mob_state->transform.size.y
@@ -229,7 +276,7 @@ void GameScene::HandleSkillHitMobCollision(float) {
             mob_state->transform.position.y + mob_state->transform.size.y / 2
           },
           skill_hitbox->data->name,
-          skill_hitbox->data->damage
+          damage
         );
 
         if (skill_hitbox->data->is_destroy_by_mob) {
@@ -264,6 +311,8 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                              [&is_end = is_end_](Player* p, MobHitBox* m, collision::CollisionResult) -> void {
                                if (m->attack_delay >= 0) return;
                                if (m->hit_player) return;
+                               if (p->GetIsInvincible()) return;
+
                                m->hit_player = true;
                                m->timeout = 0;
 
@@ -275,13 +324,42 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                                  is_end = true;
                                }
                              });
+
+  // handle invincible
+  if (player_->GetIsInvincible()) {
+    std::vector<Collider<MobState>> mob_colliders = mob_manager_->GetColliders();
+    std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
+    collision::HandleDetection(player_collider, mob_colliders_span,
+                               [&mob_manager = mob_manager_, &ui = ui_, &monster_killed = monster_killed_](
+                               Player* p, MobState* mob_state, collision::CollisionResult) -> void {
+                                 if (mob_state->hp <= 0) return;
+                                 if (mob::is_death_state(mob_state->state)) return;
+
+                                 mob_manager->MakeDamage(*mob_state, 999, [&]() {
+                                   // make damage text
+                                   ui->AddDamageText(
+                                     {
+                                       mob_state->transform.position.x + mob_state->transform.size.x / 2,
+                                       mob_state->transform.position.y + mob_state->transform.size.y / 2
+                                     },
+                                     L"無敵",
+                                     999
+                                   );
+
+                                   SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(
+                                     audio_clip::hit_1, p->GetPositionVector());
+                                 });
+                                 monster_killed++;
+                               }
+    );
+  }
 }
 
 void GameScene::HandleSkillHitWallCollision(float) {
   auto map_colliders = map_manager_->GetFiledObjectColliders();
 
   std::vector<Collider<SkillHitbox>> skill_colliders{};
-  for (auto s: skill_manager_->GetColliders()) {
+  for (auto s : skill_manager_->GetColliders()) {
     if (s.owner->data->is_destroy_by_wall)
       skill_colliders.push_back(s);
   }
@@ -307,6 +385,7 @@ void GameScene::UpdateUI(GameContext* ctx, float delta_time) {
   ui_->SetTimerText(timer_elapsed_);
 
   ui_->SetSkillSelected(player_->GetSelectedSkillId());
+  ui_->UpdatePlayerBuffs(player_->GetBuffs());
 
   ui_->OnUpdate(ctx, scene_context.get(), delta_time);
 }
