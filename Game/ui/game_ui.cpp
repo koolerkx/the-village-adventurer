@@ -397,10 +397,17 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
 
   // Session: Right Bottom
   // Input Hint: Background
+  constexpr float hint_box_margin = 24;
+  
+  constexpr float hint_box_width = 224;
+  constexpr float hint_box_height = 122;
+  constexpr float hint_box_x = -hint_box_margin - hint_box_width;
+  constexpr float hint_box_y = -hint_box_margin - hint_box_height;
+
   render_items.emplace_back(RenderInstanceItem{
     Transform{
-      .position = {-24 - 224, -24 - 98, 0},
-      .size = {224, 98},
+      .position = {-hint_box_margin - hint_box_width, -hint_box_margin - hint_box_height, 0},
+      .size = {hint_box_width, hint_box_height},
       .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
     },
     texture_map["Block"], color::setOpacity(color::black, 0.25f * ui_opacity_current_)
@@ -408,7 +415,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   // Input Hint: Corner
   render_items.emplace_back(RenderInstanceItem{
     Transform{
-      .position = {-24 - 224 + 8, -24 - 98 + 8, 0},
+      .position = {-hint_box_margin - hint_box_width + 8, -hint_box_margin - hint_box_height + 8, 0},
       .size = {49, 22},
       .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
     },
@@ -416,51 +423,61 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     color::setOpacity(color::white, ui_opacity_current_)
   });
   // Input Hint: Key
-  render_items.emplace_back(RenderInstanceItem{
-    Transform{
-      .position = {-24 - 224 + 106, -24 - 98 + 50, 0},
-      .size = {20, 20},
-      .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
-    },
+  constexpr float key_left_padding = 106;
+  constexpr float key_gap = 8;
+  constexpr float key_size = 20;
+
+  const std::vector<UV> moving_keys = {
     texture_map["KeyboardWUp"],
-    color::setOpacity(color::white, ui_opacity_current_)
-  });
-  render_items.emplace_back(RenderInstanceItem{
-    Transform{
-      .position = {-24 - 224 + 126, -24 - 98 + 50, 0},
-      .size = {20, 20},
-      .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
-    },
     texture_map["KeyboardAUp"],
-    color::setOpacity(color::white, ui_opacity_current_)
-  });
-  render_items.emplace_back(RenderInstanceItem{
-    Transform{
-      .position = {-24 - 224 + 146, -24 - 98 + 50, 0},
-      .size = {20, 20},
-      .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
-    },
     texture_map["KeyboardSUp"],
-    color::setOpacity(color::white, ui_opacity_current_)
-  });
-  render_items.emplace_back(RenderInstanceItem{
-    Transform{
-      .position = {-24 - 224 + 166, -24 - 98 + 50, 0},
-      .size = {20, 20},
-      .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
-    },
     texture_map["KeyboardDUp"],
-    color::setOpacity(color::white, ui_opacity_current_)
-  });
+  };
+
+  for (int i=0; i<moving_keys.size(); i++)
+  {
+    constexpr float moving_keys_y = -hint_box_margin - hint_box_height + 50;
+    
+    render_items.emplace_back(RenderInstanceItem{
+      Transform{
+          .position = {-hint_box_margin - hint_box_width + key_left_padding + i * (key_size + key_gap), moving_keys_y, 0},
+        .size = {20, 20},
+        .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
+      },
+      moving_keys[i],
+      color::setOpacity(color::white, ui_opacity_current_)
+    });
+  }
+
   render_items.emplace_back(RenderInstanceItem{
     Transform{
-      .position = {-24 - 224 + 106, -24 - 98 + 74, 0},
+      .position = {-hint_box_margin - hint_box_width + key_left_padding, -hint_box_margin - hint_box_height + 74, 0},
       .size = {40, 20},
       .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
     },
     texture_map["KeyboardSpaceUp"],
     color::setOpacity(color::white, ui_opacity_current_)
   });
+
+  const std::vector<UV> skill_switch = {
+    texture_map["KeyboardQ"],
+    texture_map["KeyboardE"],
+  };
+
+  for (int i=0; i<skill_switch.size(); i++)
+  {
+    constexpr float skill_switch_y = -hint_box_margin - hint_box_height + 98;
+    
+    render_items.emplace_back(RenderInstanceItem{
+      Transform{
+          .position = {-hint_box_margin - hint_box_width + 122 + i * (key_size + key_gap), skill_switch_y, 0},
+        .size = {20, 20},
+        .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
+      },
+      skill_switch[i],
+      color::setOpacity(color::white, ui_opacity_current_)
+    });
+  }
 
   rr->DrawSpritesInstanced(render_items, texture_id_, {}, true);
 
@@ -580,37 +597,32 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
 
   // Session: Right Bottom
   // Hint: text
-  rr->DrawFont(L"操作説明", font_key_,
-               Transform{
-                 .position = {-24 - 224 + 32, -24 - 98 + 26, 0},
-                 .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
-               }, StringSpriteProps{
-                 .pixel_size = 16.0f,
-                 .letter_spacing = 0.0f,
-                 .line_height = 0.0f,
-                 .color = color::setOpacity(color::white, ui_opacity_current_)
-               });
-  rr->DrawFont(L"移動する", font_key_,
-               Transform{
-                 .position = {-24 - 224 + 32, -24 - 98 + 50, 0},
-                 .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
-               }, StringSpriteProps{
-                 .pixel_size = 16.0f,
-                 .letter_spacing = 0.0f,
-                 .line_height = 0.0f,
-                 .color = color::setOpacity(color::white, ui_opacity_current_)
-               });
-  rr->DrawFont(L"攻撃する", font_key_,
-               Transform{
-                 .position = {-24 - 224 + 32, -24 - 98 + 74, 0},
-                 .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
-               }, StringSpriteProps{
-                 .pixel_size = 16.0f,
-                 .letter_spacing = 0.0f,
-                 .line_height = 0.0f,
-                 .color = color::setOpacity(color::white, ui_opacity_current_)
-               });
+  constexpr float hint_box_left_padding = 32;
+  constexpr float hint_box_top_padding = 26;
+  constexpr float line_size = 16.0f;
+  constexpr float line_gap = 8;
 
+  const std::array<std::wstring, 4> instruction_texts = {
+    L"操作説明",
+    L"移動する",
+    L"攻撃する",
+    L"スキル選択",
+  };
+
+  for (int i = 0; i < instruction_texts.size(); i++)
+  {
+    rr->DrawFont(instruction_texts[i], font_key_,
+               Transform{
+                  .position = {hint_box_x + hint_box_left_padding, hint_box_y + (line_size * i) + (line_gap * i) + hint_box_top_padding, 0},
+                 .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
+               }, StringSpriteProps{
+                 .pixel_size = line_size,
+                 .letter_spacing = 0.0f,
+                 .line_height = 0.0f,
+                 .color = color::setOpacity(color::white, ui_opacity_current_)
+               });
+  }
+  
   RenderDamageText(ctx, scene_ctx, camera);
 
   rr->DrawSprite(RenderItem{
