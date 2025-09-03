@@ -78,6 +78,9 @@ TileRepository::TileRepository(std::string_view metadata_filepath) {
       tile_metadata_[tileId].tile_class = item_class;
     }
 
+    float probability = tile->FloatAttribute("probability") ? tile->FloatAttribute("probability") : 1.0f;
+    tile_metadata_[tileId].probability = probability;
+
     // Animation data
     auto* animation = tile->FirstChildElement("animation");
     if (animation) {
