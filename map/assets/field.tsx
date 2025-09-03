@@ -1225,7 +1225,7 @@
    <object id="1" x="0" y="0" width="14" height="11"/>
   </objectgroup>
  </tile>
- <tile id="12072" type="Chest" probability="0.3">
+ <tile id="12072" type="Chest" probability="0.5">
   <objectgroup draworder="index" id="2">
    <object id="1" x="2" y="3" width="12" height="13"/>
   </objectgroup>
@@ -1236,7 +1236,7 @@
    <frame tileid="12264" duration="200"/>
   </animation>
  </tile>
- <tile id="12073" type="Chest" probability="0.3">
+ <tile id="12073" type="Chest" probability="0.5">
   <objectgroup draworder="index" id="2">
    <object id="1" x="2" y="3" width="12" height="13"/>
   </objectgroup>
@@ -1247,7 +1247,7 @@
    <frame tileid="12265" duration="200"/>
   </animation>
  </tile>
- <tile id="12074" type="Chest" probability="0.3">
+ <tile id="12074" type="Chest" probability="0.5">
   <objectgroup draworder="index" id="2">
    <object id="1" x="2" y="3" width="12" height="13"/>
   </objectgroup>
