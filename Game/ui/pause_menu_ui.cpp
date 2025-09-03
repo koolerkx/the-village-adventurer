@@ -15,7 +15,9 @@ PauseMenuUI::PauseMenuUI(GameContext* ctx) {
   ui_texture_id_ = tm->Load(L"assets/ui.png");
 }
 
-void PauseMenuUI::OnUpdate(GameContext* ctx, float delta_time) {}
+void PauseMenuUI::OnUpdate(GameContext* ctx, float delta_time) {
+    movement_acc_ += delta_time;  
+}
 
 void PauseMenuUI::OnFixedUpdate(GameContext* ctx, float delta_time) {}
 
@@ -138,4 +140,28 @@ void PauseMenuUI::OnRender(GameContext* ctx, Camera* camera) {
                  }
                },
                end_text_props);
+
+  // Selected Frame
+  constexpr float frame_padding = 4.0f;
+  float selected_frame_x = selected_option_ == 0 ? back_button_center_x : end_button_center_x;
+  float selected_frame_y = selected_option_ == 0 ? back_button_center_y : end_button_center_y;
+
+  float selected_width = button_width + frame_padding + selected_frame_moving_range_ * std::abs(
+      std::cos(selected_frame_moving_speed_ * movement_acc_));
+  float selected_height = button_height + frame_padding + selected_frame_moving_range_ * std::abs(
+      std::cos(selected_frame_moving_speed_ * movement_acc_));
+  rr->DrawSprite(RenderItem{
+      ui_texture_id_,
+      Transform{
+          {
+              selected_frame_x - selected_width / 2,
+              selected_frame_y - selected_height / 2,
+              0
+          },
+          {selected_width, selected_height},
+      },
+      {{selected_uv_pos_.x, selected_uv_pos_.y}, {selected_uv_size_.x, selected_uv_size_.y}},
+      color::white
+  });
+
 }

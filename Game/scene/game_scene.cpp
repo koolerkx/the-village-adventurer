@@ -22,6 +22,7 @@ import game.map.linked_map;
 import game.result_scene;
 import game.utils.helper;
 import game.player.buff;
+import game.title_scene;
 
 void GameScene::OnEnter(GameContext* ctx) {
   ctx->allow_control = false;
@@ -53,6 +54,7 @@ void GameScene::OnEnter(GameContext* ctx) {
     ui->SetUIOpacity(1.0f);
     ctx->allow_control = true;
     this->ResetTimer();
+    is_allow_pause_ = true;
   });
 
   // Pause Menu
@@ -69,17 +71,43 @@ void GameScene::OnEnter(GameContext* ctx) {
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
-  if(ctx->input_handler->IsKeyDown(KeyCode::KK_F3))
-  {
+  if (ctx->input_handler->IsKeyDown(KeyCode::KK_F3) && is_allow_pause_) {
+    pause_menu_ui_->Reset();
     is_pause_ = !is_pause_;
   }
-  
-  if (is_pause_)
-  {
+
+  if (is_pause_) {
+    constexpr int options_count = 2;
+    if (ctx->input_handler->IsKeyDown(KeyCode::KK_W) || ctx->input_handler->IsKeyDown(KeyCode::KK_UP)) {
+      pause_menu_selected_option_ = (pause_menu_selected_option_ + 1) % options_count;
+    }
+    if (ctx->input_handler->IsKeyDown(KeyCode::KK_S) || ctx->input_handler->IsKeyDown(KeyCode::KK_DOWN)) {
+      pause_menu_selected_option_ = (pause_menu_selected_option_ - 1 + options_count) % options_count;
+    }
+    pause_menu_ui_->SetSelectedOption(pause_menu_selected_option_);
+
+    if (ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE)) {
+      if (pause_menu_selected_option_ == 0) {
+        // back to game
+        is_pause_ = false;
+      }
+      else {
+        // back to title
+        is_pause_ = false;
+        is_allow_pause_ = false;
+        ctx->allow_control = false;
+
+        ui_->SetFadeOverlayAlphaTarget(1.0f, color::white, []() {
+          SceneManager::GetInstance().ChangeSceneDelayed(
+            std::make_unique<TitleScene>());
+        });
+      }
+    }
+
     pause_menu_ui_->OnUpdate(ctx, delta_time);
     return;
   }
-    
+
   // std::cout << "GameScene> OnUpdate: " << delta_time << std::endl;
   map_manager_->OnUpdate(ctx, delta_time);
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
@@ -105,8 +133,7 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
 }
 
 void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
-  if (is_pause_)
-  {
+  if (is_pause_) {
     SceneManager::GetInstance().GetAudioManager()->StopWalking();
     pause_menu_ui_->OnFixedUpdate(ctx, delta_time);
     return;
@@ -140,8 +167,7 @@ void GameScene::OnRender(GameContext* ctx) {
   ui_->OnRender(ctx, scene_context.get(), camera_.get());
 
   // Pause menu overlay
-  if (is_pause_)
-  {
+  if (is_pause_) {
     pause_menu_ui_->OnRender(ctx, camera_.get());
   }
 }
@@ -214,10 +240,10 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
       player_->AddBuff(pb);
       break;
     }
-  default:
-    break;
+    default:
+      break;
     }
-    
+
     ui_->AddEventText(chest::GetChestRewardEventText(reward_type), chest::GetChestRewardEventColor(reward_type));
   };
 

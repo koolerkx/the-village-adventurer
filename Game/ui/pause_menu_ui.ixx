@@ -31,6 +31,9 @@ private:
   const float selected_frame_moving_range_ = 13.0f;
   uint8_t selected_option_ = 0;
 
+  float title_logo_floating_speed_ = 18.0f;
+  float movement_acc_ = 0.0f;
+
 public:
   PauseMenuUI(GameContext* ctx);
   void OnUpdate(GameContext* ctx, float delta_time);
@@ -39,5 +42,10 @@ public:
 
   void SetSelectedOption(uint8_t option) {
     selected_option_ = option;
+  }
+
+  void Reset() {
+    selected_option_ = 0;
+    movement_acc_ = 0.0f;
   }
 };

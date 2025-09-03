@@ -1,4 +1,5 @@
 module;
+#include "stdint.h"
 
 export module game.scene_game;
 
@@ -44,7 +45,10 @@ private:
 
   void UpdateUI(GameContext* ctx, float delta_time);
 
+  // pause menu
   bool is_pause_ = false;
+  bool is_allow_pause_ = false;
+  uint8_t pause_menu_selected_option_ = 0;
 
 public:
   void OnEnter(GameContext* ctx) override;
