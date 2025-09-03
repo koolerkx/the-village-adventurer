@@ -65,6 +65,8 @@
         <ClCompile Include="ui\game_ui.cpp"/>
         <ClCompile Include="ui\game_ui.ixx"/>
         <ClCompile Include="ui\interpolation.ixx"/>
+        <ClCompile Include="ui\pause_menu_ui.cpp" />
+        <ClCompile Include="ui\pause_menu_ui.ixx" />
         <ClCompile Include="ui\result_ui.cpp"/>
         <ClCompile Include="ui\result_ui.ixx"/>
         <ClCompile Include="ui\title_ui.cpp"/>
