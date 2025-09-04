@@ -46,6 +46,10 @@ private:
   ComPtr<ID3D11Buffer> rect_index_buffer_;
   DXGI_FORMAT rect_index_format_ = DXGI_FORMAT_R32_UINT;
 
+  // blending
+  ComPtr<ID3D11BlendState> blend_state_multiply_ = nullptr;
+  ComPtr<ID3D11BlendState> blend_state_add_ = nullptr;
+
   // instance draw
   size_t instance_buffer_can_store_ = 0;                  // max = 2^32 = ~4.29E9
   ComPtr<ID3D11Buffer> instance_vertex_buffer_ = nullptr; // レクト頂点バッファ
@@ -65,6 +69,7 @@ private:
 
   void CreateRectBuffer(size_t max_rect_num);
   void CreateInstanceBuffer(size_t max_instance_num);
+  void CreateBlendStates();
 
 public:
   Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
@@ -113,4 +118,7 @@ public:
 
   void SetScissorRect(float left, float top, float right, float bottom) const;
   void ResetScissorRect() const;
+
+  void SetAdditiveBlending() const;
+  void SetMultiplicativeBlending() const;
 };

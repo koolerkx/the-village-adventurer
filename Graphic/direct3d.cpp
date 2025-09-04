@@ -125,36 +125,6 @@ HRESULT Dx11Wrapper::CreateDepthStencilView() {
   return hr;
 }
 
-void Dx11Wrapper::CreateBlendState() {
-  // RGB A -> 好きに使っていい値、基本は透明の表現に使う
-  // αテスト、αブレンド
-  // ブレンドステート設定
-  D3D11_BLEND_DESC bd = {};
-  bd.AlphaToCoverageEnable = FALSE;
-  bd.IndependentBlendEnable = FALSE;
-  bd.RenderTarget[0].BlendEnable = TRUE; // αブレンドするしない
-
-  // src ... ソース（今から描く絵（色）） dest　...　すでに絵描かれた絵（色）
-
-  // RGB
-  bd.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-  bd.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-  bd.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD; // 演算子
-  // SrcRGB * SrcBlend + DestRGB * (1 - DestBlend)
-
-  // A
-  bd.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-  bd.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-  bd.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-  // SrcBlendAlpha * 1 + DestBlendAlpha * 0
-
-  bd.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-  device_->CreateBlendState(&bd, blend_state_multiply_.GetAddressOf());
-
-  SetBlendMultiply(device_context_.Get(), blend_state_multiply_.Get());
-}
-
 void Dx11Wrapper::CreateDepthStencilState() {
   SetEnableDepth(false);
 }
@@ -218,7 +188,6 @@ Dx11Wrapper::Dx11Wrapper(HWND hwnd, const Dx11WrapperConfig& config) {
     assert(0);
     return;
   }
-  CreateBlendState();
   CreateDepthStencilState();
   CreateViewport();
   CreateRasterizerState();
