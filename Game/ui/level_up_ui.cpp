@@ -33,7 +33,7 @@ void LevelUpUI::OnUpdate(GameContext* ctx, float delta_time) {
     1.0f
   );
 
-  if (opacity_target_ - opacity_current_ <= 0.8) {
+  if (opacity_target_ - opacity_current_ <= 0.95) {
     fade_in_callback_();
   }
 }

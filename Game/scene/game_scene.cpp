@@ -101,7 +101,7 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
 
     auto elems = helper::GetRandomElements<3>(player_level::option_list);
     level_up_ui_->SetOptionData(elems);
-    level_up_options = elems;
+    level_up_options_ = elems;
 
     level_up_ui_->SetFadeInWithCallback([&allow = is_allow_level_up_ui_control_]() {
       allow = true;
@@ -326,7 +326,9 @@ void GameScene::HandleSkillHitMobCollision(float) {
   std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
   std::span skill_colliders_span{skill_colliders.data(), skill_colliders.size()};
 
-  float damage_multiplier = GetBuffMultiplier(player_->GetBuffs(), BuffType::ATTACK_POWER);
+  float damage_multiplier = GetBuffMultiplier(player_->GetBuffs(), BuffType::ATTACK_POWER)
+    * player_level::GetLevelAbilityMultiplier(player_->GetLevelUpAbilities(), player_level::Ability::ATTACK)
+    + player_level::GetLevelAbilityValue(player_->GetLevelUpAbilities(), player_level::Ability::ATTACK);;
 
   auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_, &monster_killed =
       monster_killed_, &skill_manager = skill_manager_, damage_multiplier]
@@ -533,11 +535,46 @@ void GameScene::HandleLevelUpUI(GameContext* ctx, float delta_time) {
     level_up_ui_->SetSelectedOption(level_up_selected_option_);
 
     if (ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE)) {
-      // select
+      am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
+      HandleLevelUpSelection(level_up_options_[level_up_selected_option_]);
+      is_show_level_up_ui = false;
+      is_allow_level_up_ui_control_ = false;
     }
   }
 
   level_up_ui_->OnUpdate(ctx, delta_time);
+}
+
+void GameScene::HandleLevelUpSelection(player_level::OptionType type) {
+  switch (type) {
+  case player_level::OptionType::ATTACK:
+    player_->AddLevelUpAbility({
+      player_level::Ability::ATTACK,
+      1.2f,
+    });
+    break;
+  case player_level::OptionType::DEFENSE:
+    player_->AddLevelUpAbility({
+      player_level::Ability::DEFENSE,
+      1.2f,
+    });
+    break;
+  case player_level::OptionType::MOVING_SPEED:
+    player_->AddLevelUpAbility({
+      player_level::Ability::MOVING_SPEED,
+      1.05f,
+    });
+    break;
+  case player_level::OptionType::HP_UP:
+    player_->AddLevelUpAbility({
+      player_level::Ability::ATTACK,
+      1.2f,
+    });
+    break;
+  case player_level::OptionType::HEAL:
+    player_->Heal(player_->GetMaxHp() * 0.5f);
+    break;
+  }
 }
 
 void GameScene::ResetTimer() {

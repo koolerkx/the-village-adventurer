@@ -19,7 +19,7 @@ import game.mobs_manager;
 import game.player.level;
 
 constexpr int BASE_CHEST_OPEN_EXP = 5;
-constexpr int BASE_MONSTER_KILL_EXP = 5;
+constexpr int BASE_MONSTER_KILL_EXP = 10;
 
 export class GameScene : public IScene {
 private:
@@ -48,6 +48,7 @@ private:
   void HandleSkillHitWallCollision(float delta_time);
   void HandlePauseMenu(GameContext* ctx, float delta_time);
   void HandleLevelUpUI(GameContext* ctx, float delta_time);
+  void HandleLevelUpSelection(player_level::OptionType);
   
   void ResetTimer();
 
@@ -63,7 +64,7 @@ private:
   bool is_show_level_up_ui = false;
   bool is_allow_level_up_ui_control_ = false;
   uint8_t level_up_selected_option_ = 1;
-  std::array<player_level::OptionType, 3> level_up_options = {};
+  std::array<player_level::OptionType, 3> level_up_options_ = {};
 
 public:
   void OnEnter(GameContext* ctx) override;

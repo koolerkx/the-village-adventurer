@@ -19,6 +19,7 @@ import game.player.input;
 import game.utils.throttle;
 import game.scene_object.skill;
 import game.player.buff;
+import game.player.level;
 
 export enum class PlayerState: unsigned char {
   IDLE_LEFT,
@@ -106,6 +107,9 @@ private:
 
   // buffs
   std::vector<PlayerBuff> buffs_;
+
+  // level up ability
+  std::vector<player_level::PlayerAbility> level_up_abilities_;
 
   // experience
   int experience_ = 0;
@@ -200,4 +204,13 @@ public:
   }
 
   int GetLevel() const { return level_; }
+
+  void AddLevelUpAbility(player_level::PlayerAbility ability) {
+    level_up_abilities_.push_back(ability);
+    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::buff2, {}, 0.5);
+  };
+
+  float GetMaxHp() const { return max_health_; }
+
+  std::vector<player_level::PlayerAbility> GetLevelUpAbilities() { return level_up_abilities_; }
 };

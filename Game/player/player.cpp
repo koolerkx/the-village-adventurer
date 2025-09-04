@@ -112,7 +112,10 @@ void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {
   else {
     float len = std::sqrt(direction_.x * direction_.x + direction_.y * direction_.y);
 
-    float move_speed = move_speed_ * GetBuffMultiplier(buffs_, BuffType::MOVING_SPEED);
+    float move_speed = move_speed_
+      * GetBuffMultiplier(buffs_, BuffType::MOVING_SPEED)
+      * player_level::GetLevelAbilityMultiplier(level_up_abilities_, player_level::Ability::MOVING_SPEED)
+      + player_level::GetLevelAbilityValue(level_up_abilities_, player_level::Ability::MOVING_SPEED);
 
     velocity_ = {
       (direction_.x / len) * move_speed,
