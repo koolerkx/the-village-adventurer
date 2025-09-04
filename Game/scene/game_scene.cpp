@@ -379,18 +379,21 @@ void GameScene::HandleMobHitPlayerCollision(float) {
     std::vector<Collider<MobState>> mob_colliders = mob_manager_->GetColliders();
     std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
     collision::HandleDetection(player_collider, mob_colliders_span,
-                               [&mob_manager = mob_manager_, &ui = ui_, &monster_killed = monster_killed_](
+                               [&mob_manager = mob_manager_, &ui = ui_, &monster_killed = monster_killed_, &player =
+                                 player_](
                                Player* p, MobState* mob_state, collision::CollisionResult) -> void {
                                  if (mob_state->hp <= 0) return;
                                  if (mob::is_death_state(mob_state->state)) return;
 
+                                 Vector2 mob_center = {
+                                   mob_state->transform.position.x + mob_state->transform.size.x / 2,
+                                   mob_state->transform.position.y + mob_state->transform.size.y / 2
+                                 };
+
                                  mob_manager->MakeDamage(*mob_state, 999, [&]() {
                                    // make damage text
                                    ui->AddDamageText(
-                                     {
-                                       mob_state->transform.position.x + mob_state->transform.size.x / 2,
-                                       mob_state->transform.position.y + mob_state->transform.size.y / 2
-                                     },
+                                     mob_center,
                                      L"無敵",
                                      999
                                    );
@@ -401,6 +404,11 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                                      audio_clip::hit_1, p->GetPositionVector());
                                  });
                                  monster_killed++;
+
+                                 ui->AddExperienceCoin(mob_center, 10, [&](int value) {
+                                   // FIXME: now using workaround since player in callback seems cannot be access correctly
+                                   player->AddExperience(value);
+                                 });
                                }
     );
   }
