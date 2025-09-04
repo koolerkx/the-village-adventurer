@@ -22,7 +22,7 @@ struct StatusUIActiveProps {
   float experience;
   float max_experience;
   float total_experience;
-  float level;
+  int level;
   std::vector<player_level::PlayerAbility> abilities;
   std::vector<PlayerBuff> buffs;
 };

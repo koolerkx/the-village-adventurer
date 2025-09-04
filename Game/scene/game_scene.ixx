@@ -71,7 +71,8 @@ private:
   std::array<player_level::OptionType, 3> level_up_options_ = {};
 
   // status menu
-  bool is_show_status_ui_ = true;
+  bool is_show_status_ui_ = false;
+  bool is_allow_status_ui_control_ = false;
 
 public:
   void OnEnter(GameContext* ctx) override;

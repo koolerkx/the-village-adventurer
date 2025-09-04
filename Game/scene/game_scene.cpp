@@ -92,9 +92,35 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
     return;
   }
 
+  if (ctx->input_handler->IsKeyDown(KeyCode::KK_F4) && is_allow_pause_ && !is_show_status_ui_) {
+    is_show_status_ui_ = true;
+    is_allow_pause_ = false;
+    status_ui_->Active({
+                         .hp = player_->GetHp(),
+                         .max_hp = player_->GetMaxHp(),
+                         .defense = player_->GetDefense(),
+                         .attack = player_->GetAttack(),
+                         .speed = player_->GetSpeed(),
+                         .experience = player_->GetExperience(),
+                         .max_experience = player_->GetMaxExperience(),
+                         .total_experience = player_->GetTotalExperience(),
+                         .level = player_->GetLevel(),
+                         .abilities = player_->GetLevelUpAbilities(),
+                         .buffs = player_->GetBuffs(),
+                       }, [&allow = is_allow_status_ui_control_]() {
+                         allow = true;
+                       });
+  }
+
   if (is_show_status_ui_) {
-    status_ui_->Active({});
     status_ui_->OnUpdate(ctx, delta_time);
+
+    if (is_allow_status_ui_control_ && (ctx->input_handler->IsKeyDown(KeyCode::KK_F4) || ctx->input_handler->
+      IsKeyDown(KeyCode::KK_SPACE))) {
+      is_show_status_ui_ = false;
+      is_allow_status_ui_control_ = false;
+      is_allow_pause_ = true;
+    }
     return;
   }
 
@@ -104,6 +130,7 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
     level_up_ui_->Reset();
     is_show_level_up_ui = true;
     is_allow_level_up_ui_control_ = false;
+    is_allow_pause_ = false;
 
     SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::select_se_1);
     SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_pause_menu);
@@ -197,10 +224,9 @@ void GameScene::OnRender(GameContext* ctx) {
     level_up_ui_->OnRender(ctx, camera_.get());
   }
 
-  // if (is_show_status_ui_) {
-  //   status_ui_->OnRender(ctx, camera_.get());
-  // }
-  status_ui_->OnRender(ctx, camera_.get());
+  if (is_show_status_ui_) {
+    status_ui_->OnRender(ctx, camera_.get());
+  }
 }
 
 void GameScene::OnExit(GameContext*) {
@@ -558,6 +584,7 @@ void GameScene::HandleLevelUpUI(GameContext* ctx, float delta_time) {
       HandleLevelUpSelection(level_up_options_[level_up_selected_option_]);
       is_show_level_up_ui = false;
       is_allow_level_up_ui_control_ = false;
+      is_allow_pause_ = true;
     }
   }
 
