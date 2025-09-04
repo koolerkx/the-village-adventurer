@@ -658,6 +658,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   }
 
   RenderDamageText(ctx, scene_ctx, camera);
+  RenderExperienceCoin(ctx, scene_ctx, camera);
 
   // Draw Event texts
   for (auto event_text : event_texts) {
@@ -729,4 +730,28 @@ void GameUI::RenderDamageText(GameContext* ctx, SceneContext*, Camera* camera) {
       camera->GetCameraProps()
     );
   }
+}
+
+void GameUI::RenderExperienceCoin(GameContext* ctx, SceneContext* scene_ctx, Camera* camera) {
+  auto rr = ctx->render_resource_manager->renderer.get();
+
+  std::vector<RenderInstanceItem> render_items_on_map;
+  std::vector<RenderInstanceItem> render_items_on_screen;
+
+  for (auto exp_coin : experience_stars_) {
+    if (exp_coin.is_stick_with_map) {
+      render_items_on_map.emplace_back(RenderInstanceItem{
+        .transform = {
+          .position = exp_coin.position,
+          .size = {8, 8},
+          .position_anchor = {-4, -4, 0}
+        },
+        .uv = texture_map["Star"],
+        .color = color::white
+      });
+    }
+  }
+
+  rr->DrawSpritesInstanced(render_items_on_map, texture_id_, camera->GetCameraProps(), true);
+  rr->DrawSpritesInstanced(render_items_on_screen, texture_id_, {}, true);
 }

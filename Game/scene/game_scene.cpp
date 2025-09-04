@@ -289,13 +289,13 @@ void GameScene::HandleSkillHitMobCollision(float) {
   (MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult) -> void {
     if (!skill_hitbox->hit_mobs.contains(mob_state->id) && !mob::is_death_state(mob_state->state)) {
       float damage = skill_hitbox->data->damage * damage_multiplier;
+      Vector2 mob_center = {
+        mob_state->transform.position.x + mob_state->transform.size.x / 2,
+        mob_state->transform.position.y + mob_state->transform.size.y / 2
+      };
 
       skill_hitbox->hit_mobs.insert(mob_state->id);
       int remain_hp = mob_manager->MakeDamage(*mob_state, damage, [&]() {
-        Vector2 mob_center = {
-          mob_state->transform.position.x + mob_state->transform.size.x,
-          mob_state->transform.position.y + mob_state->transform.size.y
-        };
         Vector2 skill_center = {
           skill_hitbox->transform.position.x + skill_hitbox->transform.size.x / 2,
           skill_hitbox->transform.position.y + skill_hitbox->transform.size.y / 2
@@ -303,10 +303,7 @@ void GameScene::HandleSkillHitMobCollision(float) {
 
         // make damage text
         ui->AddDamageText(
-          {
-            mob_state->transform.position.x + mob_state->transform.size.x / 2,
-            mob_state->transform.position.y + mob_state->transform.size.y / 2
-          },
+          mob_center,
           skill_hitbox->data->name,
           damage
         );
@@ -320,7 +317,10 @@ void GameScene::HandleSkillHitMobCollision(float) {
         }
 
         // attack push back
-        Vector2 dir = math::GetDirection(skill_center, mob_center);
+        Vector2 dir = math::GetDirection(skill_center, {
+                                           mob_state->transform.position.x + mob_state->transform.size.x,
+                                           mob_state->transform.position.y + mob_state->transform.size.y
+                                         });
 
         mob_manager->PushBack(*mob_state, {dir.x, dir.y});
         Vector2 audio_pos = {
@@ -331,6 +331,8 @@ void GameScene::HandleSkillHitMobCollision(float) {
       });
       if (remain_hp <= 0) {
         monster_killed++;
+
+        ui->AddExperienceCoin(mob_center, 10);
       }
     }
   };

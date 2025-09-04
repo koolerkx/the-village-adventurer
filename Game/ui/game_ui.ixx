@@ -58,6 +58,9 @@ std::unordered_map<std::string, UV> texture_map = {
   // full screen overlay
   {"DamageOverlay", UV{{128, 323}, {320, 180}}},
   {"HealOverlay", UV{{128, 503}, {320, 180}}},
+
+  // Experience Coin
+  {"Star", UV{{452, 106}, {32, 32}}},
 };
 
 struct DamageTextProps {
@@ -77,6 +80,12 @@ struct EventTextProps {
 struct EventLogText {
   std::wstring text;
   COLOR color;
+};
+
+struct ExperienceStar {
+  POSITION position;
+  int value;
+  bool is_stick_with_map = true;
 };
 
 export class GameUI {
@@ -130,6 +139,8 @@ private:
   std::vector<EventTextProps> event_texts = {};
 
   std::vector<PlayerBuff> player_buffs_ = {};
+
+  std::vector<ExperienceStar> experience_stars_ = {};
 
 public:
   void SetHpPercentage(float percentage) {
@@ -186,6 +197,7 @@ public:
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
   void RenderDamageText(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
+  void RenderExperienceCoin(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
 
   void SetFadeOverlayAlphaTarget(float alpha, COLOR color, std::function<void()> cb = {}) {
     fade_overlay_alpha_target_ = alpha;
@@ -225,6 +237,12 @@ public:
     event_texts.emplace_back(EventTextProps{
       .text = text,
       .color = color
+    });
+  }
+
+  void AddExperienceCoin(Vector2 position, int value) {
+    experience_stars_.emplace_back(ExperienceStar{
+      {position.x, position.y, 0}, value
     });
   }
 };
