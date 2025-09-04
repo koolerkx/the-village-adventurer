@@ -16,6 +16,7 @@
         <ClCompile Include="audio\audio_manager.ixx"/>
         <ClCompile Include="collision\collider.ixx"/>
         <ClCompile Include="collision\collision_handler.ixx"/>
+        <ClCompile Include="input\xinput.cpp" />
         <ClCompile Include="map\linked_map.ixx"/>
         <ClCompile Include="map\map_manager.cpp"/>
         <ClCompile Include="map\map_manager.ixx"/>
@@ -85,6 +86,7 @@
     <ItemGroup>
         <ClInclude Include="input\keyboard.h"/>
         <ClInclude Include="input\key_logger.h"/>
+        <ClInclude Include="input\xinput.h" />
     </ItemGroup>
     <PropertyGroup Label="Globals">
         <VCProjectVersion>15.0</VCProjectVersion>
