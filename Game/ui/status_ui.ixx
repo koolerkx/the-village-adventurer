@@ -63,6 +63,7 @@ private:
   float movement_acc_ = 0.0f;
 
   float opacity_ = 1.0f;
+  std::function<void()> fade_end_cb_ = []() {};
 
   StatusUIActiveProps props_;
 
@@ -76,7 +77,8 @@ public:
     movement_acc_ = 0.0f;
   }
 
-  void Active(const StatusUIActiveProps& props) {
+  void Active(const StatusUIActiveProps& props, std::function<void()> cb = {}) {
+    opacity_ = 0.0f;
     props_ = props;
 
     for (auto& ab : props_.abilities) {
@@ -111,5 +113,7 @@ public:
     props_.abilities.clear();
     props_.abilities.reserve(order.size());
     for (const auto& key : order) props_.abilities.push_back(std::move(agg.at(key)));
+
+    fade_end_cb_ = cb;
   }
 };

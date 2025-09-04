@@ -2,6 +2,8 @@ module;
 
 module game.ui.status_ui;
 
+import game.ui.interpolation;
+
 StatusUI::StatusUI(GameContext* ctx) {
   auto [font_spritemap_filename, font_metadata_filename] = defined_font_map[DefinedFont::FUSION_PIXEL_FONT_DEBUG];
   font_key_ = Font::MakeFontGetKey(font_spritemap_filename, font_metadata_filename,
@@ -16,6 +18,18 @@ StatusUI::StatusUI(GameContext* ctx) {
 
 void StatusUI::OnUpdate(GameContext* ctx, float delta_time) {
   movement_acc_ += delta_time;
+
+  opacity_ = interpolation::UpdateSmoothValue(
+    opacity_,
+    1.0f,
+    delta_time,
+    interpolation::SmoothType::EaseOut,
+    1.0f
+  );
+
+  if (1.0f - opacity_ <= 0.05 && fade_end_cb_) {
+    fade_end_cb_();
+  }
 }
 
 void StatusUI::OnFixedUpdate(GameContext* ctx, float delta_time) {}
@@ -381,7 +395,7 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
   wss.str(L"");
   if (props_.buffs.size() == 0) {
     wss << L"なし";
-    
+
     rr->DrawFont(wss.str(), font_key_, {
                    .position = {buff_text_x, buff_item_y, 0}
                  }, buff_text_props, {});
@@ -453,14 +467,14 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
       {button_width, button_height},
     },
     {{frame_uv_pos_.x, frame_uv_pos_.y}, {frame_uv_size_.x, frame_uv_size_.y}},
-    color::white
+    color::setOpacity(color::white, opacity_)
   });
 
   auto back_text_props = StringSpriteProps{
     .pixel_size = 24.0f,
     .letter_spacing = 0.0f,
     .line_height = 0.0f,
-    .color = color::white
+    .color = color::setOpacity(color::white, opacity_)
   };
   auto back_text_size = default_font_->GetStringSize(wss.str(), {}, back_text_props);
 
@@ -494,7 +508,7 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
       {selected_width, selected_height},
     },
     {{selected_uv_pos_.x, selected_uv_pos_.y}, {selected_uv_size_.x, selected_uv_size_.y}},
-    color::white
+    color::setOpacity(color::white, opacity_)
   });
 #pragma endregion
 }
