@@ -78,7 +78,10 @@ void GameScene::OnEnter(GameContext* ctx) {
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
-  if (ctx->input_handler->IsKeyDown(KeyCode::KK_F3) && is_allow_pause_) {
+  UpdateInput(ctx->input_handler);
+
+  if (input.is_pause_menu_button && ui_throttle.CanCall() && is_allow_pause_) {
+    input.is_pause_menu_button = false;
     pause_menu_ui_->Reset();
     is_pause_ = true;
     is_allow_pause_ = false;
@@ -92,7 +95,8 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
     return;
   }
 
-  if (ctx->input_handler->IsKeyDown(KeyCode::KK_F4) && is_allow_pause_ && !is_show_status_ui_) {
+  if (input.is_status_menu_button && ui_throttle.CanCall() && is_allow_pause_ && !is_show_status_ui_) {
+    input.is_status_menu_button = false;
     HandleOnStatusOpen(ctx, delta_time);
   }
 
@@ -506,17 +510,26 @@ void GameScene::HandlePauseMenu(GameContext* ctx, float delta_time) {
   auto am = SceneManager::GetInstance().GetAudioManager();
 
   constexpr int options_count = 2;
-  if (ctx->input_handler->IsKeyDown(KeyCode::KK_W) || ctx->input_handler->IsKeyDown(KeyCode::KK_UP)) {
+  if (input.is_button_up && ui_throttle.CanCall()) {
     pause_menu_selected_option_ = (pause_menu_selected_option_ + 1) % options_count;
     am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
   }
-  if (ctx->input_handler->IsKeyDown(KeyCode::KK_S) || ctx->input_handler->IsKeyDown(KeyCode::KK_DOWN)) {
+  if (input.is_button_down && ui_throttle.CanCall()) {
     pause_menu_selected_option_ = (pause_menu_selected_option_ - 1 + options_count) % options_count;
     am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
   }
   pause_menu_ui_->SetSelectedOption(pause_menu_selected_option_);
 
-  if (ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE)) {
+  if (input.is_pause_menu_button && ui_throttle.CanCall()) {
+    am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
+    is_pause_ = false;
+    is_allow_pause_ = true;
+    is_allow_status_ui_control_ = true;
+    SceneManager::GetInstance().GetAudioManager()->PlayPreviousBGM();
+    return;
+  }
+
+  if (input.is_button_yes && ui_throttle.CanCall()) {
     am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
 
     if (pause_menu_selected_option_ == 0) {
@@ -547,19 +560,17 @@ void GameScene::HandleLevelUpUI(GameContext* ctx, float delta_time) {
 
   if (is_allow_level_up_ui_control_) {
     constexpr int options_count = 3;
-    if (ctx->input_handler->IsKeyDown(KeyCode::KK_D) || ctx->input_handler->IsKeyDown(KeyCode::KK_RIGHT) || ctx->
-      input_handler->IsKeyDown(KeyCode::KK_E)) {
+    if (input.is_button_right && ui_throttle.CanCall()) {
       level_up_selected_option_ = (level_up_selected_option_ + 1) % options_count;
       am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
     }
-    if (ctx->input_handler->IsKeyDown(KeyCode::KK_A) || ctx->input_handler->IsKeyDown(KeyCode::KK_LEFT) || ctx->
-      input_handler->IsKeyDown(KeyCode::KK_Q)) {
+    if (input.is_button_left && ui_throttle.CanCall()) {
       level_up_selected_option_ = (level_up_selected_option_ - 1 + options_count) % options_count;
       am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
     }
     level_up_ui_->SetSelectedOption(level_up_selected_option_);
 
-    if (ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE)) {
+    if (input.is_button_yes && ui_throttle.CanCall()) {
       am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
       HandleLevelUpSelection(level_up_options_[level_up_selected_option_]);
       is_show_level_up_ui = false;
@@ -634,8 +645,7 @@ void GameScene::HandleStatusUpdate(GameContext* ctx, float delta_time) {
   auto am = SceneManager::GetInstance().GetAudioManager();
   status_ui_->OnUpdate(ctx, delta_time);
 
-  if (is_allow_status_ui_control_ && (ctx->input_handler->IsKeyDown(KeyCode::KK_F4) || ctx->input_handler->
-    IsKeyDown(KeyCode::KK_SPACE))) {
+  if (is_allow_status_ui_control_ && (input.is_button_yes || input.is_status_menu_button) && ui_throttle.CanCall()) {
     am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
     am->PlayPreviousBGM();
     is_show_status_ui_ = false;
@@ -660,4 +670,30 @@ void GameScene::UpdateUI(GameContext* ctx, float delta_time) {
   ui_->OnUpdate(ctx, scene_context.get(), delta_time, camera_.get());
   ui_->SetExperienceBarPercentage(player_->GetExperiencePercentage());
   ui_->SetPlayerLevel(player_->GetLevel());
+}
+
+void GameScene::UpdateInput(InputHandler* ih) {
+  auto x_input_analog = ih->GetXInputAnalog();
+
+  input.is_button_yes = ih->IsXInputButtonDown(XButtonCode::A)
+    || ih->IsKeyDown(KeyCode::KK_SPACE) || ih->IsKeyDown(KeyCode::KK_ENTER);
+  input.is_button_no = ih->IsXInputButtonDown(XButtonCode::B) || ih->IsKeyDown(KeyCode::KK_ESCAPE);
+
+  input.is_button_up = ih->GetXInputButton(XButtonCode::DPadUp) || x_input_analog.first.second > 0
+    || ih->GetKey(KeyCode::KK_W) || ih->GetKey(KeyCode::KK_UP);
+  input.is_button_down = ih->GetXInputButton(XButtonCode::DPadDown) || x_input_analog.first.second < 0
+    || ih->GetKey(KeyCode::KK_S) || ih->GetKey(KeyCode::KK_DOWN);
+
+  input.is_button_left = ih->GetXInputButton(XButtonCode::DPadLeft) || x_input_analog.first.first < 0
+    || ih->GetKey(KeyCode::KK_A) || ih->GetKey(KeyCode::KK_LEFT);
+  input.is_button_right = ih->GetXInputButton(XButtonCode::DPadRight) || x_input_analog.first.first > 0
+    || ih->GetKey(KeyCode::KK_D) || ih->GetKey(KeyCode::KK_RIGHT);
+
+  input.is_button_left_2 = ih->IsKeyDown(KeyCode::KK_Q)
+    || ih->IsXInputButtonDown(XButtonCode::LB) || ih->IsXInputButtonDown(XButtonCode::Y);
+  input.is_button_right_2 = ih->IsKeyDown(KeyCode::KK_E)
+    || ih->IsXInputButtonDown(XButtonCode::RB) || ih->IsXInputButtonDown(XButtonCode::B);
+
+  input.is_pause_menu_button = ih->IsKeyDown(KeyCode::KK_F3) || ih->IsXInputButtonDown(XButtonCode::Start);
+  input.is_status_menu_button = ih->IsKeyDown(KeyCode::KK_F4) || ih->IsXInputButtonDown(XButtonCode::X);
 }

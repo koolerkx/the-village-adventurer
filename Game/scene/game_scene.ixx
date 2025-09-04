@@ -18,6 +18,7 @@ import game.ui.level_up;
 import game.mobs_manager;
 import game.player.level;
 import game.ui.status_ui;
+import game.utils.throttle;
 
 constexpr int BASE_CHEST_OPEN_EXP = 5;
 constexpr int BASE_MONSTER_KILL_EXP = 10;
@@ -50,14 +51,16 @@ private:
   void HandleSkillHitMobCollision(float delta_time);
   void HandleMobHitPlayerCollision(float delta_time);
   void HandleSkillHitWallCollision(float delta_time);
-  
+
   void HandlePauseMenu(GameContext* ctx, float delta_time);
   void HandleLevelUpUI(GameContext* ctx, float delta_time);
   void HandleLevelUpSelection(player_level::OptionType);
 
   void HandleOnStatusOpen(GameContext* ctx, float delta_time);
   void HandleStatusUpdate(GameContext* ctx, float delta_time);
-  
+
+  void UpdateInput(InputHandler* ih);
+
   void ResetTimer();
 
   void UpdateUI(GameContext* ctx, float delta_time);
@@ -77,6 +80,22 @@ private:
   // status menu
   bool is_show_status_ui_ = false;
   bool is_allow_status_ui_control_ = false;
+
+  // input
+  Throttle ui_throttle{0.2};
+  struct GameInput {
+    bool is_button_yes = false;
+    bool is_button_no = false;
+
+    bool is_pause_menu_button = false;
+    bool is_status_menu_button = false;
+    bool is_button_up = false;
+    bool is_button_down = false;
+    bool is_button_left = false;
+    bool is_button_right = false;
+    bool is_button_left_2 = false;
+    bool is_button_right_2 = false;
+  } input;
 
 public:
   void OnEnter(GameContext* ctx) override;
