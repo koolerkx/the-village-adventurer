@@ -72,6 +72,8 @@
         <ClCompile Include="ui\pause_menu_ui.ixx" />
         <ClCompile Include="ui\result_ui.cpp"/>
         <ClCompile Include="ui\result_ui.ixx"/>
+        <ClCompile Include="ui\status_ui.cpp" />
+        <ClCompile Include="ui\status_ui.ixx" />
         <ClCompile Include="ui\title_ui.cpp"/>
         <ClCompile Include="ui\title_ui.ixx"/>
         <ClCompile Include="utils\encode.ixx"/>

@@ -49,6 +49,20 @@ export namespace player_level {
     return L"エラー";
   };
 
+  std::wstring GetAbilityDescription(Ability type) {
+    switch (type) {
+    case Ability::ATTACK:
+      return L"攻撃力";
+    case Ability::DEFENSE:
+      return L"防御力";
+    case Ability::MOVING_SPEED:
+      return L"移動速度";
+    case Ability::HP_UP:
+      return L"最大HP上昇";
+    }
+    return L"エラー";
+  };
+
   UV GetOptionUV(OptionType type) {
     switch (type) {
     case OptionType::ATTACK:
@@ -61,6 +75,20 @@ export namespace player_level {
       return {{64, 811}, {16, 16}};
     case OptionType::HEAL:
       return {{0, 779}, {16, 16}};
+    }
+    return {};
+  }
+  
+  UV GetAbilityUV(Ability type) {
+    switch (type) {
+    case Ability::ATTACK:
+      return {{48, 827}, {16, 16}};
+    case Ability::DEFENSE:
+      return {{0, 795}, {16, 16}};
+    case Ability::MOVING_SPEED:
+      return {{0, 811}, {16, 16}};
+    case Ability::HP_UP:
+      return {{64, 811}, {16, 16}};
     }
     return {};
   }
