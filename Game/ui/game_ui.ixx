@@ -85,7 +85,7 @@ struct EventLogText {
 struct ExperienceStar {
   POSITION position;
   int value;
-  bool is_stick_with_map = true;
+  float floating_timeout = 1.0f;
 };
 
 export class GameUI {
@@ -141,6 +141,7 @@ private:
   std::vector<PlayerBuff> player_buffs_ = {};
 
   std::vector<ExperienceStar> experience_stars_ = {};
+  const Vector2 EXP_COIN_TARGET_POS = {64, 56};
 
 public:
   void SetHpPercentage(float percentage) {
@@ -193,7 +194,7 @@ public:
 
   GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_path);
 
-  void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
+  void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time, Camera* camera);
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
   void RenderDamageText(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);

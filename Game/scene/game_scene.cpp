@@ -474,5 +474,5 @@ void GameScene::UpdateUI(GameContext* ctx, float delta_time) {
   ui_->SetSkillSelected(player_->GetSelectedSkillId());
   ui_->UpdatePlayerBuffs(player_->GetBuffs());
 
-  ui_->OnUpdate(ctx, scene_context.get(), delta_time);
+  ui_->OnUpdate(ctx, scene_context.get(), delta_time, camera_.get());
 }

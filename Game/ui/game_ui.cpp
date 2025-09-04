@@ -6,6 +6,7 @@ import std;
 import graphic.utils.types;
 import graphic.utils.font;
 import game.ui.interpolation;
+import game.math;
 
 void GameUI::PlayEnterAreaMessage(std::wstring message) {
   area_message_ = message;
@@ -24,7 +25,7 @@ GameUI::GameUI(GameContext* ctx, SceneContext*, std::wstring texture_path) {
   fade_overlay_texture_id_ = ctx->render_resource_manager->texture_manager->Load(L"assets/block_white.png");
 }
 
-void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
+void GameUI::OnUpdate(GameContext* ctx, SceneContext*, float delta_time, Camera* camera) {
   hp_percentage_current_ = interpolation::UpdateSmoothValue(
     hp_percentage_current_,
     hp_percentage_target_,
@@ -86,6 +87,39 @@ void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
       interpolation::SmoothType::EaseOut,
       1.0f
     );
+
+  std::erase_if(experience_stars_, [target = EXP_COIN_TARGET_POS](const ExperienceStar& exp_star) {
+    return math::GetDistance({exp_star.position.x, exp_star.position.y}, target) <= 2;
+  });
+  for (auto& exp_star : experience_stars_) {
+    if (exp_star.floating_timeout > 0) {
+      exp_star.floating_timeout -= delta_time;
+      if (exp_star.floating_timeout <= 0) {
+        // on floating time over
+        Vector2 screen_pos = camera->TransformToScreenSpace({exp_star.position.x, exp_star.position.y},
+                                       {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height)});
+        exp_star.position = {screen_pos.x, screen_pos.y, 0};
+      }
+    }
+    else {
+      float new_y = interpolation::UpdateSmoothValue(
+        exp_star.position.y,
+        EXP_COIN_TARGET_POS.y,
+        delta_time,
+        interpolation::SmoothType::EaseInOut,
+        20.0f
+      );
+      float new_x = interpolation::UpdateSmoothValue(
+        exp_star.position.x,
+        EXP_COIN_TARGET_POS.x,
+        delta_time,
+        interpolation::SmoothType::EaseInOut,
+        20.0f
+      );
+
+      exp_star.position = {new_x, new_y, 0};
+    }
+  }
 }
 
 void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
@@ -739,11 +773,21 @@ void GameUI::RenderExperienceCoin(GameContext* ctx, SceneContext* scene_ctx, Cam
   std::vector<RenderInstanceItem> render_items_on_screen;
 
   for (auto exp_coin : experience_stars_) {
-    if (exp_coin.is_stick_with_map) {
+    if (exp_coin.floating_timeout > 0) {
       render_items_on_map.emplace_back(RenderInstanceItem{
         .transform = {
           .position = exp_coin.position,
           .size = {8, 8},
+          .position_anchor = {-4, -4, 0}
+        },
+        .uv = texture_map["Star"],
+        .color = color::white
+      });
+    } else {
+      render_items_on_screen.emplace_back(RenderInstanceItem{
+        .transform = {
+          .position = exp_coin.position,
+          .size = {24, 24},
           .position_anchor = {-4, -4, 0}
         },
         .uv = texture_map["Star"],

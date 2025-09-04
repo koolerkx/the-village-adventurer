@@ -34,4 +34,21 @@ public:
   }
 
   CameraProps GetCameraProps() const { return {{position_.x, position_.y, 0.0f}, zoom_, AlginPivot::CENTER_CENTER}; }
+
+  Vector2 TransformToScreenSpace(Vector2 world_position, Vector2 window_size) const {
+    Vector2 relative_pos = {
+      world_position.x - position_.x,
+      world_position.y - position_.y
+    };
+    Vector2 scaled_pos = {
+      relative_pos.x * zoom_,
+      relative_pos.y * zoom_
+    };
+    Vector2 screen_pos = {
+      (window_size.x / 2.0f) + scaled_pos.x,
+      (window_size.y / 2.0f) + scaled_pos.y
+    };
+
+    return screen_pos;
+  }
 };
