@@ -45,6 +45,7 @@ public:
 
   CriAtomExPlaybackId PlayAudioClip(audio_clip clip, Vector2 position = {0, 0}, float volume = 1.0f);
   void PlayBGM(audio_clip clip);
+  void PlayPreviousBGM();
 
   void PlayWalking(audio_clip clip = audio_clip::walk_grass);
   void StopWalking();
