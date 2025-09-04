@@ -30,7 +30,7 @@ export namespace player_level {
   };
 
   std::vector<OptionType> option_list = {
-    OptionType::ATTACK, OptionType::DEFENSE, OptionType::MOVING_SPEED, OptionType::HEAL
+    OptionType::ATTACK, OptionType::DEFENSE, OptionType::MOVING_SPEED, OptionType::HP_UP, OptionType::HEAL
   };
 
   std::wstring GetOptionDescription(OptionType type) {

@@ -165,12 +165,12 @@ public:
   }
 
   float Heal(float amount) {
-    health_ = std::min(health_ + amount, max_health_);
+    health_ = std::min(health_ + amount, GetMaxHp());
     SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::buff1, {}, 0.5);
     return health_;
   }
 
-  float GetHPPercentage() const { return health_ / max_health_; }
+  float GetHPPercentage() const { return health_ / GetMaxHp(); }
 
   Player(FixedPoolIndexType texture_id, std::unique_ptr<IPlayerInput> input,
          std::unordered_map<PlayerState, scene_object::AnimationFrameData> anim_data);
@@ -218,7 +218,11 @@ public:
     SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::buff2, {}, 0.5);
   };
 
-  float GetMaxHp() const { return max_health_; }
+  float GetMaxHp() const {
+    return max_health_
+      * player_level::GetLevelAbilityMultiplier(level_up_abilities_, player_level::Ability::HP_UP)
+      + player_level::GetLevelAbilityValue(level_up_abilities_, player_level::Ability::HP_UP);
+  }
 
   std::vector<player_level::PlayerAbility> GetLevelUpAbilities() { return level_up_abilities_; }
 };

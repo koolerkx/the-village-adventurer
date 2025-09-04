@@ -568,7 +568,7 @@ void GameScene::HandleLevelUpSelection(player_level::OptionType type) {
     break;
   case player_level::OptionType::HP_UP:
     player_->AddLevelUpAbility({
-      player_level::Ability::ATTACK,
+      player_level::Ability::HP_UP,
       1.2f,
     });
     break;
