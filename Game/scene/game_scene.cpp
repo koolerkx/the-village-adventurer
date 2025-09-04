@@ -223,6 +223,14 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
     SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::chest_open, fo.position, 1.0f);
     ui_->AddEventText(chest::GetChestRewardEventText(reward_type), chest::GetChestRewardEventColor(reward_type));
     ui_->AddLogText(chest::GetChestLogText(reward_type), color::lightGreenA400);
+
+    Vector2 star_pos = {
+      fo.position.x + 8, fo.position.y + 8
+    };
+    
+    ui_->AddExperienceCoin(star_pos, BASE_CHEST_OPEN_EXP, [&](int value) {
+      player_->AddExperience(value);
+    });
   };
 
   MoveAndCollideAxis(*player_, delta_time, x, colliders, Axis::X,
@@ -332,7 +340,7 @@ void GameScene::HandleSkillHitMobCollision(float) {
       if (remain_hp <= 0) {
         monster_killed++;
 
-        ui->AddExperienceCoin(mob_center, 10, [&](int value) {
+        ui->AddExperienceCoin(mob_center, BASE_MONSTER_KILL_EXP, [&](int value) {
           player->AddExperience(value);
         });
       }
@@ -405,7 +413,7 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                                  });
                                  monster_killed++;
 
-                                 ui->AddExperienceCoin(mob_center, 10, [&](int value) {
+                                 ui->AddExperienceCoin(mob_center, BASE_MONSTER_KILL_EXP, [&](int value) {
                                    // FIXME: now using workaround since player in callback seems cannot be access correctly
                                    player->AddExperience(value);
                                  });

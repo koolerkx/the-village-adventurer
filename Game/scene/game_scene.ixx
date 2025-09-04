@@ -16,6 +16,9 @@ import game.ui.game_ui;
 import game.ui.pause_ui;
 import game.mobs_manager;
 
+constexpr int BASE_CHEST_OPEN_EXP = 5;
+constexpr int BASE_MONSTER_KILL_EXP = 5;
+
 export class GameScene : public IScene {
 private:
   std::unique_ptr<MapManager> map_manager_{nullptr};
