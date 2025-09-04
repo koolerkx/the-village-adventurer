@@ -23,6 +23,7 @@ import game.result_scene;
 import game.utils.helper;
 import game.player.buff;
 import game.title_scene;
+import game.player.level;
 
 void GameScene::OnEnter(GameContext* ctx) {
   ctx->allow_control = false;
@@ -60,6 +61,9 @@ void GameScene::OnEnter(GameContext* ctx) {
   // Pause Menu
   pause_menu_ui_ = std::make_unique<PauseMenuUI>(ctx); // extract path
 
+  // Level up UI
+  level_up_ui_ = std::make_unique<LevelUpUI>(ctx);
+
   // Mob
   mob_manager_ = std::make_unique<MobManager>(ctx);
   for (const auto& mob_props : map_manager_->GetMobProps()) {
@@ -82,9 +86,33 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
 
   if (is_pause_) {
     HandlePauseMenu(ctx, delta_time);
+    return;
   }
 
-  // std::cout << "GameScene> OnUpdate: " << delta_time << std::endl;
+  if (player_->GetLevel() != player_level_prev_) {
+    player_level_prev_ = player_->GetLevel();
+    level_up_selected_option_ = 1;
+    level_up_ui_->Reset();
+    is_show_level_up_ui = true;
+    is_allow_level_up_ui_control_ = false;
+
+    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::select_se_1);
+    SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_pause_menu);
+
+    auto elems = helper::GetRandomElements<3>(player_level::option_list);
+    level_up_ui_->SetOptionData(elems);
+    level_up_options = elems;
+
+    level_up_ui_->SetFadeInWithCallback([&allow = is_allow_level_up_ui_control_]() {
+      allow = true;
+    });
+  }
+
+  if (is_show_level_up_ui) {
+    HandleLevelUpUI(ctx, delta_time);
+    return;
+  }
+
   map_manager_->OnUpdate(ctx, delta_time);
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnUpdate(ctx, delta_time);
@@ -113,6 +141,11 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   if (is_pause_) {
     SceneManager::GetInstance().GetAudioManager()->StopWalking();
     pause_menu_ui_->OnFixedUpdate(ctx, delta_time);
+    return;
+  }
+  if (is_show_level_up_ui) {
+    SceneManager::GetInstance().GetAudioManager()->StopWalking();
+    level_up_ui_->OnFixedUpdate(ctx, delta_time);
     return;
   }
 
@@ -146,6 +179,9 @@ void GameScene::OnRender(GameContext* ctx) {
   // Pause menu overlay
   if (is_pause_) {
     pause_menu_ui_->OnRender(ctx, camera_.get());
+  }
+  if (is_show_level_up_ui) {
+    level_up_ui_->OnRender(ctx, camera_.get());
   }
 }
 
@@ -477,6 +513,31 @@ void GameScene::HandlePauseMenu(GameContext* ctx, float delta_time) {
   }
 
   pause_menu_ui_->OnUpdate(ctx, delta_time);
+}
+
+void GameScene::HandleLevelUpUI(GameContext* ctx, float delta_time) {
+  auto am = SceneManager::GetInstance().GetAudioManager();
+
+  if (is_allow_level_up_ui_control_) {
+    constexpr int options_count = 3;
+    if (ctx->input_handler->IsKeyDown(KeyCode::KK_D) || ctx->input_handler->IsKeyDown(KeyCode::KK_RIGHT) || ctx->
+      input_handler->IsKeyDown(KeyCode::KK_E)) {
+      level_up_selected_option_ = (level_up_selected_option_ + 1) % options_count;
+      am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
+    }
+    if (ctx->input_handler->IsKeyDown(KeyCode::KK_A) || ctx->input_handler->IsKeyDown(KeyCode::KK_LEFT) || ctx->
+      input_handler->IsKeyDown(KeyCode::KK_Q)) {
+      level_up_selected_option_ = (level_up_selected_option_ - 1 + options_count) % options_count;
+      am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
+    }
+    level_up_ui_->SetSelectedOption(level_up_selected_option_);
+
+    if (ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE)) {
+      // select
+    }
+  }
+
+  level_up_ui_->OnUpdate(ctx, delta_time);
 }
 
 void GameScene::ResetTimer() {

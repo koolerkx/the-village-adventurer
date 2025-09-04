@@ -22,6 +22,7 @@ export struct PlayerIntent {
 #if defined(DEBUG) || defined(_DEBUG)
   ButtonState damage_debug;
   ButtonState heal_debug;
+  ButtonState exp_debug;
 #endif
 };
 

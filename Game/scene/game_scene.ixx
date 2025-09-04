@@ -14,7 +14,9 @@ import game.scene_game.context;
 import game.scene_object.skill;
 import game.ui.game_ui;
 import game.ui.pause_ui;
+import game.ui.level_up;
 import game.mobs_manager;
+import game.player.level;
 
 constexpr int BASE_CHEST_OPEN_EXP = 5;
 constexpr int BASE_MONSTER_KILL_EXP = 5;
@@ -30,6 +32,7 @@ private:
   std::unique_ptr<Camera> camera_ = nullptr;
   std::unique_ptr<GameUI> ui_ = nullptr;
   std::unique_ptr<PauseMenuUI> pause_menu_ui_ = nullptr;
+  std::unique_ptr<LevelUpUI> level_up_ui_ = nullptr;
 
   std::unique_ptr<SceneContext> scene_context = nullptr;
 
@@ -44,7 +47,8 @@ private:
   void HandleMobHitPlayerCollision(float delta_time);
   void HandleSkillHitWallCollision(float delta_time);
   void HandlePauseMenu(GameContext* ctx, float delta_time);
-
+  void HandleLevelUpUI(GameContext* ctx, float delta_time);
+  
   void ResetTimer();
 
   void UpdateUI(GameContext* ctx, float delta_time);
@@ -53,6 +57,13 @@ private:
   bool is_pause_ = false;
   bool is_allow_pause_ = false;
   uint8_t pause_menu_selected_option_ = 0;
+
+  // level up pause menu
+  int player_level_prev_ = 1;
+  bool is_show_level_up_ui = false;
+  bool is_allow_level_up_ui_control_ = false;
+  uint8_t level_up_selected_option_ = 1;
+  std::array<player_level::OptionType, 3> level_up_options = {};
 
 public:
   void OnEnter(GameContext* ctx) override;

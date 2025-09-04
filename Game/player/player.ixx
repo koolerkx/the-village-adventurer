@@ -111,7 +111,7 @@ private:
   int experience_ = 0;
   int total_experience_ = 0;
   int level_ = 1;
-  int max_experience_ = 100;
+  int max_experience_ = 80;
 
 public:
   void SetState(PlayerState state);

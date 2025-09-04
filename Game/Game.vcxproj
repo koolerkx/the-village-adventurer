@@ -21,6 +21,7 @@
         <ClCompile Include="map\map_manager.ixx"/>
         <ClCompile Include="mobs\dummy.ixx"/>
         <ClCompile Include="mobs\slime_green.ixx"/>
+        <ClCompile Include="player\level.ixx" />
         <ClCompile Include="player\player_buff.ixx" />
         <ClCompile Include="player\player_factory.ixx"/>
         <ClCompile Include="player\player_keyboard_input.ixx"/>
@@ -65,6 +66,8 @@
         <ClCompile Include="ui\game_ui.cpp"/>
         <ClCompile Include="ui\game_ui.ixx"/>
         <ClCompile Include="ui\interpolation.ixx"/>
+        <ClCompile Include="ui\level_up_ui.cpp" />
+        <ClCompile Include="ui\level_up_ui.ixx" />
         <ClCompile Include="ui\pause_menu_ui.cpp" />
         <ClCompile Include="ui\pause_menu_ui.ixx" />
         <ClCompile Include="ui\result_ui.cpp"/>

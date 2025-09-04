@@ -80,15 +80,16 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
         scene_object::GetPlayerRotationByDirection(direction_facing_) // Right = 0
       );
     }
+
+#if defined(DEBUG) || defined(_DEBUG)
+    if (it.damage_debug.pressed) Damage(10);
+    if (it.heal_debug.pressed) Heal(10);
+    if (it.exp_debug.pressed) AddExperience(10);
+#endif
   }
   else {
     direction_ = {0, 0};
   }
-
-#if defined(DEBUG)
-  if (it.damage_debug.pressed) Damage(10);
-  if (it.heal_debug.pressed)   Heal(10);
-#endif
 
   UpdateAnimation(delta_time);
   UpdateActiveBuffs(buffs_, delta_time);
