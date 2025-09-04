@@ -246,9 +246,9 @@ public:
       + player_level::GetLevelAbilityValue(level_up_abilities_, player_level::Ability::MOVING_SPEED);
   }
 
-  float GetExperience() const { return experience_; }
-  float GetTotalExperience() const { return total_experience_; }
-  float GetMaxExperience() const { return max_experience_; }
+  int GetExperience() const { return experience_; }
+  int GetTotalExperience() const { return total_experience_; }
+  int GetMaxExperience() const { return max_experience_; }
 
 
   std::vector<player_level::PlayerAbility> GetLevelUpAbilities() { return level_up_abilities_; }

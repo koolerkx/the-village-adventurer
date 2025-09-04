@@ -311,7 +311,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   // Buff list: Background
   constexpr float buff_box_padding = 10.0f;
   constexpr float buff_item_gap = 10.0f;
-  int item_count = player_buffs_.size();
+  int item_count = static_cast<int>(player_buffs_.size());
   if (item_count > 0) {
     float buff_box_height = item_count * 32 + (item_count - 1) * buff_item_gap + buff_box_padding * 2;
     render_items.emplace_back(RenderInstanceItem{
@@ -863,7 +863,7 @@ void GameUI::RenderDamageText(GameContext* ctx, SceneContext*, Camera* camera) {
   }
 }
 
-void GameUI::RenderExperienceCoin(GameContext* ctx, SceneContext* scene_ctx, Camera* camera) {
+void GameUI::RenderExperienceCoin(GameContext* ctx, SceneContext*, Camera* camera) {
   auto rr = ctx->render_resource_manager->renderer.get();
 
   std::vector<RenderInstanceItem> render_items_on_map;

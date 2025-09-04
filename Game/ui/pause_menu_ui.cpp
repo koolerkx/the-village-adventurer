@@ -15,13 +15,13 @@ PauseMenuUI::PauseMenuUI(GameContext* ctx) {
   ui_texture_id_ = tm->Load(L"assets/ui.png");
 }
 
-void PauseMenuUI::OnUpdate(GameContext* ctx, float delta_time) {
-    movement_acc_ += delta_time;  
+void PauseMenuUI::OnUpdate(GameContext*, float delta_time) {
+  movement_acc_ += delta_time;
 }
 
-void PauseMenuUI::OnFixedUpdate(GameContext* ctx, float delta_time) {}
+void PauseMenuUI::OnFixedUpdate(GameContext*, float) {}
 
-void PauseMenuUI::OnRender(GameContext* ctx, Camera* camera) {
+void PauseMenuUI::OnRender(GameContext* ctx, Camera*) {
   auto& rr = ctx->render_resource_manager->renderer;
   std::wstringstream wss;
 
@@ -62,7 +62,7 @@ void PauseMenuUI::OnRender(GameContext* ctx, Camera* camera) {
   constexpr float button_width = 200;
   constexpr float button_height = 50;
   constexpr float button_y_offset = 20;
-  
+
   float back_button_center_x = win_size.x / 2;
   float back_button_center_y = win_size.y / 2 + button_y_offset;
   wss.str(L"");
@@ -106,7 +106,7 @@ void PauseMenuUI::OnRender(GameContext* ctx, Camera* camera) {
   float end_button_center_y = win_size.y / 2 + button_height + 20 + button_y_offset;
   wss.str(L"");
   wss << L"冒険をやめる";
-  
+
   auto end_text_props = StringSpriteProps{
     .pixel_size = 24.0f,
     .letter_spacing = 0.0f,
@@ -147,21 +147,20 @@ void PauseMenuUI::OnRender(GameContext* ctx, Camera* camera) {
   float selected_frame_y = selected_option_ == 0 ? back_button_center_y : end_button_center_y;
 
   float selected_width = button_width + frame_padding + selected_frame_moving_range_ * std::abs(
-      std::cos(selected_frame_moving_speed_ * movement_acc_));
+    std::cos(selected_frame_moving_speed_ * movement_acc_));
   float selected_height = button_height + frame_padding + selected_frame_moving_range_ * std::abs(
-      std::cos(selected_frame_moving_speed_ * movement_acc_));
+    std::cos(selected_frame_moving_speed_ * movement_acc_));
   rr->DrawSprite(RenderItem{
-      ui_texture_id_,
-      Transform{
-          {
-              selected_frame_x - selected_width / 2,
-              selected_frame_y - selected_height / 2,
-              0
-          },
-          {selected_width, selected_height},
+    ui_texture_id_,
+    Transform{
+      {
+        selected_frame_x - selected_width / 2,
+        selected_frame_y - selected_height / 2,
+        0
       },
-      {{selected_uv_pos_.x, selected_uv_pos_.y}, {selected_uv_size_.x, selected_uv_size_.y}},
-      color::white
+      {selected_width, selected_height},
+    },
+    {{selected_uv_pos_.x, selected_uv_pos_.y}, {selected_uv_size_.x, selected_uv_size_.y}},
+    color::white
   });
-
 }

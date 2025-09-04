@@ -19,9 +19,9 @@ struct StatusUIActiveProps {
   float defense;
   float attack;
   float speed;
-  float experience;
-  float max_experience;
-  float total_experience;
+  int experience;
+  int max_experience;
+  int total_experience;
   int level;
   std::vector<player_level::PlayerAbility> abilities;
   std::vector<PlayerBuff> buffs;

@@ -363,7 +363,7 @@ void GameScene::HandleSkillHitMobCollision(float) {
       };
 
       skill_hitbox->hit_mobs.insert(mob_state->id);
-      int remain_hp = mob_manager->MakeDamage(*mob_state, damage, [&]() {
+      int remain_hp = mob_manager->MakeDamage(*mob_state, static_cast<int>(damage), [&]() {
         Vector2 skill_center = {
           skill_hitbox->transform.position.x + skill_hitbox->transform.size.x / 2,
           skill_hitbox->transform.position.y + skill_hitbox->transform.size.y / 2
@@ -373,11 +373,11 @@ void GameScene::HandleSkillHitMobCollision(float) {
         ui->AddDamageText(
           mob_center,
           skill_hitbox->data->name,
-          damage
+          static_cast<short>(damage)
         );
         std::wstringstream wss;
-        wss << skill_hitbox->data->name << L" で " << mob::GetMobName(mob_state->type) << L" に " << damage <<
-          L" ダメージを与えた";
+        wss << skill_hitbox->data->name << L" で " << mob::GetMobName(mob_state->type) << L" に " <<
+          static_cast<short>(damage) << L" ダメージを与えた";
         ui->AddLogText(wss.str(), color::cyanA400);
 
         if (skill_hitbox->data->is_destroy_by_mob) {
@@ -604,7 +604,7 @@ void GameScene::HandleLevelUpSelection(player_level::OptionType type) {
   }
 }
 
-void GameScene::HandleOnStatusOpen(GameContext* ctx, float delta_time) {
+void GameScene::HandleOnStatusOpen(GameContext*, float) {
   is_show_status_ui_ = true;
   is_allow_pause_ = false;
 

@@ -16,7 +16,7 @@ StatusUI::StatusUI(GameContext* ctx) {
   ui_texture_id_ = tm->Load(L"assets/ui.png");
 }
 
-void StatusUI::OnUpdate(GameContext* ctx, float delta_time) {
+void StatusUI::OnUpdate(GameContext*, float delta_time) {
   movement_acc_ += delta_time;
 
   opacity_ = interpolation::UpdateSmoothValue(
@@ -32,9 +32,9 @@ void StatusUI::OnUpdate(GameContext* ctx, float delta_time) {
   }
 }
 
-void StatusUI::OnFixedUpdate(GameContext* ctx, float delta_time) {}
+void StatusUI::OnFixedUpdate(GameContext*, float) {}
 
-void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
+void StatusUI::OnRender(GameContext* ctx, Camera*) {
   auto& rr = ctx->render_resource_manager->renderer;
   std::wstringstream wss;
 
@@ -481,7 +481,7 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
   constexpr float button_y_offset = 20;
   constexpr float button_margin_top = 16;
 
-  float back_button_center_x = ctx->window_width / 2;
+  float back_button_center_x = ctx->window_width / 2.0f;
   float back_button_center_y = frame_content_y + frame_content_height + frame_padding
     + button_margin_top + button_y_offset;
   wss.str(L"");
