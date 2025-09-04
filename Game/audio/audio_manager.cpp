@@ -72,7 +72,7 @@ AudioManager::AudioManager() {
     // criAtomExPlayer_UpdateAll(player);
   }
 
-  static constexpr int crossfade_ms = 3000;
+  static constexpr int crossfade_ms = 2000;
   bgm_player_.current = criAtomExPlayer_Create(nullptr, nullptr, 0);
   criAtomExPlayer_AttachFader(bgm_player_.current, nullptr, nullptr, 0);
   criAtomExPlayer_SetFadeInTime(bgm_player_.current, crossfade_ms);
@@ -165,6 +165,13 @@ void AudioManager::PlayBGM(audio_clip clip) {
   criAtomExPlayer_SetCueId(bgm_player_.current, acb_hn_, cue_sheet_id);
 
   bgm_player_.current_playback_cue_id = cue_sheet_id;
+  bgm_player_.current_playback_id = criAtomExPlayer_Start(bgm_player_.current);
+  criAtomExPlayer_Stop(bgm_player_.other);
+}
+
+void AudioManager::PlayPreviousBGM() {
+  std::swap(bgm_player_.current, bgm_player_.other);
+  
   bgm_player_.current_playback_id = criAtomExPlayer_Start(bgm_player_.current);
   criAtomExPlayer_Stop(bgm_player_.other);
 }

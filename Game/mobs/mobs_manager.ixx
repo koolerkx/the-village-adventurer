@@ -178,6 +178,7 @@ export struct MobHitBox {
 
 export struct OnUpdateProps {
   Vector2 player_position{};
+  bool is_player_invincible = false;;
 };
 
 export class MobManager {
@@ -199,7 +200,7 @@ public:
   void CreateActiveArea(TileMapObjectProps);
 
   void OnUpdate(GameContext* ctx, float delta_time, OnUpdateProps props);
-  void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time, Collider<Player> player_collider);
+  void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time, Collider<Player> player_collider, bool is_player_invincible);
   void OnRender(GameContext* ctx, Camera* camera);
 
   int MakeDamage(MobState& mob_state, int damage, const std::move_only_function<void()> post_action);

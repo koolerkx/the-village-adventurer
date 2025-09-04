@@ -74,6 +74,10 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   if (ctx->input_handler->IsKeyDown(KeyCode::KK_F3) && is_allow_pause_) {
     pause_menu_ui_->Reset();
     is_pause_ = !is_pause_;
+    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::select_se_1);
+    if (is_pause_) {
+      SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_pause_menu);
+    }
   }
 
   if (is_pause_) {
@@ -85,7 +89,8 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnUpdate(ctx, delta_time);
   mob_manager_->OnUpdate(ctx, delta_time, {
-                           .player_position = player_->GetPositionVector()
+                           .player_position = player_->GetPositionVector(),
+                           .is_player_invincible = player_->GetIsInvincible()
                          });
 
   UpdateUI(ctx, delta_time);
@@ -123,7 +128,7 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
 
   ui_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnFixedUpdate(ctx, delta_time, player_->GetTransform());
-  mob_manager_->OnFixedUpdate(ctx, scene_context.get(), delta_time, player_->GetCollider());
+  mob_manager_->OnFixedUpdate(ctx, scene_context.get(), delta_time, player_->GetCollider(), player_->GetIsInvincible());
 
   SceneManager::GetInstance().GetAudioManager()->UpdateListenerPosition({
     player_->GetTransform().position.x, player_->GetTransform().position.y
@@ -177,8 +182,6 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
   auto colliders = map_manager_->GetFiledObjectColliders();
 
   std::function<void(FieldObject&)> on_chest_open = [&](FieldObject& fo) {
-    std::cout << fo.metadata.tile_class << std::endl;
-
     chest::RewardType reward_type = chest::GetRandomRewardType();
 
     switch (reward_type) {
@@ -210,12 +213,14 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
       pb.type = BuffType::INVINCIBLE;
       pb.duration = 10.0f;
       player_->AddBuff(pb);
+      SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_action_1);
       break;
     }
     default:
       break;
     }
 
+    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::chest_open, fo.position, 1.0f);
     ui_->AddEventText(chest::GetChestRewardEventText(reward_type), chest::GetChestRewardEventColor(reward_type));
     ui_->AddLogText(chest::GetChestLogText(reward_type), color::lightGreenA400);
   };
@@ -417,19 +422,26 @@ void GameScene::HandleSkillHitWallCollision(float) {
 }
 
 void GameScene::HandlePauseMenu(GameContext* ctx, float delta_time) {
+  auto am = SceneManager::GetInstance().GetAudioManager();
+
   constexpr int options_count = 2;
   if (ctx->input_handler->IsKeyDown(KeyCode::KK_W) || ctx->input_handler->IsKeyDown(KeyCode::KK_UP)) {
     pause_menu_selected_option_ = (pause_menu_selected_option_ + 1) % options_count;
+    am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
   }
   if (ctx->input_handler->IsKeyDown(KeyCode::KK_S) || ctx->input_handler->IsKeyDown(KeyCode::KK_DOWN)) {
     pause_menu_selected_option_ = (pause_menu_selected_option_ - 1 + options_count) % options_count;
+    am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
   }
   pause_menu_ui_->SetSelectedOption(pause_menu_selected_option_);
 
   if (ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE)) {
+    am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
+
     if (pause_menu_selected_option_ == 0) {
       // back to game
       is_pause_ = false;
+      SceneManager::GetInstance().GetAudioManager()->PlayPreviousBGM();
     }
     else {
       // back to title

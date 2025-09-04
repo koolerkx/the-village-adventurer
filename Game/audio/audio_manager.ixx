@@ -45,6 +45,7 @@ public:
 
   CriAtomExPlaybackId PlayAudioClip(audio_clip clip, Vector2 position = {0, 0}, float volume = 1.0f);
   void PlayBGM(audio_clip clip);
+  void PlayPreviousBGM();
 
   void PlayWalking(audio_clip clip = audio_clip::walk_grass);
   void StopWalking();
@@ -68,8 +69,9 @@ public:
   void OnFixedUpdate() {};
   void UpdateListenerPosition(Vector2) {};
 
-  int PlayAudioClip(audio_clip, Vector2, [[maybe_unused]] float v=0) { return 0; };
+  int PlayAudioClip(audio_clip, [[maybe_unused]] Vector2 pos = {}, [[maybe_unused]] float v=0) { return 0; };
   void PlayBGM(audio_clip) {};
+  void PlayPreviousBGM() {};
 
   void PlayWalking(audio_clip = audio_clip::walk_grass) {};
   void StopWalking() {};

@@ -107,14 +107,14 @@ void MobManager::OnUpdate(GameContext*, float delta_time, OnUpdateProps props) {
   });
 
   // Remove inactive, dead mobs
-  mobs_pool_.RemoveIf([&active_area_pool = active_area_pool_](MobState& it) {
+  mobs_pool_.RemoveIf([&active_area_pool = active_area_pool_, props](MobState& it) {
     if (!it.is_alive) {
       const auto mob_id = it.id;
-      active_area_pool.ForEach([mob_id](ActiveArea& area) {
+      active_area_pool.ForEach([mob_id, props](ActiveArea& area) {
         if (area.mobs.size() <= 0) return;
         std::erase(area.mobs, mob_id);
 
-        if (area.mobs.size() <= 0) {
+        if (area.mobs.size() <= 0 && !props.is_player_invincible) {
           SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_base);
         }
       });
@@ -140,10 +140,11 @@ void MobManager::OnUpdate(GameContext*, float delta_time, OnUpdateProps props) {
 }
 
 void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delta_time,
-                               Collider<Player> player_collider) {
+                               Collider<Player> player_collider, bool is_player_invincible) {
   // update mobs active state
   active_area_pool_.ForEach(
-    [player_collider, &active_area_state = this->active_area_state, &mobs_pool_ = this->mobs_pool_](
+    [player_collider, &active_area_state = this->active_area_state,
+      &mobs_pool_ = this->mobs_pool_, is_player_invincible](
     ActiveArea& it, ObjectPoolIndexType id) {
       if (active_area_state[id] == ActiveAreaState::COLLIDE_LAST_FRAME) {
         active_area_state[id] = ActiveAreaState::NOT_COLLIDE;
@@ -152,7 +153,9 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
           const auto mob = mobs_pool_.Get(mob_id);
           mob->is_battle = false;
         }
-        SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_base);
+        if (!is_player_invincible) {
+          SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_base);
+        }
       }
       if (active_area_state[id] == ActiveAreaState::COLLIDING)
         active_area_state[id] = ActiveAreaState::COLLIDE_LAST_FRAME;
@@ -161,7 +164,7 @@ void MobManager::OnFixedUpdate(GameContext*, SceneContext* scene_ctx, float delt
                                  [&](Player*, ActiveArea*, collision::CollisionResult) -> void {
                                    if (active_area_state[id] == ActiveAreaState::NOT_COLLIDE) {
                                      // OnEnter
-                                     if (it.mobs.size() > 0) {
+                                     if (it.mobs.size() > 0 && !is_player_invincible) {
                                        SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_fight_2);
                                      }
                                      for (ObjectPoolIndexType mob_id : it.mobs) {

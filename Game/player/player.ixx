@@ -148,6 +148,7 @@ public:
 
   float Heal(float amount) {
     health_ = std::min(health_ + amount, max_health_);
+    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::buff1, {}, 0.5);
     return health_;
   }
 
@@ -165,8 +166,10 @@ public:
     if (pb.type == BuffType::INVINCIBLE) {
       std::erase_if(buffs_, [](const PlayerBuff b) { return b.type == BuffType::INVINCIBLE; });
     }
+    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::buff2, {}, 0.5);
     buffs_.push_back(pb);
   }
+
   std::vector<PlayerBuff> GetBuffs() { return buffs_; }
 
   bool GetIsInvincible() const {
