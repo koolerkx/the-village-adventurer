@@ -274,6 +274,12 @@ public:
   }
 
   void SetPlayerLevel(int level) {
+    if (player_level_ != level) {
+      AddEventText(L"レベルアップ", color::yellowA400);
+      std::wstringstream wss;
+      wss << L"レベルアップ！" << level << L" になった！";
+      AddLogText(wss.str(), color::yellowA400);
+    }
     player_level_ = level;
   }
 };
