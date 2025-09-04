@@ -17,8 +17,11 @@ export struct PlayerInputConfig {
   Key attack = KeyCode::KK_SPACE;
   Key switch_skill_right = KeyCode::KK_E;
   Key switch_skill_left = KeyCode::KK_Q;
+#if defined(DEBUG) || defined(_DEBUG)
   Key damage_debug = KeyCode::KK_F1;
   Key heal_debug = KeyCode::KK_F2;
+  Key exp_debug = KeyCode::KK_F5;
+#endif
 };
 
 export class KeyboardPlayerInput : public IPlayerInput {
@@ -58,9 +61,11 @@ public:
 #if defined(DEBUG) || defined(_DEBUG)
     intent.damage_debug = step_button(props.damage_debug, prev_damage_);
     intent.heal_debug = step_button(props.heal_debug, prev_heal_);
+    intent.exp_debug = step_button(props.exp_debug, prev_exp_);
 
     prev_damage_ = intent.damage_debug.held;
     prev_heal_ = intent.heal_debug.held;
+    prev_exp_ = intent.exp_debug.held;
 #endif
 
     return intent;
@@ -75,6 +80,7 @@ private:
   bool prev_skill_switch_right_ = false;
   bool prev_damage_ = false;
   bool prev_heal_ = false;
+  bool prev_exp_ = false;
 
   bool get(Key k) const {
     return game_context_->input_handler->GetKey(k);

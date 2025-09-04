@@ -19,6 +19,7 @@ import game.player.input;
 import game.utils.throttle;
 import game.scene_object.skill;
 import game.player.buff;
+import game.player.level;
 
 export enum class PlayerState: unsigned char {
   IDLE_LEFT,
@@ -62,6 +63,8 @@ private:
     {0, 0},
     {32, 32}
   };
+
+  static constexpr float DEFAULT_DEFENSE = 5.0f;
 #pragma endregion
 
   Transform transform_ = DEFAULT_TRANSFORM;
@@ -104,14 +107,19 @@ private:
   float health_ = 100.0f;
   float max_health_ = 100.0f;
 
+  float defense = DEFAULT_DEFENSE;
+
   // buffs
   std::vector<PlayerBuff> buffs_;
+
+  // level up ability
+  std::vector<player_level::PlayerAbility> level_up_abilities_;
 
   // experience
   int experience_ = 0;
   int total_experience_ = 0;
   int level_ = 1;
-  int max_experience_ = 100;
+  int max_experience_ = 80;
 
 public:
   void SetState(PlayerState state);
@@ -148,17 +156,21 @@ public:
   Vector2 GetVelocity() const;
 
   float Damage(float amount) {
-    health_ = std::max(health_ - amount, 0.0f);
+    float damage = amount - defense
+      * player_level::GetLevelAbilityMultiplier(level_up_abilities_, player_level::Ability::DEFENSE)
+      + player_level::GetLevelAbilityValue(level_up_abilities_, player_level::Ability::DEFENSE);
+
+    health_ = std::max(health_ - damage, 0.0f);
     return health_;
   }
 
   float Heal(float amount) {
-    health_ = std::min(health_ + amount, max_health_);
+    health_ = std::min(health_ + amount, GetMaxHp());
     SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::buff1, {}, 0.5);
     return health_;
   }
 
-  float GetHPPercentage() const { return health_ / max_health_; }
+  float GetHPPercentage() const { return health_ / GetMaxHp(); }
 
   Player(FixedPoolIndexType texture_id, std::unique_ptr<IPlayerInput> input,
          std::unordered_map<PlayerState, scene_object::AnimationFrameData> anim_data);
@@ -200,4 +212,17 @@ public:
   }
 
   int GetLevel() const { return level_; }
+
+  void AddLevelUpAbility(player_level::PlayerAbility ability) {
+    level_up_abilities_.push_back(ability);
+    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::buff2, {}, 0.5);
+  };
+
+  float GetMaxHp() const {
+    return max_health_
+      * player_level::GetLevelAbilityMultiplier(level_up_abilities_, player_level::Ability::HP_UP)
+      + player_level::GetLevelAbilityValue(level_up_abilities_, player_level::Ability::HP_UP);
+  }
+
+  std::vector<player_level::PlayerAbility> GetLevelUpAbilities() { return level_up_abilities_; }
 };

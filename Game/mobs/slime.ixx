@@ -265,7 +265,7 @@ export namespace mob {
             .x = 0, .y = 0, .radius = 8
           }
         },
-        .damage = 5,
+        .damage = 10,
         .attack_delay = 0.5f,
         .timeout = 0.8f,
         .is_animated = false,

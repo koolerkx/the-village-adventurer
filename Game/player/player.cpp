@@ -80,15 +80,16 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
         scene_object::GetPlayerRotationByDirection(direction_facing_) // Right = 0
       );
     }
+
+#if defined(DEBUG) || defined(_DEBUG)
+    if (it.damage_debug.pressed) Damage(10);
+    if (it.heal_debug.pressed) Heal(10);
+    if (it.exp_debug.pressed) AddExperience(10);
+#endif
   }
   else {
     direction_ = {0, 0};
   }
-
-#if defined(DEBUG)
-  if (it.damage_debug.pressed) Damage(10);
-  if (it.heal_debug.pressed)   Heal(10);
-#endif
 
   UpdateAnimation(delta_time);
   UpdateActiveBuffs(buffs_, delta_time);
@@ -111,7 +112,10 @@ void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {
   else {
     float len = std::sqrt(direction_.x * direction_.x + direction_.y * direction_.y);
 
-    float move_speed = move_speed_ * GetBuffMultiplier(buffs_, BuffType::MOVING_SPEED);
+    float move_speed = move_speed_
+      * GetBuffMultiplier(buffs_, BuffType::MOVING_SPEED)
+      * player_level::GetLevelAbilityMultiplier(level_up_abilities_, player_level::Ability::MOVING_SPEED)
+      + player_level::GetLevelAbilityValue(level_up_abilities_, player_level::Ability::MOVING_SPEED);
 
     velocity_ = {
       (direction_.x / len) * move_speed,

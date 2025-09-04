@@ -23,6 +23,7 @@ import game.result_scene;
 import game.utils.helper;
 import game.player.buff;
 import game.title_scene;
+import game.player.level;
 
 void GameScene::OnEnter(GameContext* ctx) {
   ctx->allow_control = false;
@@ -60,6 +61,9 @@ void GameScene::OnEnter(GameContext* ctx) {
   // Pause Menu
   pause_menu_ui_ = std::make_unique<PauseMenuUI>(ctx); // extract path
 
+  // Level up UI
+  level_up_ui_ = std::make_unique<LevelUpUI>(ctx);
+
   // Mob
   mob_manager_ = std::make_unique<MobManager>(ctx);
   for (const auto& mob_props : map_manager_->GetMobProps()) {
@@ -82,9 +86,33 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
 
   if (is_pause_) {
     HandlePauseMenu(ctx, delta_time);
+    return;
   }
 
-  // std::cout << "GameScene> OnUpdate: " << delta_time << std::endl;
+  if (player_->GetLevel() != player_level_prev_) {
+    player_level_prev_ = player_->GetLevel();
+    level_up_selected_option_ = 1;
+    level_up_ui_->Reset();
+    is_show_level_up_ui = true;
+    is_allow_level_up_ui_control_ = false;
+
+    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::select_se_1);
+    SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_pause_menu);
+
+    auto elems = helper::GetRandomElements<3>(player_level::option_list);
+    level_up_ui_->SetOptionData(elems);
+    level_up_options_ = elems;
+
+    level_up_ui_->SetFadeInWithCallback([&allow = is_allow_level_up_ui_control_]() {
+      allow = true;
+    });
+  }
+
+  if (is_show_level_up_ui) {
+    HandleLevelUpUI(ctx, delta_time);
+    return;
+  }
+
   map_manager_->OnUpdate(ctx, delta_time);
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnUpdate(ctx, delta_time);
@@ -113,6 +141,11 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   if (is_pause_) {
     SceneManager::GetInstance().GetAudioManager()->StopWalking();
     pause_menu_ui_->OnFixedUpdate(ctx, delta_time);
+    return;
+  }
+  if (is_show_level_up_ui) {
+    SceneManager::GetInstance().GetAudioManager()->StopWalking();
+    level_up_ui_->OnFixedUpdate(ctx, delta_time);
     return;
   }
 
@@ -146,6 +179,9 @@ void GameScene::OnRender(GameContext* ctx) {
   // Pause menu overlay
   if (is_pause_) {
     pause_menu_ui_->OnRender(ctx, camera_.get());
+  }
+  if (is_show_level_up_ui) {
+    level_up_ui_->OnRender(ctx, camera_.get());
   }
 }
 
@@ -290,7 +326,9 @@ void GameScene::HandleSkillHitMobCollision(float) {
   std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
   std::span skill_colliders_span{skill_colliders.data(), skill_colliders.size()};
 
-  float damage_multiplier = GetBuffMultiplier(player_->GetBuffs(), BuffType::ATTACK_POWER);
+  float damage_multiplier = GetBuffMultiplier(player_->GetBuffs(), BuffType::ATTACK_POWER)
+    * player_level::GetLevelAbilityMultiplier(player_->GetLevelUpAbilities(), player_level::Ability::ATTACK)
+    + player_level::GetLevelAbilityValue(player_->GetLevelUpAbilities(), player_level::Ability::ATTACK);;
 
   auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_, &monster_killed =
       monster_killed_, &skill_manager = skill_manager_, damage_multiplier]
@@ -360,10 +398,11 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                              ](Player* p, MobHitBox* m, collision::CollisionResult) -> void {
                                if (m->attack_delay >= 0) return;
                                if (m->hit_player) return;
-                               if (p->GetIsInvincible()) return;
 
                                m->hit_player = true;
                                m->timeout = 0;
+
+                               if (p->GetIsInvincible()) return;
 
                                std::wstringstream wss;
                                wss << L"プレイヤーが "
@@ -477,6 +516,67 @@ void GameScene::HandlePauseMenu(GameContext* ctx, float delta_time) {
   }
 
   pause_menu_ui_->OnUpdate(ctx, delta_time);
+}
+
+void GameScene::HandleLevelUpUI(GameContext* ctx, float delta_time) {
+  auto am = SceneManager::GetInstance().GetAudioManager();
+
+  if (is_allow_level_up_ui_control_) {
+    constexpr int options_count = 3;
+    if (ctx->input_handler->IsKeyDown(KeyCode::KK_D) || ctx->input_handler->IsKeyDown(KeyCode::KK_RIGHT) || ctx->
+      input_handler->IsKeyDown(KeyCode::KK_E)) {
+      level_up_selected_option_ = (level_up_selected_option_ + 1) % options_count;
+      am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
+    }
+    if (ctx->input_handler->IsKeyDown(KeyCode::KK_A) || ctx->input_handler->IsKeyDown(KeyCode::KK_LEFT) || ctx->
+      input_handler->IsKeyDown(KeyCode::KK_Q)) {
+      level_up_selected_option_ = (level_up_selected_option_ - 1 + options_count) % options_count;
+      am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
+    }
+    level_up_ui_->SetSelectedOption(level_up_selected_option_);
+
+    if (ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE)) {
+      am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
+      HandleLevelUpSelection(level_up_options_[level_up_selected_option_]);
+      is_show_level_up_ui = false;
+      is_allow_level_up_ui_control_ = false;
+    }
+  }
+
+  level_up_ui_->OnUpdate(ctx, delta_time);
+}
+
+void GameScene::HandleLevelUpSelection(player_level::OptionType type) {
+  switch (type) {
+  case player_level::OptionType::ATTACK:
+    player_->AddLevelUpAbility({
+      player_level::Ability::ATTACK,
+      1.2f,
+    });
+    break;
+  case player_level::OptionType::DEFENSE:
+    player_->AddLevelUpAbility({
+      player_level::Ability::DEFENSE,
+      1.2f,
+    });
+    break;
+  case player_level::OptionType::MOVING_SPEED:
+    player_->AddLevelUpAbility({
+      player_level::Ability::MOVING_SPEED,
+      1.05f,
+    });
+    break;
+  case player_level::OptionType::HP_UP:
+    player_->AddLevelUpAbility({
+      player_level::Ability::HP_UP,
+      1.0f,
+      10
+    });
+    break;
+  case player_level::OptionType::HEAL:
+    player_->Heal(player_->GetMaxHp() * 0.5f);
+    break;
+  }
 }
 
 void GameScene::ResetTimer() {
