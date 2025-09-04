@@ -111,3 +111,19 @@ DWORD XInputLogger_GetUserIndex() { return g_userIndex; }
 void XInputLogger_SetUserIndex(DWORD idx) { g_userIndex = idx; }
 
 XINPUT_STATE XInputLogger_GetRawState() { return g_rawState; }
+
+void XInputLogger_SetVibration(WORD leftMotor, WORD rightMotor) {
+  if (!g_connected) return;
+  XINPUT_VIBRATION vib{};
+  vib.wLeftMotorSpeed = leftMotor;
+  vib.wRightMotorSpeed = rightMotor;
+  XInputSetState(g_userIndex, &vib);
+}
+
+void XInputLogger_StopVibration() {
+  if (!g_connected) return;
+  XINPUT_VIBRATION vib{};
+  vib.wLeftMotorSpeed = 0;
+  vib.wRightMotorSpeed = 0;
+  XInputSetState(g_userIndex, &vib);
+}

@@ -56,3 +56,6 @@ DWORD XInputLogger_GetUserIndex();
 void XInputLogger_SetUserIndex(DWORD idx);
 
 XINPUT_STATE XInputLogger_GetRawState();
+
+void XInputLogger_SetVibration(WORD leftMotor, WORD rightMotor);
+void XInputLogger_StopVibration();

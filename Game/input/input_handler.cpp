@@ -58,3 +58,11 @@ std::pair<std::pair<float, float>, std::pair<float, float>> InputHandler::GetXIn
   return std::make_pair(std::make_pair(ca.leftStick.x, ca.leftStick.y), std::make_pair(ca.rightStick.x, ca.rightStick.y)
   );
 }
+
+void InputHandler::SetXInputVibration(int leftMotor, int rightMotor) {
+  XInputLogger_SetVibration(static_cast<WORD>(leftMotor), static_cast<WORD>(rightMotor));
+}
+
+void InputHandler::StopXInputVibration() {
+  XInputLogger_StopVibration();
+}
