@@ -87,7 +87,7 @@ private:
   }
 
   ButtonState step_button(Key k, bool prevHeld) const {
-    const bool now = get(k);
+    const bool now = get(k);    
     ButtonState st;
     st.held = now;
     st.pressed = (!prevHeld && now);
