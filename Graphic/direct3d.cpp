@@ -169,6 +169,34 @@ void Dx11Wrapper::CreateViewport() {
   device_context_->RSSetViewports(1, &viewport_); // ビューポートの設定
 }
 
+void Dx11Wrapper::CreateRasterizerState() {
+  D3D11_RASTERIZER_DESC raster_desc;
+
+  raster_desc.FillMode = D3D11_FILL_SOLID;
+  raster_desc.CullMode = D3D11_CULL_BACK;
+  raster_desc.FrontCounterClockwise = false;
+  raster_desc.DepthClipEnable = TRUE;
+  raster_desc.ScissorEnable = true;
+  raster_desc.MultisampleEnable = false;
+  raster_desc.AntialiasedLineEnable = false;
+
+  raster_desc.DepthBias = 0;
+  raster_desc.DepthBiasClamp = 0.0f;
+  raster_desc.SlopeScaledDepthBias = 0.0f;
+
+  device_->CreateRasterizerState(&raster_desc, rasterizer_state_.GetAddressOf());
+  device_context_->RSSetState(rasterizer_state_.Get());
+
+  D3D11_RECT scissor_rect = {
+    .left = 0,
+    .top = 0,
+    .right = win_size_.cx,
+    .bottom = win_size_.cy
+  };
+
+  device_context_->RSSetScissorRects(1, &scissor_rect);
+}
+
 Dx11Wrapper::Dx11Wrapper(HWND hwnd, const Dx11WrapperConfig& config) {
   config_ = config;
   win_size_.cx = config.window_size_width;
@@ -193,6 +221,7 @@ Dx11Wrapper::Dx11Wrapper(HWND hwnd, const Dx11WrapperConfig& config) {
   CreateBlendState();
   CreateDepthStencilState();
   CreateViewport();
+  CreateRasterizerState();
 
   std::unique_ptr<ShaderManager> shader_manager = std::make_unique<ShaderManager>(
     device_.Get(), device_context_.Get(), config_);

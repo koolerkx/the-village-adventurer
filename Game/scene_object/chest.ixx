@@ -18,4 +18,5 @@ export namespace chest {
 
   std::wstring GetChestRewardEventText(RewardType t);
   COLOR GetChestRewardEventColor(RewardType t);
+  std::wstring GetChestLogText(RewardType t);
 }

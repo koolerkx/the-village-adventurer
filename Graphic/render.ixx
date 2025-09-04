@@ -110,4 +110,7 @@ public:
                             FixedPoolIndexType texture_id,
                             CameraProps camera_props = {},
                             bool is_half_pixel_offset_correction = false);
+
+  void SetScissorRect(float left, float top, float right, float bottom) const;
+  void ResetScissorRect() const;
 };

@@ -73,7 +73,7 @@ export struct MobState {
 
   float is_show_hurt_frame_timer = 0.0f;
   float is_show_hp_bar_timer = 0.0f;
-  
+
   Vector2 velocity;
   // mob data
   int hp;
@@ -127,12 +127,28 @@ export namespace mob {
       state == MobActionState::ATTACK_LEFT ||
       state == MobActionState::ATTACK_RIGHT;
   }
+
   bool is_position_reset(Vector2 mob_pos, Vector2 inactive_pos) {
     constexpr float DISTANCE_THRESHOLD = 32.0f;
     if (math::GetDistance(mob_pos, inactive_pos) < DISTANCE_THRESHOLD) {
       return true;
     }
     return false;
+  }
+
+  std::wstring GetMobName(MobType t) {
+    switch (t) {
+    case MobType::SLIME:
+      return L"スライム";
+    case MobType::SLIME_GREEN:
+      return L"翠スライム";
+    case MobType::SLIME_FIRE:
+      return L"炎スライム";
+    case MobType::DUMMY:
+      return L"訓練人形";
+    default:
+      return L"モンスター";
+    }
   }
 }
 
