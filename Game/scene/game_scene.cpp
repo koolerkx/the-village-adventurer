@@ -401,7 +401,7 @@ void GameScene::HandleMobHitPlayerCollision(float) {
 
                                m->hit_player = true;
                                m->timeout = 0;
-                               
+
                                if (p->GetIsInvincible()) return;
 
                                std::wstringstream wss;
@@ -569,7 +569,8 @@ void GameScene::HandleLevelUpSelection(player_level::OptionType type) {
   case player_level::OptionType::HP_UP:
     player_->AddLevelUpAbility({
       player_level::Ability::HP_UP,
-      1.2f,
+      1.0f,
+      10
     });
     break;
   case player_level::OptionType::HEAL:

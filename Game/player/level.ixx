@@ -36,15 +36,15 @@ export namespace player_level {
   std::wstring GetOptionDescription(OptionType type) {
     switch (type) {
     case OptionType::ATTACK:
-      return L"UŒ‚—ÍUP";
+      return L"UŒ‚—Í1.2”{";
     case OptionType::DEFENSE:
-      return L"–hŒä—ÍUP";
+      return L"–hŒä—Í1.2”{";
     case OptionType::MOVING_SPEED:
-      return L"ˆÚ“®‘¬“xUP";
+      return L"ˆÚ“®‘¬“x1.05”{";
     case OptionType::HP_UP:
       return L"Å‘åHPã¸";
     case OptionType::HEAL:
-      return L"HP‰ñ•œ";
+      return L"HP‰ñ•œ50“";
     }
     return L"ƒGƒ‰[";
   };
