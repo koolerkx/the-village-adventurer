@@ -63,6 +63,8 @@ private:
     {0, 0},
     {32, 32}
   };
+
+  static constexpr float DEFAULT_DEFENSE = 5.0f;
 #pragma endregion
 
   Transform transform_ = DEFAULT_TRANSFORM;
@@ -104,6 +106,8 @@ private:
   // Game data
   float health_ = 100.0f;
   float max_health_ = 100.0f;
+
+  float defense = DEFAULT_DEFENSE;
 
   // buffs
   std::vector<PlayerBuff> buffs_;
@@ -152,7 +156,11 @@ public:
   Vector2 GetVelocity() const;
 
   float Damage(float amount) {
-    health_ = std::max(health_ - amount, 0.0f);
+    float damage = amount - defense
+      * player_level::GetLevelAbilityMultiplier(level_up_abilities_, player_level::Ability::DEFENSE)
+      + player_level::GetLevelAbilityValue(level_up_abilities_, player_level::Ability::DEFENSE);
+
+    health_ = std::max(health_ - damage, 0.0f);
     return health_;
   }
 

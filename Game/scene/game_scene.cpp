@@ -398,10 +398,11 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                              ](Player* p, MobHitBox* m, collision::CollisionResult) -> void {
                                if (m->attack_delay >= 0) return;
                                if (m->hit_player) return;
-                               if (p->GetIsInvincible()) return;
 
                                m->hit_player = true;
                                m->timeout = 0;
+                               
+                               if (p->GetIsInvincible()) return;
 
                                std::wstringstream wss;
                                wss << L"プレイヤーが "
