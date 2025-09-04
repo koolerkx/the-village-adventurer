@@ -64,58 +64,7 @@ private:
 
   float opacity_ = 1.0f;
 
-  StatusUIActiveProps props_ = {
-    .hp = 80,
-    .max_hp = 100,
-    .defense = 100,
-    .attack = 100,
-    .speed = 100,
-    .experience = 100,
-    .max_experience = 100,
-    .total_experience = 100,
-    .level = 99,
-    .abilities = {
-      player_level::PlayerAbility{
-        .type = player_level::Ability::ATTACK,
-        .multiplier = 1.2,
-      },
-      player_level::PlayerAbility{
-        .type = player_level::Ability::DEFENSE,
-        .multiplier = 1.2,
-      },
-      player_level::PlayerAbility{
-        .type = player_level::Ability::MOVING_SPEED,
-        .multiplier = 1.2,
-      },
-      player_level::PlayerAbility{
-        .type = player_level::Ability::HP_UP,
-        .value = 10,
-      },
-      player_level::PlayerAbility{
-        .type = player_level::Ability::ATTACK,
-        .multiplier = 1.2,
-      },
-      player_level::PlayerAbility{
-        .type = player_level::Ability::DEFENSE,
-        .multiplier = 1.2,
-      },
-      player_level::PlayerAbility{
-        .type = player_level::Ability::MOVING_SPEED,
-        .multiplier = 1.2,
-      },
-      player_level::PlayerAbility{
-        .type = player_level::Ability::HP_UP,
-        .value = 10,
-      },
-    },
-    .buffs = {
-      PlayerBuff{.type = BuffType::ATTACK_POWER},
-      PlayerBuff{.type = BuffType::ATTACK_POWER},
-      PlayerBuff{.type = BuffType::INVINCIBLE},
-      PlayerBuff{.type = BuffType::MOVING_SPEED},
-      PlayerBuff{.type = BuffType::MOVING_SPEED},
-    },
-  };
+  StatusUIActiveProps props_;
 
 public:
   StatusUI(GameContext* ctx);
@@ -125,5 +74,42 @@ public:
 
   void Reset() {
     movement_acc_ = 0.0f;
+  }
+
+  void Active(const StatusUIActiveProps& props) {
+    props_ = props;
+
+    for (auto& ab : props_.abilities) {
+      if (ab.multiplier == 0.0f) ab.multiplier = 1.0f;
+    }
+
+    // Group by abilities
+    std::vector<player_level::PlayerAbility> new_abilities;
+    new_abilities.reserve(props_.abilities.size() + 4);
+    new_abilities.emplace_back(player_level::PlayerAbility{.type = player_level::Ability::ATTACK});
+    new_abilities.emplace_back(player_level::PlayerAbility{.type = player_level::Ability::DEFENSE});
+    new_abilities.emplace_back(player_level::PlayerAbility{.type = player_level::Ability::MOVING_SPEED});
+    new_abilities.emplace_back(player_level::PlayerAbility{.type = player_level::Ability::HP_UP});
+    for (auto& a : props_.abilities) new_abilities.push_back(std::move(a));
+
+    // preserve insertion order
+    std::unordered_map<player_level::Ability, player_level::PlayerAbility> agg;
+    std::vector<player_level::Ability> order;
+    agg.reserve(new_abilities.size());
+    for (const auto& ab : new_abilities) {
+      auto it = agg.find(ab.type);
+      if (it == agg.end()) {
+        agg.emplace(ab.type, ab);
+        order.push_back(ab.type);
+      }
+      else {
+        it->second.multiplier *= ab.multiplier;
+        it->second.value += ab.value;
+      }
+    }
+
+    props_.abilities.clear();
+    props_.abilities.reserve(order.size());
+    for (const auto& key : order) props_.abilities.push_back(std::move(agg.at(key)));
   }
 };

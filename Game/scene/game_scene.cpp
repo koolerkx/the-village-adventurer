@@ -64,6 +64,9 @@ void GameScene::OnEnter(GameContext* ctx) {
   // Level up UI
   level_up_ui_ = std::make_unique<LevelUpUI>(ctx);
 
+  // Status UI
+  status_ui_ = std::make_unique<StatusUI>(ctx);
+
   // Mob
   mob_manager_ = std::make_unique<MobManager>(ctx);
   for (const auto& mob_props : map_manager_->GetMobProps()) {
@@ -86,6 +89,12 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
 
   if (is_pause_) {
     HandlePauseMenu(ctx, delta_time);
+    return;
+  }
+
+  if (is_show_status_ui_) {
+    status_ui_->Active({});
+    status_ui_->OnUpdate(ctx, delta_time);
     return;
   }
 
@@ -143,6 +152,10 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
     pause_menu_ui_->OnFixedUpdate(ctx, delta_time);
     return;
   }
+  if (is_show_status_ui_) {
+    status_ui_->OnFixedUpdate(ctx, delta_time);
+    return;
+  }
   if (is_show_level_up_ui) {
     SceneManager::GetInstance().GetAudioManager()->StopWalking();
     level_up_ui_->OnFixedUpdate(ctx, delta_time);
@@ -183,6 +196,11 @@ void GameScene::OnRender(GameContext* ctx) {
   if (is_show_level_up_ui) {
     level_up_ui_->OnRender(ctx, camera_.get());
   }
+
+  // if (is_show_status_ui_) {
+  //   status_ui_->OnRender(ctx, camera_.get());
+  // }
+  status_ui_->OnRender(ctx, camera_.get());
 }
 
 void GameScene::OnExit(GameContext*) {

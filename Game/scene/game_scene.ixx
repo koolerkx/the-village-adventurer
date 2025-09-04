@@ -17,6 +17,7 @@ import game.ui.pause_ui;
 import game.ui.level_up;
 import game.mobs_manager;
 import game.player.level;
+import game.ui.status_ui;
 
 constexpr int BASE_CHEST_OPEN_EXP = 5;
 constexpr int BASE_MONSTER_KILL_EXP = 10;
@@ -30,9 +31,12 @@ private:
 
   std::unique_ptr<Player> player_ = nullptr;
   std::unique_ptr<Camera> camera_ = nullptr;
+
+  // UI
   std::unique_ptr<GameUI> ui_ = nullptr;
   std::unique_ptr<PauseMenuUI> pause_menu_ui_ = nullptr;
   std::unique_ptr<LevelUpUI> level_up_ui_ = nullptr;
+  std::unique_ptr<StatusUI> status_ui_ = nullptr;
 
   std::unique_ptr<SceneContext> scene_context = nullptr;
 
@@ -65,6 +69,9 @@ private:
   bool is_allow_level_up_ui_control_ = false;
   uint8_t level_up_selected_option_ = 1;
   std::array<player_level::OptionType, 3> level_up_options_ = {};
+
+  // status menu
+  bool is_show_status_ui_ = true;
 
 public:
   void OnEnter(GameContext* ctx) override;

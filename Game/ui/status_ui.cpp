@@ -225,7 +225,7 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
   const float ability_text_y = frame_content_y + ability_text_margin_top;
 
   wss.str(L"");
-  wss << L"能力値（基本＋バフ）";
+  wss << L"能力値";
 
   rr->DrawFont(wss.str(), font_key_, {
                  .position = {ability_text_x, ability_text_y, 0}
@@ -245,29 +245,29 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
   // HP
   wss << L"最大HP　：";
   wss << props_.hp;
-  wss << L" + ";
-  wss << props_.max_hp;
+  // wss << L" + ";
+  // wss << props_.max_hp;
   wss << L"\n";
 
   // Defense
   wss << L"防御力　：";
   wss << props_.defense;
-  wss << L" + ";
-  wss << L"20";
+  // wss << L" + ";
+  // wss << L"20";
   wss << L"\n";
 
   // Attack
   wss << L"攻撃力　：";
   wss << props_.attack;
-  wss << L" + ";
-  wss << L"20";
+  // wss << L" + ";
+  // wss << L"20";
   wss << L"\n";
 
   // Moving
   wss << L"移動速度：";
   wss << props_.speed;
-  wss << L" + ";
-  wss << L"20";
+  // wss << L" + ";
+  // wss << L"20";
   wss << L"\n";
 
   // Exp
@@ -316,7 +316,7 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
   for (int i = 0; i < props_.abilities.size(); i++) {
     auto& a = props_.abilities[i];
     wss << player_level::GetAbilityDescription(a.type);
-    if (a.value > 0.0f) {
+    if (a.type > player_level::Ability::HP_UP) {
       wss << " ";
       wss << a.value;
       wss << " ";
@@ -379,40 +379,49 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
   };
 
   wss.str(L"");
-  for (int i = 0; i < props_.buffs.size(); i++) {
-    auto& a = props_.buffs[i];
-    wss << GetBuffDisplayText(a.type);
-    if (a.type != BuffType::INVINCIBLE) {
-      wss << L"：残り";
-      wss << std::fixed << std::setprecision(0);
-      wss << a.duration - a.elapsed;
-      wss << L"秒";
-    }
-    wss << L"\n";
-
-    constexpr float ability_icon_size = 36;
-    constexpr float ability_icon_margin_top = 12;
-
-    const float ability_icon_start_x = buff_text_x;
-    const float ability_icon_start_y = buff_text_y + section_title_props.pixel_size;
-    constexpr float ability_item_gap = 12;
-
-    ui_render_instances.emplace_back(RenderInstanceItem{
-      .transform = {
-        .position = {
-          ability_icon_start_x,
-          ability_icon_start_y + ability_icon_margin_top + (ability_item_gap + ability_icon_size) * i, 0
-        },
-        .size = {36, 36}
-      },
-      .uv = GetBuffIconUV(a.type),
-      .color = color::setOpacity(color::white, opacity_)
-    });
+  if (props_.buffs.size() == 0) {
+    wss << L"なし";
+    
+    rr->DrawFont(wss.str(), font_key_, {
+                   .position = {buff_text_x, buff_item_y, 0}
+                 }, buff_text_props, {});
   }
+  else {
+    for (int i = 0; i < props_.buffs.size(); i++) {
+      auto& a = props_.buffs[i];
+      wss << GetBuffDisplayText(a.type);
+      if (a.type != BuffType::INVINCIBLE) {
+        wss << L"：残り";
+        wss << std::fixed << std::setprecision(0);
+        wss << a.duration - a.elapsed;
+        wss << L"秒";
+      }
+      wss << L"\n";
 
-  rr->DrawFont(wss.str(), font_key_, {
-                 .position = {buff_item_x, buff_item_y, 0}
-               }, buff_text_props, {});
+      constexpr float ability_icon_size = 36;
+      constexpr float ability_icon_margin_top = 12;
+
+      const float ability_icon_start_x = buff_text_x;
+      const float ability_icon_start_y = buff_text_y + section_title_props.pixel_size;
+      constexpr float ability_item_gap = 12;
+
+      ui_render_instances.emplace_back(RenderInstanceItem{
+        .transform = {
+          .position = {
+            ability_icon_start_x,
+            ability_icon_start_y + ability_icon_margin_top + (ability_item_gap + ability_icon_size) * i, 0
+          },
+          .size = {36, 36}
+        },
+        .uv = GetBuffIconUV(a.type),
+        .color = color::setOpacity(color::white, opacity_)
+      });
+    }
+
+    rr->DrawFont(wss.str(), font_key_, {
+                   .position = {buff_item_x, buff_item_y, 0}
+                 }, buff_text_props, {});
+  }
 #pragma endregion
 
   // For ability icon
