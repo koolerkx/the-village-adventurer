@@ -80,11 +80,11 @@ void GameScene::OnEnter(GameContext* ctx) {
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   if (ctx->input_handler->IsKeyDown(KeyCode::KK_F3) && is_allow_pause_) {
     pause_menu_ui_->Reset();
-    is_pause_ = !is_pause_;
+    is_pause_ = true;
+    is_allow_pause_ = false;
+    is_allow_status_ui_control_ = false;
     SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::select_se_1);
-    if (is_pause_) {
-      SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_pause_menu);
-    }
+    SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_pause_menu);
   }
 
   if (is_pause_) {
@@ -157,6 +157,7 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
     return;
   }
   if (is_show_status_ui_) {
+    SceneManager::GetInstance().GetAudioManager()->StopWalking();
     status_ui_->OnFixedUpdate(ctx, delta_time);
     return;
   }
@@ -521,6 +522,8 @@ void GameScene::HandlePauseMenu(GameContext* ctx, float delta_time) {
     if (pause_menu_selected_option_ == 0) {
       // back to game
       is_pause_ = false;
+      is_allow_pause_ = true;
+      is_allow_status_ui_control_ = true;
       SceneManager::GetInstance().GetAudioManager()->PlayPreviousBGM();
     }
     else {
