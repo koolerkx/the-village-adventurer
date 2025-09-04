@@ -109,6 +109,8 @@ private:
 
   float defense = DEFAULT_DEFENSE;
 
+  float base_attack = 10;
+
   // buffs
   std::vector<PlayerBuff> buffs_;
 
@@ -223,6 +225,31 @@ public:
       * player_level::GetLevelAbilityMultiplier(level_up_abilities_, player_level::Ability::HP_UP)
       + player_level::GetLevelAbilityValue(level_up_abilities_, player_level::Ability::HP_UP);
   }
+
+  float GetHp() const { return health_; }
+
+  float GetDefense() const {
+    return defense
+      * player_level::GetLevelAbilityMultiplier(level_up_abilities_, player_level::Ability::DEFENSE)
+      + player_level::GetLevelAbilityValue(level_up_abilities_, player_level::Ability::DEFENSE);
+  }
+
+  float GetAttack() const {
+    return base_attack
+      * player_level::GetLevelAbilityMultiplier(level_up_abilities_, player_level::Ability::ATTACK)
+      + player_level::GetLevelAbilityValue(level_up_abilities_, player_level::Ability::ATTACK);
+  }
+
+  float GetSpeed() const {
+    return move_speed_
+      * player_level::GetLevelAbilityMultiplier(level_up_abilities_, player_level::Ability::MOVING_SPEED)
+      + player_level::GetLevelAbilityValue(level_up_abilities_, player_level::Ability::MOVING_SPEED);
+  }
+
+  int GetExperience() const { return experience_; }
+  int GetTotalExperience() const { return total_experience_; }
+  int GetMaxExperience() const { return max_experience_; }
+
 
   std::vector<player_level::PlayerAbility> GetLevelUpAbilities() { return level_up_abilities_; }
 };

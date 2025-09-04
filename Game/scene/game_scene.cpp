@@ -64,6 +64,9 @@ void GameScene::OnEnter(GameContext* ctx) {
   // Level up UI
   level_up_ui_ = std::make_unique<LevelUpUI>(ctx);
 
+  // Status UI
+  status_ui_ = std::make_unique<StatusUI>(ctx);
+
   // Mob
   mob_manager_ = std::make_unique<MobManager>(ctx);
   for (const auto& mob_props : map_manager_->GetMobProps()) {
@@ -77,15 +80,24 @@ void GameScene::OnEnter(GameContext* ctx) {
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   if (ctx->input_handler->IsKeyDown(KeyCode::KK_F3) && is_allow_pause_) {
     pause_menu_ui_->Reset();
-    is_pause_ = !is_pause_;
+    is_pause_ = true;
+    is_allow_pause_ = false;
+    is_allow_status_ui_control_ = false;
     SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::select_se_1);
-    if (is_pause_) {
-      SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_pause_menu);
-    }
+    SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_pause_menu);
   }
 
   if (is_pause_) {
     HandlePauseMenu(ctx, delta_time);
+    return;
+  }
+
+  if (ctx->input_handler->IsKeyDown(KeyCode::KK_F4) && is_allow_pause_ && !is_show_status_ui_) {
+    HandleOnStatusOpen(ctx, delta_time);
+  }
+
+  if (is_show_status_ui_) {
+    HandleStatusUpdate(ctx, delta_time);
     return;
   }
 
@@ -95,6 +107,7 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
     level_up_ui_->Reset();
     is_show_level_up_ui = true;
     is_allow_level_up_ui_control_ = false;
+    is_allow_pause_ = false;
 
     SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::select_se_1);
     SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_pause_menu);
@@ -143,6 +156,11 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
     pause_menu_ui_->OnFixedUpdate(ctx, delta_time);
     return;
   }
+  if (is_show_status_ui_) {
+    SceneManager::GetInstance().GetAudioManager()->StopWalking();
+    status_ui_->OnFixedUpdate(ctx, delta_time);
+    return;
+  }
   if (is_show_level_up_ui) {
     SceneManager::GetInstance().GetAudioManager()->StopWalking();
     level_up_ui_->OnFixedUpdate(ctx, delta_time);
@@ -182,6 +200,10 @@ void GameScene::OnRender(GameContext* ctx) {
   }
   if (is_show_level_up_ui) {
     level_up_ui_->OnRender(ctx, camera_.get());
+  }
+
+  if (is_show_status_ui_) {
+    status_ui_->OnRender(ctx, camera_.get());
   }
 }
 
@@ -341,7 +363,7 @@ void GameScene::HandleSkillHitMobCollision(float) {
       };
 
       skill_hitbox->hit_mobs.insert(mob_state->id);
-      int remain_hp = mob_manager->MakeDamage(*mob_state, damage, [&]() {
+      int remain_hp = mob_manager->MakeDamage(*mob_state, static_cast<int>(damage), [&]() {
         Vector2 skill_center = {
           skill_hitbox->transform.position.x + skill_hitbox->transform.size.x / 2,
           skill_hitbox->transform.position.y + skill_hitbox->transform.size.y / 2
@@ -351,11 +373,11 @@ void GameScene::HandleSkillHitMobCollision(float) {
         ui->AddDamageText(
           mob_center,
           skill_hitbox->data->name,
-          damage
+          static_cast<short>(damage)
         );
         std::wstringstream wss;
-        wss << skill_hitbox->data->name << L" で " << mob::GetMobName(mob_state->type) << L" に " << damage <<
-          L" ダメージを与えた";
+        wss << skill_hitbox->data->name << L" で " << mob::GetMobName(mob_state->type) << L" に " <<
+          static_cast<short>(damage) << L" ダメージを与えた";
         ui->AddLogText(wss.str(), color::cyanA400);
 
         if (skill_hitbox->data->is_destroy_by_mob) {
@@ -500,6 +522,8 @@ void GameScene::HandlePauseMenu(GameContext* ctx, float delta_time) {
     if (pause_menu_selected_option_ == 0) {
       // back to game
       is_pause_ = false;
+      is_allow_pause_ = true;
+      is_allow_status_ui_control_ = true;
       SceneManager::GetInstance().GetAudioManager()->PlayPreviousBGM();
     }
     else {
@@ -540,6 +564,7 @@ void GameScene::HandleLevelUpUI(GameContext* ctx, float delta_time) {
       HandleLevelUpSelection(level_up_options_[level_up_selected_option_]);
       is_show_level_up_ui = false;
       is_allow_level_up_ui_control_ = false;
+      is_allow_pause_ = true;
     }
   }
 
@@ -576,6 +601,46 @@ void GameScene::HandleLevelUpSelection(player_level::OptionType type) {
   case player_level::OptionType::HEAL:
     player_->Heal(player_->GetMaxHp() * 0.5f);
     break;
+  }
+}
+
+void GameScene::HandleOnStatusOpen(GameContext*, float) {
+  is_show_status_ui_ = true;
+  is_allow_pause_ = false;
+
+  SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::select_se_1);
+  SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_pause_menu);
+
+  status_ui_->Active({
+                       .hp = player_->GetHp(),
+                       .max_hp = player_->GetMaxHp(),
+                       .defense = player_->GetDefense(),
+                       .attack = player_->GetAttack(),
+                       .speed = player_->GetSpeed(),
+                       .experience = player_->GetExperience(),
+                       .max_experience = player_->GetMaxExperience(),
+                       .total_experience = player_->GetTotalExperience(),
+                       .level = player_->GetLevel(),
+                       .abilities = player_->GetLevelUpAbilities(),
+                       .buffs = player_->GetBuffs(),
+                       .monster_killed = monster_killed_,
+                       .timer_elapsed = timer_elapsed_
+                     }, [&allow = is_allow_status_ui_control_]() {
+                       allow = true;
+                     });
+}
+
+void GameScene::HandleStatusUpdate(GameContext* ctx, float delta_time) {
+  auto am = SceneManager::GetInstance().GetAudioManager();
+  status_ui_->OnUpdate(ctx, delta_time);
+
+  if (is_allow_status_ui_control_ && (ctx->input_handler->IsKeyDown(KeyCode::KK_F4) || ctx->input_handler->
+    IsKeyDown(KeyCode::KK_SPACE))) {
+    am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
+    am->PlayPreviousBGM();
+    is_show_status_ui_ = false;
+    is_allow_status_ui_control_ = false;
+    is_allow_pause_ = true;
   }
 }
 

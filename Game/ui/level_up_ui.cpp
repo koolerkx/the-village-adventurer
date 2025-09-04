@@ -16,7 +16,7 @@ LevelUpUI::LevelUpUI(GameContext* ctx) {
   ui_texture_id_ = tm->Load(L"assets/ui.png");
 }
 
-void LevelUpUI::OnUpdate(GameContext* ctx, float delta_time) {
+void LevelUpUI::OnUpdate(GameContext*, float delta_time) {
   movement_acc_ += delta_time;
 
   kamifubuki_frame_timeout -= delta_time;
@@ -38,9 +38,9 @@ void LevelUpUI::OnUpdate(GameContext* ctx, float delta_time) {
   }
 }
 
-void LevelUpUI::OnFixedUpdate(GameContext* ctx, float delta_time) {}
+void LevelUpUI::OnFixedUpdate(GameContext*, float) {}
 
-void LevelUpUI::OnRender(GameContext* ctx, Camera* camera) {
+void LevelUpUI::OnRender(GameContext* ctx, Camera*) {
   auto& rr = ctx->render_resource_manager->renderer;
   std::wstringstream wss;
 
