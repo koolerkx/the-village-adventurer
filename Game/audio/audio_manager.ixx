@@ -69,8 +69,9 @@ public:
   void OnFixedUpdate() {};
   void UpdateListenerPosition(Vector2) {};
 
-  int PlayAudioClip(audio_clip, Vector2, [[maybe_unused]] float v=0) { return 0; };
+  int PlayAudioClip(audio_clip, [[maybe_unused]] Vector2 pos = {}, [[maybe_unused]] float v=0) { return 0; };
   void PlayBGM(audio_clip) {};
+  void PlayPreviousBGM() {};
 
   void PlayWalking(audio_clip = audio_clip::walk_grass) {};
   void StopWalking() {};

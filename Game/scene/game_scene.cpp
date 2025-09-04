@@ -182,20 +182,16 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
   auto colliders = map_manager_->GetFiledObjectColliders();
 
   std::function<void(FieldObject&)> on_chest_open = [&](FieldObject& fo) {
-    std::cout << fo.metadata.tile_class << std::endl;
-
     chest::RewardType reward_type = chest::GetRandomRewardType();
 
     switch (reward_type) {
     case chest::RewardType::HEAL:
       player_->Heal(helper::GetRandomNumberByOffset(10.0f, 5.0f));
-      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::buff1, {}, 0.5);
       break;
     case chest::RewardType::BUFF_ATTACK_POWER: {
       PlayerBuff pb;
       pb.type = BuffType::ATTACK_POWER;
       player_->AddBuff(pb);
-      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::buff2, {}, 0.5);
       break;
     }
     // case chest::RewardType::BUFF_ATTACK_SPEED: {
@@ -210,7 +206,6 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
       pb.duration = 5.0f;
       pb.multiplier = 1.25f;
       player_->AddBuff(pb);
-      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::buff2, {}, 0.5);
       break;
     }
     case chest::RewardType::INVINCIBLE: {
@@ -225,6 +220,7 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
       break;
     }
 
+    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::chest_open, fo.position, 1.0f);
     ui_->AddEventText(chest::GetChestRewardEventText(reward_type), chest::GetChestRewardEventColor(reward_type));
     ui_->AddLogText(chest::GetChestLogText(reward_type), color::lightGreenA400);
   };
