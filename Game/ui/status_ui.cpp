@@ -24,7 +24,7 @@ void StatusUI::OnUpdate(GameContext* ctx, float delta_time) {
     1.0f,
     delta_time,
     interpolation::SmoothType::EaseOut,
-    1.0f
+    3.0f
   );
 
   if (1.0f - opacity_ <= 0.05 && fade_end_cb_) {
@@ -257,10 +257,10 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
   wss.str(L"");
 
   // HP
-  wss << L"最大HP　：";
+  wss << L"HP　：";
   wss << props_.hp;
-  // wss << L" + ";
-  // wss << props_.max_hp;
+  wss << L" + ";
+  wss << props_.max_hp;
   wss << L"\n";
 
   // Defense

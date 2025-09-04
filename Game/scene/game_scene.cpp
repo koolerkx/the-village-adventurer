@@ -93,34 +93,11 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   }
 
   if (ctx->input_handler->IsKeyDown(KeyCode::KK_F4) && is_allow_pause_ && !is_show_status_ui_) {
-    is_show_status_ui_ = true;
-    is_allow_pause_ = false;
-    status_ui_->Active({
-                         .hp = player_->GetHp(),
-                         .max_hp = player_->GetMaxHp(),
-                         .defense = player_->GetDefense(),
-                         .attack = player_->GetAttack(),
-                         .speed = player_->GetSpeed(),
-                         .experience = player_->GetExperience(),
-                         .max_experience = player_->GetMaxExperience(),
-                         .total_experience = player_->GetTotalExperience(),
-                         .level = player_->GetLevel(),
-                         .abilities = player_->GetLevelUpAbilities(),
-                         .buffs = player_->GetBuffs(),
-                       }, [&allow = is_allow_status_ui_control_]() {
-                         allow = true;
-                       });
+    HandleOnStatusOpen(ctx, delta_time);
   }
 
   if (is_show_status_ui_) {
-    status_ui_->OnUpdate(ctx, delta_time);
-
-    if (is_allow_status_ui_control_ && (ctx->input_handler->IsKeyDown(KeyCode::KK_F4) || ctx->input_handler->
-      IsKeyDown(KeyCode::KK_SPACE))) {
-      is_show_status_ui_ = false;
-      is_allow_status_ui_control_ = false;
-      is_allow_pause_ = true;
-    }
+    HandleStatusUpdate(ctx, delta_time);
     return;
   }
 
@@ -621,6 +598,44 @@ void GameScene::HandleLevelUpSelection(player_level::OptionType type) {
   case player_level::OptionType::HEAL:
     player_->Heal(player_->GetMaxHp() * 0.5f);
     break;
+  }
+}
+
+void GameScene::HandleOnStatusOpen(GameContext* ctx, float delta_time) {
+  is_show_status_ui_ = true;
+  is_allow_pause_ = false;
+  
+  SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::select_se_1);
+  SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_pause_menu);
+  
+  status_ui_->Active({
+                       .hp = player_->GetHp(),
+                       .max_hp = player_->GetMaxHp(),
+                       .defense = player_->GetDefense(),
+                       .attack = player_->GetAttack(),
+                       .speed = player_->GetSpeed(),
+                       .experience = player_->GetExperience(),
+                       .max_experience = player_->GetMaxExperience(),
+                       .total_experience = player_->GetTotalExperience(),
+                       .level = player_->GetLevel(),
+                       .abilities = player_->GetLevelUpAbilities(),
+                       .buffs = player_->GetBuffs(),
+                     }, [&allow = is_allow_status_ui_control_]() {
+                       allow = true;
+                     });
+}
+
+void GameScene::HandleStatusUpdate(GameContext* ctx, float delta_time) {
+  auto am = SceneManager::GetInstance().GetAudioManager();
+  status_ui_->OnUpdate(ctx, delta_time);
+
+  if (is_allow_status_ui_control_ && (ctx->input_handler->IsKeyDown(KeyCode::KK_F4) || ctx->input_handler->
+    IsKeyDown(KeyCode::KK_SPACE))) {
+    am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
+    am->PlayPreviousBGM();
+    is_show_status_ui_ = false;
+    is_allow_status_ui_control_ = false;
+    is_allow_pause_ = true;
   }
 }
 
