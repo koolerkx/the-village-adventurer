@@ -96,13 +96,19 @@ void GameUI::OnUpdate(GameContext* ctx, SceneContext*, float delta_time, Camera*
       1.0f
     );
 
-  std::erase_if(experience_stars_, [target = EXP_COIN_TARGET_POS](const ExperienceStar& exp_star) {
-    if (math::GetDistance({exp_star.position.x, exp_star.position.y}, target) <= 2) {
-      exp_star.callback(exp_star.value);
-      return true;
-    }
-    return false;
-  });
+  std::erase_if(experience_stars_,
+                [target = EXP_COIN_TARGET_POS, &experience_stars_end = experience_stars_end_](
+                const ExperienceStar& exp_star) {
+                  if (math::GetDistance({exp_star.position.x, exp_star.position.y}, target) <= 2) {
+                    exp_star.callback(exp_star.value);
+                    experience_stars_end.emplace_back(StarTrajectoryEndEffect{
+                      .position = {target.x, target.y, 0}
+                    });
+
+                    return true;
+                  }
+                  return false;
+                });
   for (auto& exp_star : experience_stars_) {
     if (exp_star.floating_timeout > 0) {
       exp_star.floating_timeout -= delta_time;
@@ -136,9 +142,7 @@ void GameUI::OnUpdate(GameContext* ctx, SceneContext*, float delta_time, Camera*
     }
   }
 
-  std::erase_if(experience_stars_trajectory_, [](const StarTrajectory& t) {
-    return t.size <= 1;
-  });
+  std::erase_if(experience_stars_trajectory_, [](const StarTrajectory& t) { return t.size <= 1; });
 
   for (auto& t : experience_stars_trajectory_) {
     t.size = interpolation::UpdateSmoothValue(
@@ -147,6 +151,27 @@ void GameUI::OnUpdate(GameContext* ctx, SceneContext*, float delta_time, Camera*
       delta_time,
       interpolation::SmoothType::EaseOut,
       3.0f
+    );
+  }
+
+  std::erase_if(experience_stars_end_, [](const StarTrajectoryEndEffect& t) {
+    return t.target - t.size <= 1.0f;
+  });
+
+  for (auto& t : experience_stars_end_) {
+    t.size = interpolation::UpdateSmoothValue(
+      t.size,
+      t.target,
+      delta_time,
+      interpolation::SmoothType::EaseOut,
+      3.0f
+    );
+    t.opacity = interpolation::UpdateSmoothValue(
+      t.opacity,
+      0.0f,
+      delta_time,
+      interpolation::SmoothType::EaseOut,
+      1.0f
     );
   }
 }
@@ -838,7 +863,7 @@ void GameUI::RenderExperienceCoin(GameContext* ctx, SceneContext* scene_ctx, Cam
         .transform = {
           .position = exp_coin.position,
           .size = {24, 24},
-          .position_anchor = {-4, -4, 0}
+          .position_anchor = {-12, -12, 0}
         },
         .uv = texture_map["Star"],
         .color = color::white
@@ -851,10 +876,22 @@ void GameUI::RenderExperienceCoin(GameContext* ctx, SceneContext* scene_ctx, Cam
       .transform = {
         .position = s.position,
         .size = {s.size, s.size},
-        .position_anchor = {-4, -4, 0}
+        .position_anchor = {-s.size / 2, -s.size / 2, 0}
       },
       .uv = texture_map["StarAdditive"],
       .color = color::setOpacity(color::yellowA200, 0.3f)
+    });
+  }
+
+  for (auto s : experience_stars_end_) {
+    render_items_trajectory.emplace_back(RenderInstanceItem{
+      .transform = {
+        .position = s.position,
+        .size = {s.size, s.size},
+        .position_anchor = {-s.size / 2, -s.size / 2, 0}
+      },
+      .uv = texture_map["StarAdditive"],
+      .color = color::setOpacity(color::yellowA200, s.opacity)
     });
   }
 

@@ -95,6 +95,13 @@ struct StarTrajectory {
   float size = 24.0f;
 };
 
+struct StarTrajectoryEndEffect {
+  POSITION position;
+  float size = 24.0f;
+  float target = 96.0f;
+  float opacity = 1.0f;
+};
+
 export class GameUI {
 private:
   FixedPoolIndexType texture_id_;
@@ -150,7 +157,8 @@ private:
   // experience
   std::vector<ExperienceStar> experience_stars_ = {};
   std::vector<StarTrajectory> experience_stars_trajectory_ = {};
-  const Vector2 EXP_COIN_TARGET_POS = {64, 56};
+  std::vector<StarTrajectoryEndEffect> experience_stars_end_ = {};
+  const Vector2 EXP_COIN_TARGET_POS = {62, 54};
 
   float experience_bar_percentage_target_ = 0.0f;
   float experience_bar_percentage_current_ = 0.0f;
