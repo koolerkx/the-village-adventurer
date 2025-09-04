@@ -269,14 +269,14 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     color::setOpacity(color::white, ui_opacity_current_)
   });
   // HP Bar: Heart
-  render_items.emplace_back(RenderInstanceItem{
-    Transform{
-      .position = {38, 30, 0},
-      .size = {52, 52},
-    },
-    texture_map["Heart"],
-    color::setOpacity(color::white, ui_opacity_current_)
-  });
+  // render_items.emplace_back(RenderInstanceItem{
+  //   Transform{
+  //     .position = {38, 30, 0},
+  //     .size = {52, 52},
+  //   },
+  //   texture_map["Heart"],
+  //   color::setOpacity(color::white, ui_opacity_current_)
+  // });
   // HP Bar: HB Bar
   render_items.emplace_back(RenderInstanceItem{
     Transform{
@@ -613,6 +613,30 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .line_height = 0.0f,
                  .color = color::setOpacity(color::white, ui_opacity_current_)
                });
+
+  // Session: Left Upper
+  // HP Bar: Level
+  rr->DrawFont(L"レベル", font_key_,
+               Transform{.position = {40, 37, 0}},
+               StringSpriteProps{
+                 .pixel_size = 16.0f,
+                 .letter_spacing = 0.0f,
+                 .line_height = 0.0f,
+                 .color = color::setOpacity(color::white, ui_opacity_current_)
+               });
+  wss.str(L"");
+  wss << player_level_;
+
+  auto level_text_props = StringSpriteProps{
+    .pixel_size = 32.0f,
+    .letter_spacing = 0.0f,
+    .line_height = 0.0f,
+    .color = color::setOpacity(color::white, ui_opacity_current_)
+  };
+  StringSpriteSize level_size = default_font_->GetStringSize(wss.str(), {}, level_text_props);
+
+  rr->DrawFont(wss.str(), font_key_,
+               Transform{.position = {64 - level_size.width / 2, 50, 0}}, level_text_props);
 
   // Session: Left Upper
   // Buff
