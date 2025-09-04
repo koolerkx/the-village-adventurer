@@ -97,7 +97,7 @@ private:
 
   std::unique_ptr<IPlayerInput> input_;
   Throttle attack_throttle_{0.3f};
-  Throttle skill_select_throttle_{0.3f};
+  Throttle skill_select_throttle_{0.2f};
   Throttle function_key_throttle_{0.3f};
 
   int selected_skill_id_ = 0;
