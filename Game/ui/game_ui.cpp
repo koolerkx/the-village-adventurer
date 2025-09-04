@@ -6,6 +6,7 @@ import std;
 import graphic.utils.types;
 import graphic.utils.font;
 import game.ui.interpolation;
+import game.math;
 
 void GameUI::PlayEnterAreaMessage(std::wstring message) {
   area_message_ = message;
@@ -24,7 +25,7 @@ GameUI::GameUI(GameContext* ctx, SceneContext*, std::wstring texture_path) {
   fade_overlay_texture_id_ = ctx->render_resource_manager->texture_manager->Load(L"assets/block_white.png");
 }
 
-void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
+void GameUI::OnUpdate(GameContext* ctx, SceneContext*, float delta_time, Camera* camera) {
   hp_percentage_current_ = interpolation::UpdateSmoothValue(
     hp_percentage_current_,
     hp_percentage_target_,
@@ -60,6 +61,14 @@ void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
     if (area_message_opacity_current_ < 0.1) is_showing_area_message_ = false;
   }
 
+  experience_bar_percentage_current_ = interpolation::UpdateSmoothValue(
+    experience_bar_percentage_current_,
+    experience_bar_percentage_target_,
+    delta_time,
+    interpolation::SmoothType::EaseOut,
+    0.5f
+  );
+
   if (std::abs(fade_overlay_alpha_current_ - fade_overlay_alpha_target_) > 0.01f)
     fade_overlay_alpha_current_ = interpolation::UpdateSmoothValue(
       fade_overlay_alpha_current_,
@@ -86,6 +95,85 @@ void GameUI::OnUpdate(GameContext*, SceneContext*, float delta_time) {
       interpolation::SmoothType::EaseOut,
       1.0f
     );
+
+  std::erase_if(experience_stars_,
+                [target = EXP_COIN_TARGET_POS, &experience_stars_end = experience_stars_end_](
+                const ExperienceStar& exp_star) {
+                  if (math::GetDistance({exp_star.position.x, exp_star.position.y}, target) <= 2) {
+                    exp_star.callback(exp_star.value);
+                    experience_stars_end.emplace_back(StarTrajectoryEndEffect{
+                      .position = {target.x, target.y, 0}
+                    });
+
+                    return true;
+                  }
+                  return false;
+                });
+  for (auto& exp_star : experience_stars_) {
+    if (exp_star.floating_timeout > 0) {
+      exp_star.floating_timeout -= delta_time;
+      if (exp_star.floating_timeout <= 0) {
+        // on floating time over
+        Vector2 screen_pos = camera->TransformToScreenSpace({exp_star.position.x, exp_star.position.y},
+                                                            {
+                                                              static_cast<float>(ctx->window_width),
+                                                              static_cast<float>(ctx->window_height)
+                                                            });
+        exp_star.position = {screen_pos.x, screen_pos.y, 0};
+      }
+    }
+    else {
+      float new_y = interpolation::UpdateSmoothValue(
+        exp_star.position.y,
+        EXP_COIN_TARGET_POS.y,
+        delta_time,
+        interpolation::SmoothType::EaseInOut,
+        20.0f
+      );
+      float new_x = interpolation::UpdateSmoothValue(
+        exp_star.position.x,
+        EXP_COIN_TARGET_POS.x,
+        delta_time,
+        interpolation::SmoothType::EaseInOut,
+        20.0f
+      );
+
+      exp_star.position = {new_x, new_y, 0};
+    }
+  }
+
+  std::erase_if(experience_stars_trajectory_, [](const StarTrajectory& t) { return t.size <= 1; });
+
+  for (auto& t : experience_stars_trajectory_) {
+    t.size = interpolation::UpdateSmoothValue(
+      t.size,
+      0,
+      delta_time,
+      interpolation::SmoothType::EaseOut,
+      3.0f
+    );
+  }
+
+  std::erase_if(experience_stars_end_, [](const StarTrajectoryEndEffect& t) {
+    return t.target - t.size <= 1.0f;
+  });
+
+  for (auto& t : experience_stars_end_) {
+    t.size = interpolation::UpdateSmoothValue(
+      t.size,
+      t.target,
+      delta_time,
+      interpolation::SmoothType::EaseOut,
+      3.0f
+    );
+    t.opacity = interpolation::UpdateSmoothValue(
+      t.opacity,
+      0.0f,
+      delta_time,
+      interpolation::SmoothType::EaseOut,
+      1.0f
+    );
+  }
 }
 
 void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
@@ -127,6 +215,14 @@ void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
   event_texts.erase(std::remove_if(event_texts.begin(), event_texts.end(),
                                    [](EventTextProps text) { return text.opacity <= 0.05; }),
                     event_texts.end());
+
+  for (auto& exp_star : experience_stars_) {
+    if (exp_star.floating_timeout <= 0) {
+      experience_stars_trajectory_.emplace_back(StarTrajectory{
+        .position = exp_star.position,
+      });
+    }
+  }
 }
 
 void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera) {
@@ -493,6 +589,17 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     });
   }
 
+  // Session: Upper
+  // Experience Bar
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {0, 0, 0},
+      .size = {static_cast<float>(ctx->window_width) * experience_bar_percentage_current_, 8}
+    },
+    texture_map["Block"],
+    color::setOpacity(color::amberA700, ui_opacity_current_)
+  });
+
   rr->DrawSpritesInstanced(render_items, texture_id_, {}, true);
 
   // On Top of instanced Draw
@@ -658,6 +765,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   }
 
   RenderDamageText(ctx, scene_ctx, camera);
+  RenderExperienceCoin(ctx, scene_ctx, camera);
 
   // Draw Event texts
   for (auto event_text : event_texts) {
@@ -729,4 +837,68 @@ void GameUI::RenderDamageText(GameContext* ctx, SceneContext*, Camera* camera) {
       camera->GetCameraProps()
     );
   }
+}
+
+void GameUI::RenderExperienceCoin(GameContext* ctx, SceneContext* scene_ctx, Camera* camera) {
+  auto rr = ctx->render_resource_manager->renderer.get();
+
+  std::vector<RenderInstanceItem> render_items_on_map;
+  std::vector<RenderInstanceItem> render_items_on_screen;
+  std::vector<RenderInstanceItem> render_items_trajectory;
+
+  for (auto exp_coin : experience_stars_) {
+    if (exp_coin.floating_timeout > 0) {
+      render_items_on_map.emplace_back(RenderInstanceItem{
+        .transform = {
+          .position = exp_coin.position,
+          .size = {8, 8},
+          .position_anchor = {-4, -4, 0}
+        },
+        .uv = texture_map["Star"],
+        .color = color::white
+      });
+    }
+    else {
+      render_items_on_screen.emplace_back(RenderInstanceItem{
+        .transform = {
+          .position = exp_coin.position,
+          .size = {24, 24},
+          .position_anchor = {-12, -12, 0}
+        },
+        .uv = texture_map["Star"],
+        .color = color::white
+      });
+    }
+  }
+
+  for (auto s : experience_stars_trajectory_) {
+    render_items_trajectory.emplace_back(RenderInstanceItem{
+      .transform = {
+        .position = s.position,
+        .size = {s.size, s.size},
+        .position_anchor = {-s.size / 2, -s.size / 2, 0}
+      },
+      .uv = texture_map["StarAdditive"],
+      .color = color::setOpacity(color::yellowA200, 0.3f)
+    });
+  }
+
+  for (auto s : experience_stars_end_) {
+    render_items_trajectory.emplace_back(RenderInstanceItem{
+      .transform = {
+        .position = s.position,
+        .size = {s.size, s.size},
+        .position_anchor = {-s.size / 2, -s.size / 2, 0}
+      },
+      .uv = texture_map["StarAdditive"],
+      .color = color::setOpacity(color::yellowA200, s.opacity)
+    });
+  }
+
+  rr->SetAdditiveBlending();
+  rr->DrawSpritesInstanced(render_items_trajectory, texture_id_, {}, true);
+  rr->SetMultiplicativeBlending();
+
+  rr->DrawSpritesInstanced(render_items_on_map, texture_id_, camera->GetCameraProps(), true);
+  rr->DrawSpritesInstanced(render_items_on_screen, texture_id_, {}, true);
 }

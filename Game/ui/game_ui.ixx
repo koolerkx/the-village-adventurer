@@ -58,6 +58,10 @@ std::unordered_map<std::string, UV> texture_map = {
   // full screen overlay
   {"DamageOverlay", UV{{128, 323}, {320, 180}}},
   {"HealOverlay", UV{{128, 503}, {320, 180}}},
+
+  // Experience Coin
+  {"Star", UV{{452, 106}, {32, 32}}},
+  {"StarAdditive", UV{{452, 138}, {32, 32}}},
 };
 
 struct DamageTextProps {
@@ -77,6 +81,25 @@ struct EventTextProps {
 struct EventLogText {
   std::wstring text;
   COLOR color;
+};
+
+struct ExperienceStar {
+  POSITION position;
+  int value;
+  std::function<void(int)> callback;
+  float floating_timeout = 1.0f;
+};
+
+struct StarTrajectory {
+  POSITION position;
+  float size = 24.0f;
+};
+
+struct StarTrajectoryEndEffect {
+  POSITION position;
+  float size = 24.0f;
+  float target = 96.0f;
+  float opacity = 1.0f;
 };
 
 export class GameUI {
@@ -131,6 +154,15 @@ private:
 
   std::vector<PlayerBuff> player_buffs_ = {};
 
+  // experience
+  std::vector<ExperienceStar> experience_stars_ = {};
+  std::vector<StarTrajectory> experience_stars_trajectory_ = {};
+  std::vector<StarTrajectoryEndEffect> experience_stars_end_ = {};
+  const Vector2 EXP_COIN_TARGET_POS = {62, 54};
+
+  float experience_bar_percentage_target_ = 0.0f;
+  float experience_bar_percentage_current_ = 0.0f;
+  
 public:
   void SetHpPercentage(float percentage) {
     if (std::abs(hp_percentage_target_ - percentage) > 0.00001f) {
@@ -182,10 +214,11 @@ public:
 
   GameUI(GameContext* ctx, SceneContext* scene_ctx, std::wstring texture_path);
 
-  void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
+  void OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time, Camera* camera);
   void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time);
   void OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
   void RenderDamageText(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
+  void RenderExperienceCoin(GameContext* ctx, SceneContext* scene_ctx, Camera* camera);
 
   void SetFadeOverlayAlphaTarget(float alpha, COLOR color, std::function<void()> cb = {}) {
     fade_overlay_alpha_target_ = alpha;
@@ -226,5 +259,15 @@ public:
       .text = text,
       .color = color
     });
+  }
+  
+  void AddExperienceCoin(Vector2 position, int value, const std::function<void(int)>& callback) {
+    experience_stars_.emplace_back(ExperienceStar{
+      {position.x, position.y, 0}, value, callback
+    });
+  }
+
+  void SetExperienceBarPercentage(float percentage) {
+    experience_bar_percentage_target_ = percentage;
   }
 };

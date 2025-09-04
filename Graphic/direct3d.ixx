@@ -60,7 +60,6 @@ export class Dx11Wrapper {
   HRESULT InitializeDXGIDevice();
   HRESULT CreateFinalRenderTargets();
   HRESULT CreateDepthStencilView();
-  void CreateBlendState();
   void CreateDepthStencilState();
   void CreateViewport();
   void CreateRasterizerState();

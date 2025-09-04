@@ -27,6 +27,8 @@ Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
   shader_manager_ = shader_manager;
   texture_manager_ = texture_manager;
 
+  CreateBlendStates();
+  
   vertex_num_ = vertex_num;
 
   // 頂点バッファ生成
@@ -116,6 +118,30 @@ void Renderer::CreateInstanceBuffer(const size_t max_instance_num) {
   instDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
   instDesc.ByteWidth = static_cast<UINT>(max_instance_num * sizeof(InstanceData));
   device_->CreateBuffer(&instDesc, nullptr, instance_vertex_buffer_.GetAddressOf());
+}
+
+void Renderer::CreateBlendStates() {
+  D3D11_BLEND_DESC bd = {};
+  bd.AlphaToCoverageEnable = false;
+  bd.IndependentBlendEnable = false;
+  bd.RenderTarget[0].BlendEnable = true;
+
+  bd.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+  bd.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+  bd.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+
+  bd.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+  bd.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+  bd.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+
+  bd.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+  device_->CreateBlendState(&bd, &blend_state_multiply_);
+
+  bd.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+  device_->CreateBlendState(&bd, &blend_state_add_);
+
+  SetMultiplicativeBlending();
 }
 
 DirectX::XMMATRIX Renderer::MakeProjectMatrix(SIZE window_size, CameraProps camera_props,
@@ -685,4 +711,12 @@ void Renderer::ResetScissorRect() const {
     .bottom = window_size_.cy
   };
   device_context_->RSSetScissorRects(1, &scissor_rect);
+}
+
+void Renderer::SetAdditiveBlending() const {  
+  device_context_->OMSetBlendState(blend_state_add_.Get(), {}, 0xffffffff);
+}
+
+void Renderer::SetMultiplicativeBlending() const {
+  device_context_->OMSetBlendState(blend_state_multiply_.Get(), {}, 0xffffffff);
 }
