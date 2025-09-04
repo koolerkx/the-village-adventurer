@@ -89,7 +89,8 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   player_->OnUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnUpdate(ctx, delta_time);
   mob_manager_->OnUpdate(ctx, delta_time, {
-                           .player_position = player_->GetPositionVector()
+                           .player_position = player_->GetPositionVector(),
+                           .is_player_invincible = player_->GetIsInvincible()
                          });
 
   UpdateUI(ctx, delta_time);
@@ -127,7 +128,7 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
 
   ui_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnFixedUpdate(ctx, delta_time, player_->GetTransform());
-  mob_manager_->OnFixedUpdate(ctx, scene_context.get(), delta_time, player_->GetCollider());
+  mob_manager_->OnFixedUpdate(ctx, scene_context.get(), delta_time, player_->GetCollider(), player_->GetIsInvincible());
 
   SceneManager::GetInstance().GetAudioManager()->UpdateListenerPosition({
     player_->GetTransform().position.x, player_->GetTransform().position.y
@@ -188,11 +189,13 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
     switch (reward_type) {
     case chest::RewardType::HEAL:
       player_->Heal(helper::GetRandomNumberByOffset(10.0f, 5.0f));
+      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::buff1, {}, 0.5);
       break;
     case chest::RewardType::BUFF_ATTACK_POWER: {
       PlayerBuff pb;
       pb.type = BuffType::ATTACK_POWER;
       player_->AddBuff(pb);
+      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::buff2, {}, 0.5);
       break;
     }
     // case chest::RewardType::BUFF_ATTACK_SPEED: {
@@ -207,6 +210,7 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
       pb.duration = 5.0f;
       pb.multiplier = 1.25f;
       player_->AddBuff(pb);
+      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::buff2, {}, 0.5);
       break;
     }
     case chest::RewardType::INVINCIBLE: {
@@ -214,6 +218,7 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
       pb.type = BuffType::INVINCIBLE;
       pb.duration = 10.0f;
       player_->AddBuff(pb);
+      SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_action_1);
       break;
     }
     default:
