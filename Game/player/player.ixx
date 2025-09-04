@@ -202,6 +202,7 @@ public:
   void AddExperience(int value) {
     experience_ += value;
     total_experience_ += value;
+    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::metal_se);
     if (experience_ >= max_experience_) {
       level_++;
       experience_ -= max_experience_;
@@ -249,7 +250,6 @@ public:
   int GetExperience() const { return experience_; }
   int GetTotalExperience() const { return total_experience_; }
   int GetMaxExperience() const { return max_experience_; }
-
 
   std::vector<player_level::PlayerAbility> GetLevelUpAbilities() { return level_up_abilities_; }
 };

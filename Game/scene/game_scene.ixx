@@ -46,11 +46,11 @@ private:
   int monster_killed_ = 0;
   double timer_elapsed_ = 0; // in seconds
 
-  void HandlePlayerMovementAndCollisions(float delta_time);
+  void HandlePlayerMovementAndCollisions(GameContext* ctx, float delta_time);
   void HandlePlayerEnterMapCollision(float delta_time, SceneContext* scene_ctx);
-  void HandleSkillHitMobCollision(float delta_time);
-  void HandleMobHitPlayerCollision(float delta_time);
-  void HandleSkillHitWallCollision(float delta_time);
+  void HandleSkillHitMobCollision(GameContext* ctx, float delta_time);
+  void HandleMobHitPlayerCollision(GameContext* ctx, float delta_time);
+  void HandleSkillHitWallCollision(GameContext* ctx, float delta_time);
 
   void HandlePauseMenu(GameContext* ctx, float delta_time);
   void HandleLevelUpUI(GameContext* ctx, float delta_time);

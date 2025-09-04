@@ -80,6 +80,13 @@ void GameScene::OnEnter(GameContext* ctx) {
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
   UpdateInput(ctx->input_handler);
 
+  if (scene_context->vibration_timeout >= 0) {
+    scene_context->vibration_timeout -= delta_time;
+  }
+  else {
+    ctx->input_handler->StopXInputVibration();
+  }
+
   if (input.is_pause_menu_button && ui_throttle.CanCall() && is_allow_pause_) {
     input.is_pause_menu_button = false;
     pause_menu_ui_->Reset();
@@ -172,14 +179,14 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   }
 
   player_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
-  HandlePlayerMovementAndCollisions(delta_time);
+  HandlePlayerMovementAndCollisions(ctx, delta_time);
   camera_->UpdatePosition(player_->GetPositionVector(), delta_time);
 
   HandlePlayerEnterMapCollision(delta_time, scene_context.get());
 
-  HandleSkillHitMobCollision(delta_time);
-  HandleMobHitPlayerCollision(delta_time);
-  HandleSkillHitWallCollision(delta_time);
+  HandleSkillHitMobCollision(ctx, delta_time);
+  HandleMobHitPlayerCollision(ctx, delta_time);
+  HandleSkillHitWallCollision(ctx, delta_time);
 
   ui_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnFixedUpdate(ctx, delta_time, player_->GetTransform());
@@ -211,8 +218,8 @@ void GameScene::OnRender(GameContext* ctx) {
   }
 }
 
-void GameScene::OnExit(GameContext*) {
-  std::cout << "GameScene> OnExit" << std::endl;
+void GameScene::OnExit(GameContext* ctx) {
+  ctx->input_handler->StopXInputVibration();
 }
 
 namespace {
@@ -239,7 +246,7 @@ namespace {
   }
 }
 
-void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
+void GameScene::HandlePlayerMovementAndCollisions(GameContext* ctx, float delta_time) {
   const auto [x, y] = player_->GetVelocity();
   auto colliders = map_manager_->GetFiledObjectColliders();
 
@@ -295,10 +302,19 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
     });
   };
 
+  std::function<void(FieldObject&)> on_collide_wall = [&](FieldObject& fo) {
+    ctx->input_handler->SetXInputVibration(VIBRATION_LOWER_LOW, VIBRATION_LOW);
+    scene_context->vibration_timeout = 0.1f;
+  };
+
   MoveAndCollideAxis(*player_, delta_time, x, colliders, Axis::X,
-                     [on_chest_open](FieldObject* fo) { OnPlayerEnterFieldObject(fo, on_chest_open); });
+                     [on_collide_wall, on_chest_open](FieldObject* fo) {
+                       OnPlayerEnterFieldObject(fo, on_collide_wall, on_chest_open);
+                     });
   MoveAndCollideAxis(*player_, delta_time, y, colliders, Axis::Y,
-                     [on_chest_open](FieldObject* fo) { OnPlayerEnterFieldObject(fo, on_chest_open); });
+                     [on_collide_wall, on_chest_open](FieldObject* fo) {
+                       OnPlayerEnterFieldObject(fo, on_collide_wall, on_chest_open);
+                     });
 }
 
 void GameScene::HandlePlayerEnterMapCollision(float, SceneContext* scene_ctx) {
@@ -345,7 +361,7 @@ void GameScene::HandlePlayerEnterMapCollision(float, SceneContext* scene_ctx) {
     });
 }
 
-void GameScene::HandleSkillHitMobCollision(float) {
+void GameScene::HandleSkillHitMobCollision(GameContext* ctx, float) {
   auto mob_colliders = mob_manager_->GetColliders();
   auto skill_colliders = skill_manager_->GetColliders();
 
@@ -357,7 +373,7 @@ void GameScene::HandleSkillHitMobCollision(float) {
     + player_level::GetLevelAbilityValue(player_->GetLevelUpAbilities(), player_level::Ability::ATTACK);;
 
   auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_, &monster_killed =
-      monster_killed_, &skill_manager = skill_manager_, damage_multiplier]
+      monster_killed_, &skill_manager = skill_manager_, damage_multiplier, &ctx, &scene_ctx = scene_context]
   (MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult) -> void {
     if (!skill_hitbox->hit_mobs.contains(mob_state->id) && !mob::is_death_state(mob_state->state)) {
       float damage = skill_hitbox->data->damage * damage_multiplier;
@@ -385,7 +401,7 @@ void GameScene::HandleSkillHitMobCollision(float) {
         ui->AddLogText(wss.str(), color::cyanA400);
 
         if (skill_hitbox->data->is_destroy_by_mob) {
-          skill_manager->HandleDestroyCollision(skill_hitbox);
+          skill_manager->HandleDestroyCollision(skill_hitbox, ctx, scene_ctx->vibration_timeout);
         }
 
         // attack push back
@@ -414,13 +430,14 @@ void GameScene::HandleSkillHitMobCollision(float) {
   collision::HandleDetection(mob_colliders_span, skill_colliders_span, cb);
 }
 
-void GameScene::HandleMobHitPlayerCollision(float) {
+void GameScene::HandleMobHitPlayerCollision(GameContext* ctx, float) {
   Collider<Player> player_collider = player_->GetCollider();
   std::vector<Collider<MobHitBox>> mob_hitbox_collider = mob_manager_->GetHitBoxColliders();
   std::span mob_hitbox_collider_span{mob_hitbox_collider.data(), mob_hitbox_collider.size()};
 
   collision::HandleDetection(player_collider, mob_hitbox_collider_span,
-                             [&is_end = is_end_, &ui = ui_
+                             [&is_end = is_end_, &ui = ui_,
+                               &ctx, &scene_ctx = scene_context
                              ](Player* p, MobHitBox* m, collision::CollisionResult) -> void {
                                if (m->attack_delay >= 0) return;
                                if (m->hit_player) return;
@@ -441,6 +458,8 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                                float hp = p->Damage(m->damage);
                                SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(
                                  audio_clip::hit_2, p->GetPositionVector());
+                               scene_ctx->vibration_timeout = 0.1f;
+                               ctx->input_handler->SetXInputVibration(VIBRATION_HALF, VIBRATION_HALF);
 
                                if (hp <= 0) {
                                  is_end = true;
@@ -453,7 +472,7 @@ void GameScene::HandleMobHitPlayerCollision(float) {
     std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
     collision::HandleDetection(player_collider, mob_colliders_span,
                                [&mob_manager = mob_manager_, &ui = ui_, &monster_killed = monster_killed_, &player =
-                                 player_](
+                                 player_, &ctx, &scene_ctx = scene_context](
                                Player* p, MobState* mob_state, collision::CollisionResult) -> void {
                                  if (mob_state->hp <= 0) return;
                                  if (mob::is_death_state(mob_state->state)) return;
@@ -475,6 +494,8 @@ void GameScene::HandleMobHitPlayerCollision(float) {
 
                                    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(
                                      audio_clip::hit_1, p->GetPositionVector());
+                                   scene_ctx->vibration_timeout = 0.1f;
+                                   ctx->input_handler->SetXInputVibration(VIBRATION_HIGH, VIBRATION_HIGH);
                                  });
                                  monster_killed++;
 
@@ -487,7 +508,7 @@ void GameScene::HandleMobHitPlayerCollision(float) {
   }
 }
 
-void GameScene::HandleSkillHitWallCollision(float) {
+void GameScene::HandleSkillHitWallCollision(GameContext* ctx, float) {
   auto map_colliders = map_manager_->GetFiledObjectColliders();
 
   std::vector<Collider<SkillHitbox>> skill_colliders{};
@@ -500,9 +521,10 @@ void GameScene::HandleSkillHitWallCollision(float) {
   std::span<Collider<FieldObject>> map_colliders_span{map_colliders.data(), map_colliders.size()};
 
   collision::HandleDetection(skill_colliders_span, map_colliders_span,
-                             [&skill_manager = skill_manager_](SkillHitbox* skill, FieldObject*,
-                                                               collision::CollisionResult) -> void {
-                               skill_manager->HandleDestroyCollision(skill);
+                             [&skill_manager = skill_manager_, &ctx, &scene_ctx = scene_context](
+                             SkillHitbox* skill, FieldObject*,
+                             collision::CollisionResult) -> void {
+                               skill_manager->HandleDestroyCollision(skill, ctx, scene_ctx->vibration_timeout);
                              });
 }
 

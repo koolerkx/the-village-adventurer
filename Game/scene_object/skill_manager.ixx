@@ -140,7 +140,7 @@ public:
 
   void PlaySkill(SKILL_TYPE type, Vector2 position, float rotation = 0);
 
-  void HandleDestroyCollision(SkillHitbox* skill, std::optional<Vector2> next_position = std::nullopt);
+  void HandleDestroyCollision(SkillHitbox* skill, GameContext* ctx, float& vibration_timeout, std::optional<Vector2> next_position = std::nullopt);
 
   std::vector<Collider<SkillHitbox>> GetColliders();
 };
