@@ -191,6 +191,7 @@ public:
     if (experience_ >= max_experience_) {
       level_++;
       experience_ -= max_experience_;
+      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::level_up, {}, 1.0f);
     }
   }
 
