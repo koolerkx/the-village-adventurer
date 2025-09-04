@@ -25,6 +25,8 @@ struct StatusUIActiveProps {
   int level;
   std::vector<player_level::PlayerAbility> abilities;
   std::vector<PlayerBuff> buffs;
+  int monster_killed;
+  double timer_elapsed;
 };
 
 export class StatusUI {
@@ -66,6 +68,8 @@ private:
   std::function<void()> fade_end_cb_ = []() {};
 
   StatusUIActiveProps props_;
+  int timer_elapsed_minute_ = 0;
+  int timer_elapsed_seconds_ = 0;
 
 public:
   StatusUI(GameContext* ctx);
@@ -80,6 +84,11 @@ public:
   void Active(const StatusUIActiveProps& props, std::function<void()> cb = {}) {
     opacity_ = 0.0f;
     props_ = props;
+
+    int total_seconds = static_cast<int>(props.timer_elapsed);
+
+    timer_elapsed_minute_ = (total_seconds % 3600) / 60;
+    timer_elapsed_seconds_ = total_seconds % 60;
 
     for (auto& ab : props_.abilities) {
       if (ab.multiplier == 0.0f) ab.multiplier = 1.0f;

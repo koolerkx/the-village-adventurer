@@ -604,10 +604,10 @@ void GameScene::HandleLevelUpSelection(player_level::OptionType type) {
 void GameScene::HandleOnStatusOpen(GameContext* ctx, float delta_time) {
   is_show_status_ui_ = true;
   is_allow_pause_ = false;
-  
+
   SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::select_se_1);
   SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_pause_menu);
-  
+
   status_ui_->Active({
                        .hp = player_->GetHp(),
                        .max_hp = player_->GetMaxHp(),
@@ -620,6 +620,8 @@ void GameScene::HandleOnStatusOpen(GameContext* ctx, float delta_time) {
                        .level = player_->GetLevel(),
                        .abilities = player_->GetLevelUpAbilities(),
                        .buffs = player_->GetBuffs(),
+                       .monster_killed = monster_killed_,
+                       .timer_elapsed = timer_elapsed_
                      }, [&allow = is_allow_status_ui_control_]() {
                        allow = true;
                      });

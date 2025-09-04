@@ -45,7 +45,7 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
 
   constexpr float frame_width = 840;
   constexpr float frame_height = 480;
-  constexpr float frame_padding = 20;
+  constexpr float frame_padding = 10;
   constexpr float frame_content_width = frame_width - frame_padding * 2;
   constexpr float frame_content_height = frame_height - frame_padding * 2;
   const float frame_content_x = win_center_x - frame_content_width / 2;
@@ -85,11 +85,12 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
 
 #pragma region Status Bar
   // Status Bar Frame
-  constexpr float margin_top = 70;
+  constexpr float margin_top = 52;
+  constexpr float margin_left = 142;
   constexpr float status_bar_frame_width = 320;
   constexpr float status_bar_frame_height = 64;
 
-  const float status_bar_frame_center_x = win_center_x;
+  const float status_bar_frame_center_x = frame_content_x + margin_left + status_bar_frame_width / 2;
   const float status_bar_frame_center_y = frame_content_y + margin_top + status_bar_frame_height / 2;
 
   const float status_bar_frame_x = status_bar_frame_center_x - status_bar_frame_width / 2;
@@ -172,7 +173,7 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
 
 #pragma region Text
 #pragma region Title text
-  constexpr float TITLE_TEXT_MARGIN_TOP = 28;
+  constexpr float TITLE_TEXT_MARGIN_TOP = 10;
   const float title_text_center_x = win_center_x;
   const float title_text_center_y = frame_content_y + TITLE_TEXT_MARGIN_TOP;
 
@@ -226,13 +227,43 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
                }, level_value_props, {});
 #pragma endregion
 
+#pragma region Game State text
+  constexpr float game_state_text_margin_left = 16;
+
+  wss.str(L"");
+  wss << L"経過時間：";
+  wss << std::setw(2) << std::setfill(L'0') << timer_elapsed_minute_;
+  wss << ":";
+  wss << std::setw(2) << std::setfill(L'0') << timer_elapsed_seconds_;
+  wss << L"\n";
+  wss << L"撃退した魔物：";
+  wss << props_.monster_killed;
+
+  const StringSpriteProps game_state_text_props = {
+    .pixel_size = 20.0f,
+    .line_spacing = 10.0f,
+    .color = color::setOpacity(color::white, opacity_)
+  };
+  auto game_state_text_size = default_font_->GetStringSize(wss.str(), {}, game_state_text_props);
+
+  rr->DrawFont(wss.str(), font_key_, {
+                 .position = {
+                   status_bar_frame_x + status_bar_frame_width + game_state_text_margin_left,
+                   status_bar_frame_center_y - game_state_text_size.height / 2,
+                   0
+                 }
+               }, game_state_text_props, {});
+
+
+#pragma endregion
+
   const StringSpriteProps section_title_props = {
     .pixel_size = 24.0f,
     .color = color::setOpacity(color::white, opacity_)
   };
 
 #pragma region Ability Text
-  constexpr float ability_text_margin_top = 154;
+  constexpr float ability_text_margin_top = 132;
   constexpr float ability_text_margin_left = 38;
 
   const float ability_text_x = frame_content_x + ability_text_margin_left;
@@ -259,7 +290,7 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
   // HP
   wss << L"HP　：";
   wss << props_.hp;
-  wss << L" + ";
+  wss << L" / ";
   wss << props_.max_hp;
   wss << L"\n";
 
@@ -301,7 +332,7 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
 
 #pragma endregion
 #pragma region Level Up Ability Text
-  constexpr float level_up_ability_text_margin_top = 154;
+  constexpr float level_up_ability_text_margin_top = 132;
   constexpr float level_up_ability_text_margin_left = 280;
 
   const float level_up_ability_text_x = frame_content_x + level_up_ability_text_margin_left;
@@ -330,7 +361,7 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
   for (int i = 0; i < props_.abilities.size(); i++) {
     auto& a = props_.abilities[i];
     wss << player_level::GetAbilityDescription(a.type);
-    if (a.type > player_level::Ability::HP_UP) {
+    if (a.type == player_level::Ability::HP_UP) {
       wss << " ";
       wss << a.value;
       wss << " ";
@@ -367,7 +398,7 @@ void StatusUI::OnRender(GameContext* ctx, Camera* camera) {
                }, ability_item_text_props, {});
 #pragma endregion
 #pragma region Buff Text
-  constexpr float buff_text_margin_top = 154;
+  constexpr float buff_text_margin_top = 132;
   constexpr float buff_text_margin_left = 522;
 
   const float buff_text_x = frame_content_x + buff_text_margin_left;
