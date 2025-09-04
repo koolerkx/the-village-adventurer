@@ -97,7 +97,10 @@ void GameUI::OnUpdate(GameContext* ctx, SceneContext*, float delta_time, Camera*
       if (exp_star.floating_timeout <= 0) {
         // on floating time over
         Vector2 screen_pos = camera->TransformToScreenSpace({exp_star.position.x, exp_star.position.y},
-                                       {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height)});
+                                                            {
+                                                              static_cast<float>(ctx->window_width),
+                                                              static_cast<float>(ctx->window_height)
+                                                            });
         exp_star.position = {screen_pos.x, screen_pos.y, 0};
       }
     }
@@ -119,6 +122,20 @@ void GameUI::OnUpdate(GameContext* ctx, SceneContext*, float delta_time, Camera*
 
       exp_star.position = {new_x, new_y, 0};
     }
+  }
+
+  std::erase_if(experience_stars_trajectory_, [](const StarTrajectory& t) {
+    return t.size <= 1;
+  });
+
+  for (auto& t : experience_stars_trajectory_) {
+    t.size = interpolation::UpdateSmoothValue(
+      t.size,
+      0,
+      delta_time,
+      interpolation::SmoothType::EaseOut,
+      3.0f
+    );
   }
 }
 
@@ -161,6 +178,14 @@ void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
   event_texts.erase(std::remove_if(event_texts.begin(), event_texts.end(),
                                    [](EventTextProps text) { return text.opacity <= 0.05; }),
                     event_texts.end());
+
+  for (auto& exp_star : experience_stars_) {
+    if (exp_star.floating_timeout <= 0) {
+      experience_stars_trajectory_.emplace_back(StarTrajectory{
+        .position = exp_star.position,
+      });
+    }
+  }
 }
 
 void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera) {
@@ -771,6 +796,7 @@ void GameUI::RenderExperienceCoin(GameContext* ctx, SceneContext* scene_ctx, Cam
 
   std::vector<RenderInstanceItem> render_items_on_map;
   std::vector<RenderInstanceItem> render_items_on_screen;
+  std::vector<RenderInstanceItem> render_items_trajectory;
 
   for (auto exp_coin : experience_stars_) {
     if (exp_coin.floating_timeout > 0) {
@@ -783,7 +809,8 @@ void GameUI::RenderExperienceCoin(GameContext* ctx, SceneContext* scene_ctx, Cam
         .uv = texture_map["Star"],
         .color = color::white
       });
-    } else {
+    }
+    else {
       render_items_on_screen.emplace_back(RenderInstanceItem{
         .transform = {
           .position = exp_coin.position,
@@ -795,6 +822,22 @@ void GameUI::RenderExperienceCoin(GameContext* ctx, SceneContext* scene_ctx, Cam
       });
     }
   }
+
+  for (auto s : experience_stars_trajectory_) {
+    render_items_trajectory.emplace_back(RenderInstanceItem{
+      .transform = {
+        .position = s.position,
+        .size = {s.size, s.size},
+        .position_anchor = {-4, -4, 0}
+      },
+      .uv = texture_map["StarAdditive"],
+      .color = color::setOpacity(color::yellowA200, 0.3f)
+    });
+  }
+
+  rr->SetAdditiveBlending();
+  rr->DrawSpritesInstanced(render_items_trajectory, texture_id_, {}, true);
+  rr->SetMultiplicativeBlending();
 
   rr->DrawSpritesInstanced(render_items_on_map, texture_id_, camera->GetCameraProps(), true);
   rr->DrawSpritesInstanced(render_items_on_screen, texture_id_, {}, true);

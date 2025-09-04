@@ -61,6 +61,7 @@ std::unordered_map<std::string, UV> texture_map = {
 
   // Experience Coin
   {"Star", UV{{452, 106}, {32, 32}}},
+  {"StarAdditive", UV{{452, 138}, {32, 32}}},
 };
 
 struct DamageTextProps {
@@ -86,6 +87,11 @@ struct ExperienceStar {
   POSITION position;
   int value;
   float floating_timeout = 1.0f;
+};
+
+struct StarTrajectory {
+  POSITION position;
+  float size = 24.0f;
 };
 
 export class GameUI {
@@ -141,6 +147,7 @@ private:
   std::vector<PlayerBuff> player_buffs_ = {};
 
   std::vector<ExperienceStar> experience_stars_ = {};
+  std::vector<StarTrajectory> experience_stars_trajectory_ = {};
   const Vector2 EXP_COIN_TARGET_POS = {64, 56};
 
 public:
