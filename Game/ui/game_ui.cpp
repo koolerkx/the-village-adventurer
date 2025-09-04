@@ -61,6 +61,14 @@ void GameUI::OnUpdate(GameContext* ctx, SceneContext*, float delta_time, Camera*
     if (area_message_opacity_current_ < 0.1) is_showing_area_message_ = false;
   }
 
+  experience_bar_percentage_current_ = interpolation::UpdateSmoothValue(
+    experience_bar_percentage_current_,
+    experience_bar_percentage_target_,
+    delta_time,
+    interpolation::SmoothType::EaseOut,
+    0.5f
+  );
+
   if (std::abs(fade_overlay_alpha_current_ - fade_overlay_alpha_target_) > 0.01f)
     fade_overlay_alpha_current_ = interpolation::UpdateSmoothValue(
       fade_overlay_alpha_current_,
@@ -89,7 +97,7 @@ void GameUI::OnUpdate(GameContext* ctx, SceneContext*, float delta_time, Camera*
     );
 
   std::erase_if(experience_stars_, [target = EXP_COIN_TARGET_POS](const ExperienceStar& exp_star) {
-    if (math::GetDistance({exp_star.position.x, exp_star.position.y}, target) <= 2 ) {
+    if (math::GetDistance({exp_star.position.x, exp_star.position.y}, target) <= 2) {
       exp_star.callback(exp_star.value);
       return true;
     }
@@ -555,6 +563,17 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       color::setOpacity(color::white, ui_opacity_current_)
     });
   }
+
+  // Session: Upper
+  // Experience Bar
+  render_items.emplace_back(RenderInstanceItem{
+    Transform{
+      .position = {0, 0, 0},
+      .size = {static_cast<float>(ctx->window_width) * experience_bar_percentage_current_, 8}
+    },
+    texture_map["Block"],
+    color::setOpacity(color::amberA700, ui_opacity_current_)
+  });
 
   rr->DrawSpritesInstanced(render_items, texture_id_, {}, true);
 

@@ -477,4 +477,5 @@ void GameScene::UpdateUI(GameContext* ctx, float delta_time) {
   ui_->UpdatePlayerBuffs(player_->GetBuffs());
 
   ui_->OnUpdate(ctx, scene_context.get(), delta_time, camera_.get());
+  ui_->SetExperienceBarPercentage(player_->GetExperiencePercentage());
 }

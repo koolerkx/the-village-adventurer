@@ -147,10 +147,14 @@ private:
 
   std::vector<PlayerBuff> player_buffs_ = {};
 
+  // experience
   std::vector<ExperienceStar> experience_stars_ = {};
   std::vector<StarTrajectory> experience_stars_trajectory_ = {};
   const Vector2 EXP_COIN_TARGET_POS = {64, 56};
 
+  float experience_bar_percentage_target_ = 0.0f;
+  float experience_bar_percentage_current_ = 0.0f;
+  
 public:
   void SetHpPercentage(float percentage) {
     if (std::abs(hp_percentage_target_ - percentage) > 0.00001f) {
@@ -253,5 +257,9 @@ public:
     experience_stars_.emplace_back(ExperienceStar{
       {position.x, position.y, 0}, value, callback
     });
+  }
+
+  void SetExperienceBarPercentage(float percentage) {
+    experience_bar_percentage_target_ = percentage;
   }
 };
