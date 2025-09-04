@@ -109,6 +109,7 @@ private:
 
   // experience
   int experience_ = 0;
+  int total_experience_ = 0;
   int level_ = 1;
   int max_experience_ = 100;
 
@@ -186,9 +187,11 @@ public:
 
   void AddExperience(int value) {
     experience_ += value;
+    total_experience_ += value;
     if (experience_ >= max_experience_) {
       level_++;
       experience_ -= max_experience_;
+      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::level_up, {}, 1.0f);
     }
   }
 

@@ -227,7 +227,7 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
     Vector2 star_pos = {
       fo.position.x + 8, fo.position.y + 8
     };
-    
+
     ui_->AddExperienceCoin(star_pos, BASE_CHEST_OPEN_EXP, [&](int value) {
       player_->AddExperience(value);
     });
@@ -494,4 +494,5 @@ void GameScene::UpdateUI(GameContext* ctx, float delta_time) {
 
   ui_->OnUpdate(ctx, scene_context.get(), delta_time, camera_.get());
   ui_->SetExperienceBarPercentage(player_->GetExperiencePercentage());
+  ui_->SetPlayerLevel(player_->GetLevel());
 }

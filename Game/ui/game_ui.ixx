@@ -162,7 +162,9 @@ private:
 
   float experience_bar_percentage_target_ = 0.0f;
   float experience_bar_percentage_current_ = 0.0f;
-  
+
+  int player_level_ = 1;
+
 public:
   void SetHpPercentage(float percentage) {
     if (std::abs(hp_percentage_target_ - percentage) > 0.00001f) {
@@ -260,7 +262,7 @@ public:
       .color = color
     });
   }
-  
+
   void AddExperienceCoin(Vector2 position, int value, const std::function<void(int)>& callback) {
     experience_stars_.emplace_back(ExperienceStar{
       {position.x, position.y, 0}, value, callback
@@ -269,5 +271,15 @@ public:
 
   void SetExperienceBarPercentage(float percentage) {
     experience_bar_percentage_target_ = percentage;
+  }
+
+  void SetPlayerLevel(int level) {
+    if (player_level_ != level) {
+      AddEventText(L"レベルアップ", color::yellowA400);
+      std::wstringstream wss;
+      wss << L"レベルアップ！" << level << L" になった！";
+      AddLogText(wss.str(), color::yellowA400);
+    }
+    player_level_ = level;
   }
 };
