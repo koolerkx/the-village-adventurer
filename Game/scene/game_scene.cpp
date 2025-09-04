@@ -332,7 +332,9 @@ void GameScene::HandleSkillHitMobCollision(float) {
       if (remain_hp <= 0) {
         monster_killed++;
 
-        ui->AddExperienceCoin(mob_center, 10);
+        ui->AddExperienceCoin(mob_center, 10, [&](int value) {
+          player->AddExperience(value);
+        });
       }
     }
   };

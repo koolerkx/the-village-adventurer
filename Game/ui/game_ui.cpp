@@ -89,7 +89,11 @@ void GameUI::OnUpdate(GameContext* ctx, SceneContext*, float delta_time, Camera*
     );
 
   std::erase_if(experience_stars_, [target = EXP_COIN_TARGET_POS](const ExperienceStar& exp_star) {
-    return math::GetDistance({exp_star.position.x, exp_star.position.y}, target) <= 2;
+    if (math::GetDistance({exp_star.position.x, exp_star.position.y}, target) <= 2 ) {
+      exp_star.callback(exp_star.value);
+      return true;
+    }
+    return false;
   });
   for (auto& exp_star : experience_stars_) {
     if (exp_star.floating_timeout > 0) {

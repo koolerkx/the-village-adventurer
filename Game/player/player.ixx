@@ -107,6 +107,11 @@ private:
   // buffs
   std::vector<PlayerBuff> buffs_;
 
+  // experience
+  int experience_ = 0;
+  int level_ = 1;
+  int max_experience_ = 100;
+
 public:
   void SetState(PlayerState state);
 
@@ -178,4 +183,18 @@ public:
     }
     return false;
   }
+
+  void AddExperience(int value) {
+    experience_ += value;
+    if (experience_ >= max_experience_) {
+      level_++;
+      experience_ -= max_experience_;
+    }
+  }
+
+  float GetExperiencePercentage() const {
+    return static_cast<float>(experience_) / static_cast<float>(max_experience_);
+  }
+
+  int GetLevel() const { return level_; }
 };

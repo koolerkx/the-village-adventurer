@@ -86,6 +86,7 @@ struct EventLogText {
 struct ExperienceStar {
   POSITION position;
   int value;
+  std::function<void(int)> callback;
   float floating_timeout = 1.0f;
 };
 
@@ -247,10 +248,10 @@ public:
       .color = color
     });
   }
-
-  void AddExperienceCoin(Vector2 position, int value) {
+  
+  void AddExperienceCoin(Vector2 position, int value, const std::function<void(int)>& callback) {
     experience_stars_.emplace_back(ExperienceStar{
-      {position.x, position.y, 0}, value
+      {position.x, position.y, 0}, value, callback
     });
   }
 };
