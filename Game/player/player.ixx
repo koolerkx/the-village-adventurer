@@ -97,7 +97,7 @@ private:
 
   std::unique_ptr<IPlayerInput> input_;
   Throttle attack_throttle_{0.3f};
-  Throttle skill_select_throttle_{0.3f};
+  Throttle skill_select_throttle_{0.2f};
   Throttle function_key_throttle_{0.3f};
 
   int selected_skill_id_ = 0;
@@ -202,6 +202,7 @@ public:
   void AddExperience(int value) {
     experience_ += value;
     total_experience_ += value;
+    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::metal_se);
     if (experience_ >= max_experience_) {
       level_++;
       experience_ -= max_experience_;
@@ -249,7 +250,6 @@ public:
   int GetExperience() const { return experience_; }
   int GetTotalExperience() const { return total_experience_; }
   int GetMaxExperience() const { return max_experience_; }
-
 
   std::vector<player_level::PlayerAbility> GetLevelUpAbilities() { return level_up_abilities_; }
 };

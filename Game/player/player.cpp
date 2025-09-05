@@ -79,6 +79,9 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
         {transform_.position.x, transform_.position.y},
         scene_object::GetPlayerRotationByDirection(direction_facing_) // Right = 0
       );
+
+      ctx->input_handler->SetXInputVibration(VIBRATION_LOW, VIBRATION_HIGH);
+      scene_ctx->vibration_timeout = 0.075f;
     }
 
 #if defined(DEBUG) || defined(_DEBUG)

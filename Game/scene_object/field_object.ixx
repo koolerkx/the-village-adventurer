@@ -25,9 +25,13 @@ export struct FieldObject {
 };
 
 export void OnPlayerEnterFieldObject(FieldObject* field_object,
+                                     const std::function<void(FieldObject&)>& on_collide_wall = [](FieldObject&) {},
                                      const std::function<void(FieldObject&)>& on_chest_open = [](FieldObject&) {}
 ) {
-  if (field_object->type == FieldObjectType::WALL) return;
+  if (field_object->type == FieldObjectType::WALL) {
+    on_collide_wall(*field_object);
+    return;
+  };
 
   // FieldObjectType::CHEST
   if (!field_object->animation_state.is_playing && field_object->animation_state.current_frame == 0) {

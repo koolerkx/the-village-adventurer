@@ -8,6 +8,8 @@ import game.scene_object;
 import game.types;
 import graphic.utils.types;
 import game.collision.collider;
+import game.player.input.xinput;
+import game.player.input.composite;
 
 std::unordered_map<PlayerState, scene_object::AnimationFrameData> animation_data{
   {
@@ -63,13 +65,16 @@ std::unordered_map<PlayerState, scene_object::AnimationFrameData> animation_data
 export class PlayerFactory {
 public:
   std::unique_ptr<Player> Create(GameContext* ctx) {
-    std::unique_ptr<KeyboardPlayerInput> player_keyboard_input_ = std::make_unique<KeyboardPlayerInput>(ctx);
+    std::unique_ptr<XInputPlayerInput> player_xinput_input = std::make_unique<XInputPlayerInput>(ctx);
+    std::unique_ptr<KeyboardPlayerInput> player_keyboard_input = std::make_unique<KeyboardPlayerInput>(ctx);
+    std::unique_ptr<CompositePlayerInput> composite_player_input = std::make_unique<CompositePlayerInput>(
+      std::move(player_xinput_input), std::move(player_keyboard_input));
+
     const auto tm = ctx->render_resource_manager->texture_manager.get();
-    
     static const std::wstring texture_path = L"assets/character_01.png";
     FixedPoolIndexType texture_id_ = tm->Load(texture_path);
 
-    auto player = std::make_unique<Player>(texture_id_, std::move(player_keyboard_input_), animation_data);
+    auto player = std::make_unique<Player>(texture_id_, std::move(composite_player_input), animation_data);
 
     return std::move(player);
   }

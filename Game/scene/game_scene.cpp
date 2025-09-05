@@ -78,7 +78,17 @@ void GameScene::OnEnter(GameContext* ctx) {
 }
 
 void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
-  if (ctx->input_handler->IsKeyDown(KeyCode::KK_F3) && is_allow_pause_) {
+  UpdateInput(ctx->input_handler);
+
+  if (scene_context->vibration_timeout >= 0) {
+    scene_context->vibration_timeout -= delta_time;
+  }
+  else {
+    ctx->input_handler->StopXInputVibration();
+  }
+
+  if (input.is_pause_menu_button && ui_throttle.CanCall() && is_allow_pause_) {
+    input.is_pause_menu_button = false;
     pause_menu_ui_->Reset();
     is_pause_ = true;
     is_allow_pause_ = false;
@@ -92,7 +102,8 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
     return;
   }
 
-  if (ctx->input_handler->IsKeyDown(KeyCode::KK_F4) && is_allow_pause_ && !is_show_status_ui_) {
+  if (input.is_status_menu_button && ui_throttle.CanCall() && is_allow_pause_ && !is_show_status_ui_) {
+    input.is_status_menu_button = false;
     HandleOnStatusOpen(ctx, delta_time);
   }
 
@@ -168,14 +179,14 @@ void GameScene::OnFixedUpdate(GameContext* ctx, float delta_time) {
   }
 
   player_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
-  HandlePlayerMovementAndCollisions(delta_time);
+  HandlePlayerMovementAndCollisions(ctx, delta_time);
   camera_->UpdatePosition(player_->GetPositionVector(), delta_time);
 
   HandlePlayerEnterMapCollision(delta_time, scene_context.get());
 
-  HandleSkillHitMobCollision(delta_time);
-  HandleMobHitPlayerCollision(delta_time);
-  HandleSkillHitWallCollision(delta_time);
+  HandleSkillHitMobCollision(ctx, delta_time);
+  HandleMobHitPlayerCollision(ctx, delta_time);
+  HandleSkillHitWallCollision(ctx, delta_time);
 
   ui_->OnFixedUpdate(ctx, scene_context.get(), delta_time);
   skill_manager_->OnFixedUpdate(ctx, delta_time, player_->GetTransform());
@@ -207,8 +218,8 @@ void GameScene::OnRender(GameContext* ctx) {
   }
 }
 
-void GameScene::OnExit(GameContext*) {
-  std::cout << "GameScene> OnExit" << std::endl;
+void GameScene::OnExit(GameContext* ctx) {
+  ctx->input_handler->StopXInputVibration();
 }
 
 namespace {
@@ -235,7 +246,7 @@ namespace {
   }
 }
 
-void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
+void GameScene::HandlePlayerMovementAndCollisions(GameContext* ctx, float delta_time) {
   const auto [x, y] = player_->GetVelocity();
   auto colliders = map_manager_->GetFiledObjectColliders();
 
@@ -291,10 +302,19 @@ void GameScene::HandlePlayerMovementAndCollisions(float delta_time) {
     });
   };
 
+  std::function<void(FieldObject&)> on_collide_wall = [&](FieldObject& fo) {
+    ctx->input_handler->SetXInputVibration(VIBRATION_LOWER_LOW, VIBRATION_LOW);
+    scene_context->vibration_timeout = 0.1f;
+  };
+
   MoveAndCollideAxis(*player_, delta_time, x, colliders, Axis::X,
-                     [on_chest_open](FieldObject* fo) { OnPlayerEnterFieldObject(fo, on_chest_open); });
+                     [on_collide_wall, on_chest_open](FieldObject* fo) {
+                       OnPlayerEnterFieldObject(fo, on_collide_wall, on_chest_open);
+                     });
   MoveAndCollideAxis(*player_, delta_time, y, colliders, Axis::Y,
-                     [on_chest_open](FieldObject* fo) { OnPlayerEnterFieldObject(fo, on_chest_open); });
+                     [on_collide_wall, on_chest_open](FieldObject* fo) {
+                       OnPlayerEnterFieldObject(fo, on_collide_wall, on_chest_open);
+                     });
 }
 
 void GameScene::HandlePlayerEnterMapCollision(float, SceneContext* scene_ctx) {
@@ -341,7 +361,7 @@ void GameScene::HandlePlayerEnterMapCollision(float, SceneContext* scene_ctx) {
     });
 }
 
-void GameScene::HandleSkillHitMobCollision(float) {
+void GameScene::HandleSkillHitMobCollision(GameContext* ctx, float) {
   auto mob_colliders = mob_manager_->GetColliders();
   auto skill_colliders = skill_manager_->GetColliders();
 
@@ -353,7 +373,7 @@ void GameScene::HandleSkillHitMobCollision(float) {
     + player_level::GetLevelAbilityValue(player_->GetLevelUpAbilities(), player_level::Ability::ATTACK);;
 
   auto cb = [&mob_manager = this->mob_manager_, &ui = this->ui_, &player = this->player_, &monster_killed =
-      monster_killed_, &skill_manager = skill_manager_, damage_multiplier]
+      monster_killed_, &skill_manager = skill_manager_, damage_multiplier, &ctx, &scene_ctx = scene_context]
   (MobState* mob_state, SkillHitbox* skill_hitbox, collision::CollisionResult) -> void {
     if (!skill_hitbox->hit_mobs.contains(mob_state->id) && !mob::is_death_state(mob_state->state)) {
       float damage = skill_hitbox->data->damage * damage_multiplier;
@@ -381,7 +401,7 @@ void GameScene::HandleSkillHitMobCollision(float) {
         ui->AddLogText(wss.str(), color::cyanA400);
 
         if (skill_hitbox->data->is_destroy_by_mob) {
-          skill_manager->HandleDestroyCollision(skill_hitbox);
+          skill_manager->HandleDestroyCollision(skill_hitbox, ctx, scene_ctx->vibration_timeout);
         }
 
         // attack push back
@@ -410,13 +430,14 @@ void GameScene::HandleSkillHitMobCollision(float) {
   collision::HandleDetection(mob_colliders_span, skill_colliders_span, cb);
 }
 
-void GameScene::HandleMobHitPlayerCollision(float) {
+void GameScene::HandleMobHitPlayerCollision(GameContext* ctx, float) {
   Collider<Player> player_collider = player_->GetCollider();
   std::vector<Collider<MobHitBox>> mob_hitbox_collider = mob_manager_->GetHitBoxColliders();
   std::span mob_hitbox_collider_span{mob_hitbox_collider.data(), mob_hitbox_collider.size()};
 
   collision::HandleDetection(player_collider, mob_hitbox_collider_span,
-                             [&is_end = is_end_, &ui = ui_
+                             [&is_end = is_end_, &ui = ui_,
+                               &ctx, &scene_ctx = scene_context
                              ](Player* p, MobHitBox* m, collision::CollisionResult) -> void {
                                if (m->attack_delay >= 0) return;
                                if (m->hit_player) return;
@@ -437,6 +458,8 @@ void GameScene::HandleMobHitPlayerCollision(float) {
                                float hp = p->Damage(m->damage);
                                SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(
                                  audio_clip::hit_2, p->GetPositionVector());
+                               scene_ctx->vibration_timeout = 0.1f;
+                               ctx->input_handler->SetXInputVibration(VIBRATION_HALF, VIBRATION_HALF);
 
                                if (hp <= 0) {
                                  is_end = true;
@@ -449,7 +472,7 @@ void GameScene::HandleMobHitPlayerCollision(float) {
     std::span mob_colliders_span{mob_colliders.data(), mob_colliders.size()};
     collision::HandleDetection(player_collider, mob_colliders_span,
                                [&mob_manager = mob_manager_, &ui = ui_, &monster_killed = monster_killed_, &player =
-                                 player_](
+                                 player_, &ctx, &scene_ctx = scene_context](
                                Player* p, MobState* mob_state, collision::CollisionResult) -> void {
                                  if (mob_state->hp <= 0) return;
                                  if (mob::is_death_state(mob_state->state)) return;
@@ -471,6 +494,8 @@ void GameScene::HandleMobHitPlayerCollision(float) {
 
                                    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(
                                      audio_clip::hit_1, p->GetPositionVector());
+                                   scene_ctx->vibration_timeout = 0.1f;
+                                   ctx->input_handler->SetXInputVibration(VIBRATION_HIGH, VIBRATION_HIGH);
                                  });
                                  monster_killed++;
 
@@ -483,7 +508,7 @@ void GameScene::HandleMobHitPlayerCollision(float) {
   }
 }
 
-void GameScene::HandleSkillHitWallCollision(float) {
+void GameScene::HandleSkillHitWallCollision(GameContext* ctx, float) {
   auto map_colliders = map_manager_->GetFiledObjectColliders();
 
   std::vector<Collider<SkillHitbox>> skill_colliders{};
@@ -496,9 +521,10 @@ void GameScene::HandleSkillHitWallCollision(float) {
   std::span<Collider<FieldObject>> map_colliders_span{map_colliders.data(), map_colliders.size()};
 
   collision::HandleDetection(skill_colliders_span, map_colliders_span,
-                             [&skill_manager = skill_manager_](SkillHitbox* skill, FieldObject*,
-                                                               collision::CollisionResult) -> void {
-                               skill_manager->HandleDestroyCollision(skill);
+                             [&skill_manager = skill_manager_, &ctx, &scene_ctx = scene_context](
+                             SkillHitbox* skill, FieldObject*,
+                             collision::CollisionResult) -> void {
+                               skill_manager->HandleDestroyCollision(skill, ctx, scene_ctx->vibration_timeout);
                              });
 }
 
@@ -506,17 +532,26 @@ void GameScene::HandlePauseMenu(GameContext* ctx, float delta_time) {
   auto am = SceneManager::GetInstance().GetAudioManager();
 
   constexpr int options_count = 2;
-  if (ctx->input_handler->IsKeyDown(KeyCode::KK_W) || ctx->input_handler->IsKeyDown(KeyCode::KK_UP)) {
+  if (input.is_button_up && ui_throttle.CanCall()) {
     pause_menu_selected_option_ = (pause_menu_selected_option_ + 1) % options_count;
     am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
   }
-  if (ctx->input_handler->IsKeyDown(KeyCode::KK_S) || ctx->input_handler->IsKeyDown(KeyCode::KK_DOWN)) {
+  if (input.is_button_down && ui_throttle.CanCall()) {
     pause_menu_selected_option_ = (pause_menu_selected_option_ - 1 + options_count) % options_count;
     am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
   }
   pause_menu_ui_->SetSelectedOption(pause_menu_selected_option_);
 
-  if (ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE)) {
+  if (input.is_pause_menu_button && ui_throttle.CanCall()) {
+    am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
+    is_pause_ = false;
+    is_allow_pause_ = true;
+    is_allow_status_ui_control_ = true;
+    SceneManager::GetInstance().GetAudioManager()->PlayPreviousBGM();
+    return;
+  }
+
+  if (input.is_button_yes && ui_throttle.CanCall()) {
     am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
 
     if (pause_menu_selected_option_ == 0) {
@@ -547,19 +582,17 @@ void GameScene::HandleLevelUpUI(GameContext* ctx, float delta_time) {
 
   if (is_allow_level_up_ui_control_) {
     constexpr int options_count = 3;
-    if (ctx->input_handler->IsKeyDown(KeyCode::KK_D) || ctx->input_handler->IsKeyDown(KeyCode::KK_RIGHT) || ctx->
-      input_handler->IsKeyDown(KeyCode::KK_E)) {
+    if (input.is_button_right && ui_throttle.CanCall()) {
       level_up_selected_option_ = (level_up_selected_option_ + 1) % options_count;
       am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
     }
-    if (ctx->input_handler->IsKeyDown(KeyCode::KK_A) || ctx->input_handler->IsKeyDown(KeyCode::KK_LEFT) || ctx->
-      input_handler->IsKeyDown(KeyCode::KK_Q)) {
+    if (input.is_button_left && ui_throttle.CanCall()) {
       level_up_selected_option_ = (level_up_selected_option_ - 1 + options_count) % options_count;
       am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
     }
     level_up_ui_->SetSelectedOption(level_up_selected_option_);
 
-    if (ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE)) {
+    if (input.is_button_yes && ui_throttle.CanCall()) {
       am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
       HandleLevelUpSelection(level_up_options_[level_up_selected_option_]);
       is_show_level_up_ui = false;
@@ -634,8 +667,7 @@ void GameScene::HandleStatusUpdate(GameContext* ctx, float delta_time) {
   auto am = SceneManager::GetInstance().GetAudioManager();
   status_ui_->OnUpdate(ctx, delta_time);
 
-  if (is_allow_status_ui_control_ && (ctx->input_handler->IsKeyDown(KeyCode::KK_F4) || ctx->input_handler->
-    IsKeyDown(KeyCode::KK_SPACE))) {
+  if (is_allow_status_ui_control_ && (input.is_button_yes || input.is_status_menu_button) && ui_throttle.CanCall()) {
     am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
     am->PlayPreviousBGM();
     is_show_status_ui_ = false;
@@ -660,4 +692,30 @@ void GameScene::UpdateUI(GameContext* ctx, float delta_time) {
   ui_->OnUpdate(ctx, scene_context.get(), delta_time, camera_.get());
   ui_->SetExperienceBarPercentage(player_->GetExperiencePercentage());
   ui_->SetPlayerLevel(player_->GetLevel());
+}
+
+void GameScene::UpdateInput(InputHandler* ih) {
+  auto x_input_analog = ih->GetXInputAnalog();
+
+  input.is_button_yes = ih->IsXInputButtonDown(XButtonCode::A)
+    || ih->IsKeyDown(KeyCode::KK_SPACE) || ih->IsKeyDown(KeyCode::KK_ENTER);
+  input.is_button_no = ih->IsXInputButtonDown(XButtonCode::B) || ih->IsKeyDown(KeyCode::KK_ESCAPE);
+
+  input.is_button_up = ih->GetXInputButton(XButtonCode::DPadUp) || x_input_analog.first.second > 0
+    || ih->GetKey(KeyCode::KK_W) || ih->GetKey(KeyCode::KK_UP);
+  input.is_button_down = ih->GetXInputButton(XButtonCode::DPadDown) || x_input_analog.first.second < 0
+    || ih->GetKey(KeyCode::KK_S) || ih->GetKey(KeyCode::KK_DOWN);
+
+  input.is_button_left = ih->GetXInputButton(XButtonCode::DPadLeft) || x_input_analog.first.first < 0
+    || ih->GetKey(KeyCode::KK_A) || ih->GetKey(KeyCode::KK_LEFT);
+  input.is_button_right = ih->GetXInputButton(XButtonCode::DPadRight) || x_input_analog.first.first > 0
+    || ih->GetKey(KeyCode::KK_D) || ih->GetKey(KeyCode::KK_RIGHT);
+
+  input.is_button_left_2 = ih->IsKeyDown(KeyCode::KK_Q)
+    || ih->IsXInputButtonDown(XButtonCode::LB) || ih->IsXInputButtonDown(XButtonCode::Y);
+  input.is_button_right_2 = ih->IsKeyDown(KeyCode::KK_E)
+    || ih->IsXInputButtonDown(XButtonCode::RB) || ih->IsXInputButtonDown(XButtonCode::B);
+
+  input.is_pause_menu_button = ih->IsKeyDown(KeyCode::KK_F3) || ih->IsXInputButtonDown(XButtonCode::Start);
+  input.is_status_menu_button = ih->IsKeyDown(KeyCode::KK_F4) || ih->IsXInputButtonDown(XButtonCode::X);
 }

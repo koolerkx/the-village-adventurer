@@ -177,7 +177,7 @@ void SkillManager::PlaySkill(SKILL_TYPE type, Vector2 position, float rotation) 
   inserted->collider.owner = inserted; // HACK: workaround handle the object lifecycle
 }
 
-void SkillManager::HandleDestroyCollision(SkillHitbox* skill, std::optional<Vector2> next_position) {
+void SkillManager::HandleDestroyCollision(SkillHitbox* skill, GameContext* ctx, float& vibration_timeout, std::optional<Vector2> next_position) {
   skill->is_destroy_on_next = true;
 
   Vector2 next_pos;
@@ -186,6 +186,11 @@ void SkillManager::HandleDestroyCollision(SkillHitbox* skill, std::optional<Vect
   }
   else {
     next_pos = {skill->transform.position.x, skill->transform.position.y};
+  }
+
+  if (skill->data->spawn_next == SKILL_TYPE::EXPLOSION) {
+    ctx->input_handler->SetXInputVibration(VIBRATION_HIGH, VIBRATION_HALF);
+    vibration_timeout = 0.1f;
   }
 
   PlaySkill(

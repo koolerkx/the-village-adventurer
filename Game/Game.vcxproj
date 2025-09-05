@@ -16,6 +16,7 @@
         <ClCompile Include="audio\audio_manager.ixx"/>
         <ClCompile Include="collision\collider.ixx"/>
         <ClCompile Include="collision\collision_handler.ixx"/>
+        <ClCompile Include="input\xinput.cpp" />
         <ClCompile Include="map\linked_map.ixx"/>
         <ClCompile Include="map\map_manager.cpp"/>
         <ClCompile Include="map\map_manager.ixx"/>
@@ -24,6 +25,7 @@
         <ClCompile Include="player\level.ixx" />
         <ClCompile Include="player\player_buff.ixx" />
         <ClCompile Include="player\player_factory.ixx"/>
+        <ClCompile Include="player\player_input_composite.ixx" />
         <ClCompile Include="player\player_keyboard_input.ixx"/>
         <ClCompile Include="player\player_input.ixx"/>
         <ClCompile Include="map\tilemap_object_handler.ixx"/>
@@ -35,6 +37,7 @@
         <ClCompile Include="map\TileMap.cpp"/>
         <ClCompile Include="map\TileMap.ixx"/>
         <ClCompile Include="player\player_spec.ixx"/>
+        <ClCompile Include="player\player_xinput.ixx" />
         <ClCompile Include="scene\game_scene.cpp"/>
         <ClCompile Include="scene\game_scene.ixx"/>
         <ClCompile Include="scene\game_scene_context.ixx"/>
@@ -85,6 +88,7 @@
     <ItemGroup>
         <ClInclude Include="input\keyboard.h"/>
         <ClInclude Include="input\key_logger.h"/>
+        <ClInclude Include="input\xinput.h" />
     </ItemGroup>
     <PropertyGroup Label="Globals">
         <VCProjectVersion>15.0</VCProjectVersion>
