@@ -3,6 +3,7 @@ module;
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <objbase.h>
+#include "resource.h"
 
 module application;
 
@@ -74,7 +75,7 @@ void Application::CreateGameWindow(HWND& hwnd, WNDCLASSEX& windowClass, const Gr
   windowClass.cbSize = sizeof(WNDCLASSEX);
   windowClass.lpfnWndProc = WindowProcedure;
   windowClass.hInstance = hinst;
-  windowClass.hIcon = LoadIcon(hinst, IDI_APPLICATION);
+  windowClass.hIcon = LoadIcon(hinst, MAKEINTRESOURCE(IDI_APP_ICON));
   windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
   windowClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
   windowClass.lpszMenuName = nullptr;
