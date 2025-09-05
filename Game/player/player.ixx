@@ -202,7 +202,7 @@ public:
   void AddExperience(int value) {
     experience_ += value;
     total_experience_ += value;
-    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::metal_se);
+    SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::metal_se, GetPositionVector());
     if (experience_ >= max_experience_) {
       level_++;
       experience_ -= max_experience_;
