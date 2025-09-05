@@ -128,10 +128,40 @@ void ResultUI::OnRender(GameContext* ctx, Camera*) {
 
   // Result
   std::wstringstream wss;
-  wss << L"撃退した魔物：" << monster_killed_ << "\n";
-  wss << L"冒険した時間："
-    << std::setw(2) << std::setfill(L'0') << minutes_ << L":"
-    << std::setw(2) << std::setfill(L'0') << seconds_;
+  auto make_left = [&](const std::wstring& label, const std::wstring& expr) {
+    std::wstringstream tmp;
+    tmp << label << expr;
+    return tmp.str();
+  };
+  auto output_line = [&](const std::wstring& left, const std::wstring& right) {
+    wss << std::left << std::setw(18) << left
+      << L"= " << right << L"\n";
+  };
+  {
+    std::wstringstream expr;
+    expr << monster_killed_ << L" × " << multiplier_monster_;
+    output_line(make_left(L"撃退した魔物：", expr.str()),
+                std::to_wstring(monster_killed_ * multiplier_monster_));
+  }
+  {
+    std::wstringstream expr;
+    expr << std::setw(2) << std::setfill(L'0') << minutes_
+      << L":" << std::setw(2) << std::setfill(L'0') << seconds_;
+    output_line(make_left(L"冒険した時間：", expr.str()),
+                std::to_wstring(static_cast<int>(minutes_ * 60 + seconds_) * multiplier_time_));
+  }
+  {
+    std::wstringstream expr;
+    expr << level_ << L" × " << multiplier_level_;
+    output_line(make_left(L"最終レベル　：", expr.str()),
+                std::to_wstring(level_ * multiplier_level_));
+  }
+  {
+    std::wstringstream expr;
+    expr << score_;
+    output_line(make_left(L"スコア　　　：", expr.str()),
+                std::to_wstring(score_));
+  }
 
   auto stat_text_prop = StringSpriteProps{
     .pixel_size = 32.0f,
@@ -142,7 +172,6 @@ void ResultUI::OnRender(GameContext* ctx, Camera*) {
   };
 
   auto stat_text = default_font_->GetStringSize(wss.str(), {}, stat_text_prop);
-
 
   rr->DrawFont(wss.str(),
                font_key_,
@@ -155,9 +184,43 @@ void ResultUI::OnRender(GameContext* ctx, Camera*) {
                },
                stat_text_prop);
 
+  // Ranking
+  wss.str(L"");
+
+  wss << L"冒険者ランキング";
+  for (int i = 0; i < 5; i++) {
+    if (i < ranking_.size() ) {
+      auto ranking_item = ranking_[i];
+      wss << "\n" << EpochToDateTime(ranking_item.timestamp_ms) << " ";
+      wss << ranking_item.score;
+    } else {
+      wss << "\n";
+    }
+  }
+
+  auto ranking_text_prop = StringSpriteProps{
+    .pixel_size = 24.0f,
+    .letter_spacing = 0.0f,
+    .line_height = 26.0f,
+    .color = color::white
+  };
+  auto ranking_text = default_font_->GetStringSize(wss.str(), {}, ranking_text_prop);
+  constexpr float ranking_text_margin = 16.0f;
+
+  rr->DrawFont(wss.str(),
+               font_key_,
+               Transform{
+                 .position = {
+                   static_cast<float>(ctx->window_width) - ranking_text.width - ranking_text_margin,
+                   static_cast<float>(ctx->window_height) - ranking_text.height - ranking_text_margin,
+                   0
+                 }
+               },
+               ranking_text_prop);
+
   // Start Button
   float start_button_center_x = static_cast<float>(ctx->window_width) / 2;
-  float start_button_center_y = static_cast<float>(ctx->window_height) / 2 + 125;
+  float start_button_center_y = static_cast<float>(ctx->window_height) / 2 + 140;
 
   rr->DrawSprite(RenderItem{
     ui_texture_id_,

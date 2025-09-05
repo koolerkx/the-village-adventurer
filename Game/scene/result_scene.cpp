@@ -6,13 +6,32 @@ import game.audio.audio_clip;
 import game.scene_manager;
 import game.scene_game;
 import game.title_scene;
+import game.types;
 
 ResultScene::ResultScene(ResultSceneProps props) {
   monster_killed_ = props.monster_killed;
+  level_ = props.level;
 
   int total_seconds = static_cast<int>(props.elapsed_seconds);
   minutes_ = (total_seconds % 3600) / 60;
   seconds_ = total_seconds % 60;
+
+  score_ =
+    monster_killed_ * score_multiplier_monster
+    + level_ * score_multiplier_level
+    + minutes_ * score_multiplier_time;
+
+  ranking_ = LoadRanking();
+  ranking_.push_back(RankingItem{
+    .score = static_cast<std::uint32_t>(score_),
+    .timestamp_ms = NowEpochMillis(),
+  });
+  SortRanking(ranking_);
+  SaveRanking(ranking_);
+
+  for (auto r : ranking_) {
+    std::cout << r.timestamp_ms << " " << r.score << std::endl;
+  }
 }
 
 void ResultScene::OnEnter(GameContext* ctx) {
@@ -22,6 +41,12 @@ void ResultScene::OnEnter(GameContext* ctx) {
   result_ui_->SetMinutes(static_cast<float>(minutes_));
   result_ui_->SetSeconds(static_cast<float>(seconds_));
   result_ui_->SetMonsterKilled(monster_killed_);
+  result_ui_->SetLevel(level_);
+  result_ui_->SetMultiplierMonster(score_multiplier_monster);
+  result_ui_->SetMultiplierLevel(score_multiplier_level);
+  result_ui_->SetMultiplierTime(score_multiplier_time);
+  result_ui_->SetScore(score_);
+  result_ui_->SetRanking(ranking_);
 }
 
 void ResultScene::OnUpdate(GameContext* ctx, float delta_time) {
@@ -80,3 +105,66 @@ void ResultScene::OnRender(GameContext* ctx) {
 }
 
 void ResultScene::OnExit(GameContext*) {}
+
+// Recreate the file if the save data is crash
+std::vector<RankingItem> ResultScene::LoadRanking(const std::string& filepath) {
+  std::vector<RankingItem> items;
+
+  // Create empty
+  if (!std::filesystem::exists(filepath)) {
+    CreateEmptyRankingFile();
+    return {};
+  }
+
+  std::ifstream ifs(filepath, std::ios::binary);
+  if (!ifs) {
+    std::cerr << "Failed to open file for reading: " << filepath << "\n";
+    CreateEmptyRankingFile();
+    return {};
+  }
+
+  std::uint32_t count = 0;
+  if (!ifs.read(reinterpret_cast<char*>(&count), sizeof(count))) {
+    std::cerr << "Failed to read count from file: " << filepath << "\n";
+    CreateEmptyRankingFile();
+    return {};
+  }
+
+  items.resize(count);
+  if (count > 0) {
+    const std::size_t bytes = static_cast<std::size_t>(count) * sizeof(RankingItem);
+    if (!ifs.read(reinterpret_cast<char*>(items.data()), static_cast<std::streamsize>(bytes))) {
+      std::cerr << "Failed to read items from file: " << filepath << "\n";
+      items.clear();
+      CreateEmptyRankingFile();
+    }
+  }
+
+  return items;
+}
+
+
+void ResultScene::SaveRanking(const std::vector<RankingItem>& items, const std::string& filepath) {
+  std::ofstream ofs(filepath, std::ios::binary | std::ios::trunc);
+  if (!ofs) {
+    throw std::runtime_error("Failed to open file for writing: " + filepath);
+  }
+
+  const std::uint32_t count = static_cast<std::uint32_t>(items.size());
+  ofs.write(reinterpret_cast<const char*>(&count), sizeof(count));
+
+  if (count > 0) {
+    const std::size_t bytes = static_cast<std::size_t>(count) * sizeof(RankingItem);
+    ofs.write(reinterpret_cast<const char*>(items.data()), static_cast<std::streamsize>(bytes));
+  }
+}
+
+void ResultScene::CreateEmptyRankingFile(const std::string& filepath) {
+  std::ofstream ofs(filepath, std::ios::binary);
+  if (!ofs) {
+    std::cerr << "Failed to create file: " << filepath << "\n";
+    return;
+  }
+  const std::uint32_t count = 0;
+  ofs.write(reinterpret_cast<const char*>(&count), sizeof(count));
+}
