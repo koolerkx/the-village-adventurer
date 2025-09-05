@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" class="ささやきの樹海" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="12">
+<map version="1.10" tiledversion="1.11.2" class="ささやきの樹海" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="14">
  <tileset firstgid="1" source="../assets/field.tsx"/>
  <layer id="1" name="Ground" width="32" height="32">
   <data encoding="csv">
@@ -169,6 +169,12 @@
    <point/>
   </object>
   <object id="11" name="Slime3" type="slime" x="352" y="224">
+   <point/>
+  </object>
+  <object id="12" name="Slime1" type="slime_green" x="336" y="256">
+   <point/>
+  </object>
+  <object id="13" name="Slime1" type="slime_green" x="176" y="272">
    <point/>
   </object>
  </objectgroup>
