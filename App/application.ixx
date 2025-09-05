@@ -1,6 +1,7 @@
 module;
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <stdint.h>
 
 export module application;
 
@@ -15,6 +16,12 @@ import game.scene_manager;
 import graphic.debug;
 #endif
 
+enum WindowState: uint8_t {
+  WINDOWED,
+  FULLSCREEN,
+  BORDERLESS
+};
+
 export class Application {
 private:
   // ウィンドウ
@@ -27,7 +34,7 @@ private:
   void CreateGameWindow(HWND& hwnd, WNDCLASSEX& windowClass, const GraphicConfig& graphic_config);
   static LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
   LRESULT HandleWindowMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-  
+
   // シングルトン、コピー・代入禁止
   Application();
   Application(const Application&) = delete;
@@ -43,6 +50,15 @@ private:
 
   void OnUpdate(float delta_time);
   void OnFixedUpdate(float delta_time);
+
+  // saved windowed state
+  DWORD saved_style_ = 0;
+  DWORD saved_ex_style_ = 0;
+  RECT  saved_rect_{};
+  bool  saved_maximized_ = false;
+  WindowState window_state_ = WindowState::WINDOWED;
+  void EnterBorderless();
+  void ExitBorderless();
 
 public:
   static Application& Instance();

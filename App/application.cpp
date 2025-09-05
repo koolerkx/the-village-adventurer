@@ -150,8 +150,8 @@ bool Application::Init() {
   std::unique_ptr<GameContext> initial_context = std::make_unique<GameContext>();
   initial_context->render_resource_manager = direct3d_->GetResourceManager();
   initial_context->input_handler = input_handler_.get();
-  initial_context->window_width = win_size_.cx;
-  initial_context->window_height = win_size_.cy;
+  initial_context->window_width = config.graphic.window_size_width;
+  initial_context->window_height = config.graphic.window_size_height;
 
   SceneManager::Init(std::move(
                        std::make_unique<TitleScene>()
@@ -214,6 +214,22 @@ Application::~Application() {}
 
 void Application::OnUpdate(float delta_time) {
   input_handler_->OnUpdate();
+
+  if (input_handler_->IsKeyDown(KK_F11)) {
+    if (window_state_ == BORDERLESS) {
+      ExitBorderless();
+      window_state_ = WINDOWED;
+      direct3d_->SetFullscreen(false);
+    }
+    else if (window_state_ == WINDOWED) {
+      window_state_ = FULLSCREEN;
+      direct3d_->SetFullscreen(true);
+    }
+    else {
+      EnterBorderless();
+    }
+  }
+
   SceneManager::GetInstance().OnUpdate(delta_time);
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -241,4 +257,66 @@ void Application::OnFixedUpdate(float delta_time) {
 #if defined(DEBUG) || defined(_DEBUG)
   debug_manager_->OnFixedUpdate(delta_time);
 #endif
+}
+
+
+static RECT GetMonitorRectForWindow(HWND hwnd) {
+  HMONITOR hmon = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+  MONITORINFO mi{sizeof(mi)};
+  GetMonitorInfo(hmon, &mi);
+  return mi.rcMonitor;
+}
+
+void Application::EnterBorderless() {
+  if (window_state_ == WindowState::BORDERLESS) return;
+  direct3d_->SetFullscreen(false);
+
+  saved_style_ = static_cast<DWORD>(GetWindowLongPtr(hwnd_, GWL_STYLE));
+  saved_ex_style_ = static_cast<DWORD>(GetWindowLongPtr(hwnd_, GWL_EXSTYLE));
+
+  WINDOWPLACEMENT wp{sizeof(wp)};
+  GetWindowPlacement(hwnd_, &wp);
+  saved_maximized_ = (wp.showCmd == SW_SHOWMAXIMIZED);
+
+  GetWindowRect(hwnd_, &saved_rect_);
+
+  // Set borderless
+  SetWindowLongPtr(hwnd_, GWL_STYLE, WS_POPUP | WS_VISIBLE);
+  SetWindowLongPtr(hwnd_, GWL_EXSTYLE, saved_ex_style_ & ~(WS_EX_WINDOWEDGE));
+
+  RECT mon = GetMonitorRectForWindow(hwnd_);
+
+  // Always on top
+  const HWND zOrder = HWND_TOP;
+  SetWindowPos(hwnd_, zOrder,
+               mon.left, mon.top,
+               mon.right - mon.left, mon.bottom - mon.top,
+               SWP_FRAMECHANGED | SWP_NOOWNERZORDER | SWP_SHOWWINDOW);
+
+  // note: remain direct3d canvas resolution 
+  // direct3d_->Resize(mon.right - mon.left, mon.bottom - mon.top);
+
+  window_state_ = WindowState::BORDERLESS;
+}
+
+void Application::ExitBorderless() {
+  if (window_state_ != WindowState::BORDERLESS) return;
+
+  SetWindowLongPtr(hwnd_, GWL_STYLE, saved_style_);
+  SetWindowLongPtr(hwnd_, GWL_EXSTYLE, saved_ex_style_);
+
+  SetWindowPos(hwnd_, nullptr,
+               saved_rect_.left, saved_rect_.top,
+               saved_rect_.right - saved_rect_.left,
+               saved_rect_.bottom - saved_rect_.top,
+               SWP_FRAMECHANGED | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_SHOWWINDOW);
+
+  if (saved_maximized_) {
+    ShowWindow(hwnd_, SW_MAXIMIZE);
+  }
+  else {
+    ShowWindow(hwnd_, SW_SHOWNOACTIVATE);
+  }
+
+  window_state_ = WindowState::WINDOWED;
 }
