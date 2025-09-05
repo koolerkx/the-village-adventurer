@@ -267,3 +267,7 @@ void Dx11Wrapper::SetEnableDepth(bool enable) {
   device_->CreateDepthStencilState(&dsd, depth_stencil_state_depth_disable_.GetAddressOf());
   device_context_->OMSetDepthStencilState(depth_stencil_state_depth_disable_.Get(), NULL);
 }
+
+void Dx11Wrapper::SetFullscreen(bool enable) {
+  swapchain_->SetFullscreenState(enable, NULL);
+}

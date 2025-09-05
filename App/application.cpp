@@ -214,6 +214,17 @@ Application::~Application() {}
 
 void Application::OnUpdate(float delta_time) {
   input_handler_->OnUpdate();
+
+  if (input_handler_->IsKeyDown(KK_F11)) {
+   if (window_state_ == FULLSCREEN) {
+     window_state_ = WINDOWED;
+     direct3d_->SetFullscreen(false);
+   } else {
+     window_state_ = FULLSCREEN;
+     // direct3d_->SetFullscreen(true);
+   }
+  }
+  
   SceneManager::GetInstance().OnUpdate(delta_time);
 
 #if defined(DEBUG) || defined(_DEBUG)

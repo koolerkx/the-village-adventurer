@@ -88,4 +88,6 @@ public:
   SIZE GetWindowSize() const { return win_size_; }
   ResourceManager* GetResourceManager() const;
   void SetEnableDepth(bool enable = true);
+
+  void SetFullscreen(bool enable);
 };
