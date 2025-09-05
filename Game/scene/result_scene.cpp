@@ -6,6 +6,7 @@ import game.audio.audio_clip;
 import game.scene_manager;
 import game.scene_game;
 import game.title_scene;
+import game.types;
 
 ResultScene::ResultScene(ResultSceneProps props) {
   monster_killed_ = props.monster_killed;
@@ -45,6 +46,7 @@ void ResultScene::OnEnter(GameContext* ctx) {
   result_ui_->SetMultiplierLevel(score_multiplier_level);
   result_ui_->SetMultiplierTime(score_multiplier_time);
   result_ui_->SetScore(score_);
+  result_ui_->SetRanking(ranking_);
 }
 
 void ResultScene::OnUpdate(GameContext* ctx, float delta_time) {

@@ -7,6 +7,7 @@ import std;
 import game.scene;
 import game.ui.result_ui;
 import game.utils.throttle;
+import game.types;
 
 export struct ResultSceneProps {
   int monster_killed;
@@ -23,11 +24,6 @@ constexpr int score_multiplier_monster = 100;
 constexpr int score_multiplier_level = 200;
 constexpr int score_multiplier_time = 10;
 const std::string default_ranking_file = "save.dat";
-
-struct RankingItem {
-  uint32_t score;
-  int64_t timestamp_ms; // unix epoch
-};
 
 export class ResultScene : public IScene {
 private:

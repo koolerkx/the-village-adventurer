@@ -1,4 +1,5 @@
 module;
+#include "stdint.h"
 
 export module game.types;
 
@@ -64,4 +65,9 @@ export enum class CollideState {
   COLLIDING,
   NOT_COLLIDE,
   COLLIDE_LAST_FRAME
+};
+
+export struct RankingItem {
+  uint32_t score;
+  int64_t timestamp_ms; // unix epoch
 };

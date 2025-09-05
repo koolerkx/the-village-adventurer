@@ -1,4 +1,5 @@
 module;
+#include <time.h>
 #include "stdint.h"
 
 export module game.ui.result_ui;
@@ -59,6 +60,21 @@ private:
   int multiplier_time_ = 0;
   int score_;
 
+  std::vector<RankingItem> ranking_;
+
+  static inline std::wstring EpochToDateTime(std::int64_t epoch_ms) {
+    using namespace std::chrono;
+    // epoch_ms -> time_point
+    system_clock::time_point tp{milliseconds{epoch_ms}};
+    std::time_t tt = system_clock::to_time_t(tp);
+    std::tm local_tm{};
+    _localtime64_s(&local_tm, &tt);
+
+    std::wstringstream wss;
+    wss << std::put_time(&local_tm, L"%Y/%m/%d %H:%M");
+    return wss.str();
+  }
+
 public:
   ResultUI(GameContext* ctx);
   void OnUpdate(GameContext* ctx, float delta_time);
@@ -74,7 +90,8 @@ public:
   void SetMultiplierLevel(int multiplier) { multiplier_level_ = multiplier; }
   void SetMultiplierTime(int multiplier) { multiplier_time_ = multiplier; }
   void SetScore(int score) { score_ = score; }
-  
+  void SetRanking(std::vector<RankingItem> ranking) { ranking_ = ranking; }
+
   void SetSelectedOption(uint8_t option) {
     selected_option_ = option;
   }
