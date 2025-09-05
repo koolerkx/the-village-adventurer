@@ -13,6 +13,8 @@
 *.cso
 map/roguelike-topdown-game.tiled-session
 
+save.dat
+
 # ide specific
 .idea/.idea.roguelike-topdown-game/.idea/discord.xml
 
