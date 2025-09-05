@@ -139,7 +139,7 @@ void ResultUI::OnRender(GameContext* ctx, Camera*) {
   };
   {
     std::wstringstream expr;
-    expr << monster_killed_ << L"×" << multiplier_monster_;
+    expr << monster_killed_ << L" × " << multiplier_monster_;
     output_line(make_left(L"撃退した魔物：", expr.str()),
                 std::to_wstring(monster_killed_ * multiplier_monster_));
   }
@@ -152,7 +152,7 @@ void ResultUI::OnRender(GameContext* ctx, Camera*) {
   }
   {
     std::wstringstream expr;
-    expr << level_ << L"×" << multiplier_level_;
+    expr << level_ << L" × " << multiplier_level_;
     output_line(make_left(L"最終レベル　：", expr.str()),
                 std::to_wstring(level_ * multiplier_level_));
   }
@@ -187,7 +187,7 @@ void ResultUI::OnRender(GameContext* ctx, Camera*) {
 
   // Start Button
   float start_button_center_x = static_cast<float>(ctx->window_width) / 2;
-  float start_button_center_y = static_cast<float>(ctx->window_height) / 2 + 125;
+  float start_button_center_y = static_cast<float>(ctx->window_height) / 2 + 140;
 
   rr->DrawSprite(RenderItem{
     ui_texture_id_,
