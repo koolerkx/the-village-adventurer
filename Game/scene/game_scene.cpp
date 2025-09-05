@@ -716,6 +716,7 @@ void GameScene::UpdateInput(InputHandler* ih) {
   input.is_button_right_2 = ih->IsKeyDown(KeyCode::KK_E)
     || ih->IsXInputButtonDown(XButtonCode::RB) || ih->IsXInputButtonDown(XButtonCode::B);
 
-  input.is_pause_menu_button = ih->IsKeyDown(KeyCode::KK_F3) || ih->IsXInputButtonDown(XButtonCode::Start);
-  input.is_status_menu_button = ih->IsKeyDown(KeyCode::KK_F4) || ih->IsXInputButtonDown(XButtonCode::X);
+  input.is_pause_menu_button = ih->IsKeyDown(KeyCode::KK_ESCAPE) || ih->IsXInputButtonDown(XButtonCode::Start);
+  input.is_status_menu_button = ih->IsKeyDown(KeyCode::KK_I) || ih->IsKeyDown(KeyCode::KK_R)
+    || ih->IsXInputButtonDown(XButtonCode::X);
 }
