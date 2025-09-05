@@ -11,12 +11,17 @@ import game.utils.throttle;
 export struct ResultSceneProps {
   int monster_killed;
   float elapsed_seconds;
+  int level;
 };
 
 enum class SelectedOption: uint8_t {
   RESTART,
   BACK_TO_TITLE
 };
+
+constexpr int score_multiplier_monster = 100;
+constexpr int score_multiplier_level = 200;
+constexpr int score_multiplier_time = 10;
 
 export class ResultScene : public IScene {
 private:
@@ -32,6 +37,9 @@ private:
   int monster_killed_ = 0;
   int minutes_ = 0;
   int seconds_ = 0;
+  int level_ = 0;
+
+  int score_ = 0;
 
 public:
   ResultScene(ResultSceneProps props);

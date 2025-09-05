@@ -128,10 +128,40 @@ void ResultUI::OnRender(GameContext* ctx, Camera*) {
 
   // Result
   std::wstringstream wss;
-  wss << L"撃退した魔物：" << monster_killed_ << "\n";
-  wss << L"冒険した時間："
-    << std::setw(2) << std::setfill(L'0') << minutes_ << L":"
-    << std::setw(2) << std::setfill(L'0') << seconds_;
+  auto make_left = [&](const std::wstring& label, const std::wstring& expr) {
+    std::wstringstream tmp;
+    tmp << label << expr;
+    return tmp.str();
+  };
+  auto output_line = [&](const std::wstring& left, const std::wstring& right) {
+    wss << std::left << std::setw(18) << left
+      << L"= " << right << L"\n";
+  };
+  {
+    std::wstringstream expr;
+    expr << monster_killed_ << L"×" << multiplier_monster_;
+    output_line(make_left(L"撃退した魔物：", expr.str()),
+                std::to_wstring(monster_killed_ * multiplier_monster_));
+  }
+  {
+    std::wstringstream expr;
+    expr << std::setw(2) << std::setfill(L'0') << minutes_
+      << L":" << std::setw(2) << std::setfill(L'0') << seconds_;
+    output_line(make_left(L"冒険した時間：", expr.str()),
+                std::to_wstring(static_cast<int>(minutes_ * 60 + seconds_) * multiplier_time_));
+  }
+  {
+    std::wstringstream expr;
+    expr << level_ << L"×" << multiplier_level_;
+    output_line(make_left(L"最終レベル　：", expr.str()),
+                std::to_wstring(level_ * multiplier_level_));
+  }
+  {
+    std::wstringstream expr;
+    expr << score_;
+    output_line(make_left(L"スコア　　　：", expr.str()),
+                std::to_wstring(score_));
+  }
 
   auto stat_text_prop = StringSpriteProps{
     .pixel_size = 32.0f,

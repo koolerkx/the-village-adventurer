@@ -9,10 +9,16 @@ import game.title_scene;
 
 ResultScene::ResultScene(ResultSceneProps props) {
   monster_killed_ = props.monster_killed;
+  level_ = props.level;
 
   int total_seconds = static_cast<int>(props.elapsed_seconds);
   minutes_ = (total_seconds % 3600) / 60;
   seconds_ = total_seconds % 60;
+
+  score_ =
+    monster_killed_ * score_multiplier_monster
+    + level_ * score_multiplier_level
+    + minutes_ * score_multiplier_time;
 }
 
 void ResultScene::OnEnter(GameContext* ctx) {
@@ -22,6 +28,11 @@ void ResultScene::OnEnter(GameContext* ctx) {
   result_ui_->SetMinutes(static_cast<float>(minutes_));
   result_ui_->SetSeconds(static_cast<float>(seconds_));
   result_ui_->SetMonsterKilled(monster_killed_);
+  result_ui_->SetLevel(level_);
+  result_ui_->SetMultiplierMonster(score_multiplier_monster);
+  result_ui_->SetMultiplierLevel(score_multiplier_level);
+  result_ui_->SetMultiplierTime(score_multiplier_time);
+  result_ui_->SetScore(score_);
 }
 
 void ResultScene::OnUpdate(GameContext* ctx, float delta_time) {

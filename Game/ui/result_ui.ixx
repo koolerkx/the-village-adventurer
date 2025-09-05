@@ -52,6 +52,12 @@ private:
   int monster_killed_ = 0;
   float minutes_ = 22;
   float seconds_ = 9;
+  int level_ = 0;
+
+  int multiplier_monster_ = 0;
+  int multiplier_level_ = 0;
+  int multiplier_time_ = 0;
+  int score_;
 
 public:
   ResultUI(GameContext* ctx);
@@ -62,7 +68,13 @@ public:
   void SetMonsterKilled(int monster_killed) { monster_killed_ = monster_killed; }
   void SetMinutes(float minutes) { minutes_ = minutes; }
   void SetSeconds(float seconds) { seconds_ = seconds; }
+  void SetLevel(int level) { level_ = level; }
 
+  void SetMultiplierMonster(int multiplier) { multiplier_monster_ = multiplier; }
+  void SetMultiplierLevel(int multiplier) { multiplier_level_ = multiplier; }
+  void SetMultiplierTime(int multiplier) { multiplier_time_ = multiplier; }
+  void SetScore(int score) { score_ = score; }
+  
   void SetSelectedOption(uint8_t option) {
     selected_option_ = option;
   }
