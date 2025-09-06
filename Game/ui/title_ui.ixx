@@ -12,6 +12,8 @@ import graphic.utils.font;
 import graphic.utils.types;
 import game.types;
 
+import game.ui.component.input_hint;
+
 export class TitleUI {
 private:
   std::wstring font_key_;
@@ -53,6 +55,8 @@ public:
   void OnUpdate(GameContext* ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, float delta_time);
   void OnRender(GameContext* ctx, Camera* camera);
+
+  std::unique_ptr<InputHintComponent> input_hint_ = nullptr;
 
   void SetSelectedOption(uint8_t option) {
     selected_option_ = option;
