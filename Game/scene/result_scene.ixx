@@ -13,6 +13,7 @@ export struct ResultSceneProps {
   int monster_killed;
   float elapsed_seconds;
   int level;
+  bool is_default_x_input;
 };
 
 enum class SelectedOption: uint8_t {
@@ -62,6 +63,7 @@ private:
   static void SaveRanking(const std::vector<RankingItem>& items, const std::string& filepath = default_ranking_file);
   static void CreateEmptyRankingFile(const std::string& filepath = default_ranking_file);
 
+  bool is_x_input_;
 public:
   ResultScene(ResultSceneProps props);
   void OnEnter(GameContext* ctx) override;

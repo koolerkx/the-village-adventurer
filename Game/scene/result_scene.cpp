@@ -32,6 +32,8 @@ ResultScene::ResultScene(ResultSceneProps props) {
   for (auto r : ranking_) {
     std::cout << r.timestamp_ms << " " << r.score << std::endl;
   }
+
+  is_x_input_ = props.is_default_x_input;
 }
 
 void ResultScene::OnEnter(GameContext* ctx) {
@@ -57,18 +59,22 @@ void ResultScene::OnUpdate(GameContext* ctx, float delta_time) {
   bool is_xinput_button_yes = ih->GetXInputButton(XButtonCode::A);
   bool is_xinput_button_up = ih->GetXInputButton(XButtonCode::DPadUp) || ih->GetXInputAnalog().first.second > 0.0f;
   bool is_xinput_button_down = ih->GetXInputButton(XButtonCode::DPadDown) || ih->GetXInputAnalog().first.second < 0.0f;
+  bool is_xinput_any = is_xinput_button_up || is_xinput_button_down || is_xinput_button_yes;
+
+  bool is_keyboard_yes = ih->GetKey(KeyCode::KK_ENTER) || ih->GetKey(KeyCode::KK_SPACE);
+  bool is_keyboard_up = ih->GetKey(KeyCode::KK_UP) || ih->GetKey(KeyCode::KK_W);
+  bool is_keyboard_down = ih->GetKey(KeyCode::KK_DOWN) || ih->GetKey(KeyCode::KK_S);
+  bool is_keyboard_any = is_keyboard_up || is_keyboard_down || is_keyboard_yes;
 
   if (is_allow_control_) {
-    if ((ih->GetKey(KeyCode::KK_UP) || ih->GetKey(KeyCode::KK_W) || is_xinput_button_up)
-      && input_throttle_.CanCall()) {
+    if ((is_keyboard_up || is_xinput_button_up) && input_throttle_.CanCall()) {
       selected_option_++;
       selected_option_ %= options_count;
       result_ui_->SetSelectedOption(selected_option_);
       am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
     }
 
-    if ((ih->GetKey(KeyCode::KK_DOWN) || ih->GetKey(KeyCode::KK_S) || is_xinput_button_down)
-      && input_throttle_.CanCall()) {
+    if ((is_keyboard_down || is_xinput_button_down) && input_throttle_.CanCall()) {
       selected_option_--;
       selected_option_ += static_cast<uint8_t>(options_count);
       selected_option_ %= static_cast<uint8_t>(options_count);
@@ -76,22 +82,30 @@ void ResultScene::OnUpdate(GameContext* ctx, float delta_time) {
       am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
     }
 
-    if ((ih->IsKeyDown(KeyCode::KK_ENTER) || ih->IsKeyDown(KeyCode::KK_SPACE) || is_xinput_button_yes)
-      && enter_throttle_.CanCall()) {
+    if ((is_keyboard_yes || is_xinput_button_yes) && enter_throttle_.CanCall()) {
       if (static_cast<SelectedOption>(selected_option_) == SelectedOption::RESTART) {
         am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
-        result_ui_->SetFadeOverlayAlphaTarget(1.0f, color::black, []() -> void {
-          SceneManager::GetInstance().ChangeScene(std::make_unique<GameScene>());
+        result_ui_->SetFadeOverlayAlphaTarget(1.0f, color::black, [&is_x_input = is_x_input_]() -> void {
+          SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<GameScene>(is_x_input));
         });
       }
       else if (static_cast<SelectedOption>(selected_option_) == SelectedOption::BACK_TO_TITLE) {
         am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
-        result_ui_->SetFadeOverlayAlphaTarget(1.0f, color::white, []() -> void {
-          SceneManager::GetInstance().ChangeScene(std::make_unique<TitleScene>());
+        result_ui_->SetFadeOverlayAlphaTarget(1.0f, color::white, [&is_x_input = is_x_input_]() -> void {
+          SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<TitleScene>(is_x_input));
         });
       }
     }
   }
+
+  if (is_keyboard_any) {
+    result_ui_->SetIsXInput(false);
+    is_x_input_ = false;
+  }
+  else if (is_xinput_any) {
+    is_x_input_ = true;
+  }
+  result_ui_->SetIsXInput(is_x_input_);
 
   result_ui_->OnUpdate(ctx, delta_time);
 }

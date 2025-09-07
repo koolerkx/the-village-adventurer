@@ -696,27 +696,65 @@ void GameScene::UpdateUI(GameContext* ctx, float delta_time) {
 
 void GameScene::UpdateInput(InputHandler* ih) {
   auto x_input_analog = ih->GetXInputAnalog();
+  // XInput / Keyboard split
+  bool is_xinput_yes = ih->IsXInputButtonDown(XButtonCode::A);
+  bool is_keyboard_yes = ih->IsKeyDown(KeyCode::KK_SPACE) || ih->IsKeyDown(KeyCode::KK_ENTER);
+  input.is_button_yes = is_xinput_yes || is_keyboard_yes;
 
-  input.is_button_yes = ih->IsXInputButtonDown(XButtonCode::A)
-    || ih->IsKeyDown(KeyCode::KK_SPACE) || ih->IsKeyDown(KeyCode::KK_ENTER);
-  input.is_button_no = ih->IsXInputButtonDown(XButtonCode::B) || ih->IsKeyDown(KeyCode::KK_ESCAPE);
+  bool is_xinput_no = ih->IsXInputButtonDown(XButtonCode::B);
+  bool is_keyboard_no = ih->IsKeyDown(KeyCode::KK_ESCAPE);
+  input.is_button_no = is_xinput_no || is_keyboard_no;
 
-  input.is_button_up = ih->GetXInputButton(XButtonCode::DPadUp) || x_input_analog.first.second > 0
-    || ih->GetKey(KeyCode::KK_W) || ih->GetKey(KeyCode::KK_UP);
-  input.is_button_down = ih->GetXInputButton(XButtonCode::DPadDown) || x_input_analog.first.second < 0
-    || ih->GetKey(KeyCode::KK_S) || ih->GetKey(KeyCode::KK_DOWN);
+  bool is_xinput_up = ih->GetXInputButton(XButtonCode::DPadUp) || x_input_analog.first.second > 0;
+  bool is_keyboard_up = ih->GetKey(KeyCode::KK_W) || ih->GetKey(KeyCode::KK_UP);
+  input.is_button_up = is_xinput_up || is_keyboard_up;
 
-  input.is_button_left = ih->GetXInputButton(XButtonCode::DPadLeft) || x_input_analog.first.first < 0
-    || ih->GetKey(KeyCode::KK_A) || ih->GetKey(KeyCode::KK_LEFT);
-  input.is_button_right = ih->GetXInputButton(XButtonCode::DPadRight) || x_input_analog.first.first > 0
-    || ih->GetKey(KeyCode::KK_D) || ih->GetKey(KeyCode::KK_RIGHT);
+  bool is_xinput_down = ih->GetXInputButton(XButtonCode::DPadDown) || x_input_analog.first.second < 0;
+  bool is_keyboard_down = ih->GetKey(KeyCode::KK_S) || ih->GetKey(KeyCode::KK_DOWN);
+  input.is_button_down = is_xinput_down || is_keyboard_down;
 
-  input.is_button_left_2 = ih->IsKeyDown(KeyCode::KK_Q)
-    || ih->IsXInputButtonDown(XButtonCode::LB) || ih->IsXInputButtonDown(XButtonCode::Y);
-  input.is_button_right_2 = ih->IsKeyDown(KeyCode::KK_E)
-    || ih->IsXInputButtonDown(XButtonCode::RB) || ih->IsXInputButtonDown(XButtonCode::B);
+  bool is_xinput_left = ih->GetXInputButton(XButtonCode::DPadLeft) || x_input_analog.first.first < 0;
+  bool is_keyboard_left = ih->GetKey(KeyCode::KK_A) || ih->GetKey(KeyCode::KK_LEFT);
+  input.is_button_left = is_xinput_left || is_keyboard_left;
 
-  input.is_pause_menu_button = ih->IsKeyDown(KeyCode::KK_ESCAPE) || ih->IsXInputButtonDown(XButtonCode::Start);
-  input.is_status_menu_button = ih->IsKeyDown(KeyCode::KK_I) || ih->IsKeyDown(KeyCode::KK_R)
-    || ih->IsXInputButtonDown(XButtonCode::X);
+  bool is_xinput_right = ih->GetXInputButton(XButtonCode::DPadRight) || x_input_analog.first.first > 0;
+  bool is_keyboard_right = ih->GetKey(KeyCode::KK_D) || ih->GetKey(KeyCode::KK_RIGHT);
+  input.is_button_right = is_xinput_right || is_keyboard_right;
+
+  bool is_xinput_left_2 = ih->IsXInputButtonDown(XButtonCode::LB) || ih->IsXInputButtonDown(XButtonCode::Y);
+  bool is_keyboard_left_2 = ih->IsKeyDown(KeyCode::KK_Q);
+  input.is_button_left_2 = is_xinput_left_2 || is_keyboard_left_2;
+
+  bool is_xinput_right_2 = ih->IsXInputButtonDown(XButtonCode::RB) || ih->IsXInputButtonDown(XButtonCode::B);
+  bool is_keyboard_right_2 = ih->IsKeyDown(KeyCode::KK_E);
+  input.is_button_right_2 = is_xinput_right_2 || is_keyboard_right_2;
+
+  bool is_xinput_pause_menu = ih->IsXInputButtonDown(XButtonCode::Start);
+  bool is_keyboard_pause_menu = ih->IsKeyDown(KeyCode::KK_ESCAPE);
+  input.is_pause_menu_button = is_xinput_pause_menu || is_keyboard_pause_menu;
+
+  bool is_xinput_status_menu = ih->IsXInputButtonDown(XButtonCode::X) || ih->IsXInputButtonDown(XButtonCode::Back);
+  bool is_keyboard_status_menu = ih->IsKeyDown(KeyCode::KK_I) || ih->IsKeyDown(KeyCode::KK_R);
+  input.is_status_menu_button = is_xinput_status_menu || is_keyboard_status_menu;
+
+  // Any input detection
+  bool is_xinput_any = is_xinput_yes || is_xinput_no || is_xinput_up || is_xinput_down ||
+    is_xinput_left || is_xinput_right || is_xinput_left_2 || is_xinput_right_2 ||
+    is_xinput_pause_menu || is_xinput_status_menu;
+  bool is_keyboard_any = is_keyboard_yes || is_keyboard_no || is_keyboard_up || is_keyboard_down ||
+    is_keyboard_left || is_keyboard_right || is_keyboard_left_2 || is_keyboard_right_2 ||
+    is_keyboard_pause_menu || is_keyboard_status_menu;
+
+  if (is_xinput_any) {
+    ui_->SetIsXInput(true);
+    pause_menu_ui_->SetIsXInput(true);
+    status_ui_->SetIsXInput(true);
+    level_up_ui_->SetIsXInput(true);
+  }
+  else if (is_keyboard_any) {
+    ui_->SetIsXInput(false);
+    pause_menu_ui_->SetIsXInput(false);
+    status_ui_->SetIsXInput(false);
+    level_up_ui_->SetIsXInput(false);
+  }
 }

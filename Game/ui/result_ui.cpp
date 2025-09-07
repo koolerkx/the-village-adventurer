@@ -19,9 +19,26 @@ ResultUI::ResultUI(GameContext* ctx) {
   background_4_texture_id_ = tm->Load(L"assets/result_bg_4.png");
   ui_texture_id_ = tm->Load(L"assets/ui.png");
   overlay_texture_id_ = tm->Load(L"assets/block_white.png");
+  
+  std::vector<InputHint> input_hints = {
+    InputHint{L"確認", {KeyCode::KK_SPACE, KeyCode::KK_ENTER}},
+    InputHint{L"選択", {KeyCode::KK_W, KeyCode::KK_S, KeyCode::KK_UP, KK_DOWN}}
+  };
+  std::vector<InputHint> x_button_input_hints = {
+    InputHint{L"確認", {XButtonCode::A}},
+    InputHint{L"選択", {XButtonCode::LeftThumb, XButtonCode::DPadUp, XButtonCode::DPadDown}}
+  };
+  
+  input_hint_ = std::make_unique<InputHintComponent>(ctx, InputHintProps{
+                                                       1, input_hints, false, true
+                                                     });
+  x_button_input_hints_ = std::make_unique<InputHintComponent>(ctx, InputHintProps{
+                                                                 1, x_button_input_hints, false, true
+                                                               });
+
 }
 
-void ResultUI::OnUpdate(GameContext*, float delta_time) {
+void ResultUI::OnUpdate(GameContext* ctx, float delta_time) {
   uv_horizontal_offset_ += delta_time * uv_offset_speed_;
 
   movement_acc_ += delta_time;
@@ -42,9 +59,15 @@ void ResultUI::OnUpdate(GameContext*, float delta_time) {
       cb();
     }
   }
+
+  x_button_input_hints_->OnUpdate(ctx, delta_time);
+  input_hint_->OnUpdate(ctx, delta_time);
 }
 
-void ResultUI::OnFixedUpdate(GameContext*, float) {}
+void ResultUI::OnFixedUpdate(GameContext* ctx, float delta_time) {
+  x_button_input_hints_->OnFixedUpdate(ctx, delta_time);
+  input_hint_->OnFixedUpdate(ctx, delta_time);
+}
 
 void ResultUI::OnRender(GameContext* ctx, Camera*) {
   auto& rr = ctx->render_resource_manager->renderer;
@@ -184,40 +207,6 @@ void ResultUI::OnRender(GameContext* ctx, Camera*) {
                },
                stat_text_prop);
 
-  // Ranking
-  wss.str(L"");
-
-  wss << L"冒険者ランキング";
-  for (int i = 0; i < 5; i++) {
-    if (i < ranking_.size() ) {
-      auto ranking_item = ranking_[i];
-      wss << "\n" << EpochToDateTime(ranking_item.timestamp_ms) << " ";
-      wss << ranking_item.score;
-    } else {
-      wss << "\n";
-    }
-  }
-
-  auto ranking_text_prop = StringSpriteProps{
-    .pixel_size = 24.0f,
-    .letter_spacing = 0.0f,
-    .line_height = 26.0f,
-    .color = color::white
-  };
-  auto ranking_text = default_font_->GetStringSize(wss.str(), {}, ranking_text_prop);
-  constexpr float ranking_text_margin = 16.0f;
-
-  rr->DrawFont(wss.str(),
-               font_key_,
-               Transform{
-                 .position = {
-                   static_cast<float>(ctx->window_width) - ranking_text.width - ranking_text_margin,
-                   static_cast<float>(ctx->window_height) - ranking_text.height - ranking_text_margin,
-                   0
-                 }
-               },
-               ranking_text_prop);
-
   // Start Button
   float start_button_center_x = static_cast<float>(ctx->window_width) / 2;
   float start_button_center_y = static_cast<float>(ctx->window_height) / 2 + 140;
@@ -331,6 +320,50 @@ void ResultUI::OnRender(GameContext* ctx, Camera*) {
                  }
                },
                end_text_props);
+
+  // Ranking
+  wss.str(L"");
+
+  wss << L"冒険者ランキング";
+  for (int i = 0; i < 5; i++) {
+    if (i < ranking_.size()) {
+      auto ranking_item = ranking_[i];
+      wss << "\n" << EpochToDateTime(ranking_item.timestamp_ms) << " ";
+      wss << ranking_item.score;
+    }
+    else {
+      wss << "\n";
+    }
+  }
+
+  auto ranking_text_prop = StringSpriteProps{
+    .pixel_size = 24.0f,
+    .letter_spacing = 0.0f,
+    .line_height = 26.0f,
+    .color = color::white
+  };
+  auto ranking_text = default_font_->GetStringSize(wss.str(), {}, ranking_text_prop);
+  constexpr float ranking_text_margin = 16.0f;
+
+  rr->DrawFont(wss.str(),
+               font_key_,
+               Transform{
+                 .position = {
+                   // static_cast<float>(ctx->window_width) - ranking_text.width - ranking_text_margin,
+                   ranking_text_margin,
+                   static_cast<float>(ctx->window_height) - ranking_text.height - ranking_text_margin -
+                   version_text_size.height - version_text_padding,
+                   0
+                 }
+               },
+               ranking_text_prop);
+
+  if (is_x_input_) {
+    x_button_input_hints_->OnRender(ctx);
+  }
+  else {
+    input_hint_->OnRender(ctx);
+  }
 
   // overlay
   rr->DrawSprite(RenderItem{

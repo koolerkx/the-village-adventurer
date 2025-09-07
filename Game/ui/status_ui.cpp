@@ -14,9 +14,23 @@ StatusUI::StatusUI(GameContext* ctx) {
 
   background_texture_id_ = tm->Load(L"assets/block_white.png");
   ui_texture_id_ = tm->Load(L"assets/ui.png");
+
+  std::vector<InputHint> input_hints = {
+    InputHint{L"確認", {KeyCode::KK_SPACE, KeyCode::KK_ENTER}},
+  };
+  std::vector<InputHint> x_button_input_hints = {
+    InputHint{L"確認", {XButtonCode::A}},
+  };
+
+  input_hint_ = std::make_unique<InputHintComponent>(ctx, InputHintProps{
+                                                       1, input_hints, false, false
+                                                     });
+  x_button_input_hints_ = std::make_unique<InputHintComponent>(ctx, InputHintProps{
+                                                                 1, x_button_input_hints, false, false
+                                                               });
 }
 
-void StatusUI::OnUpdate(GameContext*, float delta_time) {
+void StatusUI::OnUpdate(GameContext* ctx, float delta_time) {
   movement_acc_ += delta_time;
 
   opacity_ = interpolation::UpdateSmoothValue(
@@ -30,9 +44,18 @@ void StatusUI::OnUpdate(GameContext*, float delta_time) {
   if (1.0f - opacity_ <= 0.05 && fade_end_cb_) {
     fade_end_cb_();
   }
+
+  input_hint_->SetOpacity(opacity_);
+  x_button_input_hints_->SetOpacity(opacity_);
+
+  input_hint_->OnUpdate(ctx, delta_time);
+  x_button_input_hints_->OnUpdate(ctx, delta_time);
 }
 
-void StatusUI::OnFixedUpdate(GameContext*, float) {}
+void StatusUI::OnFixedUpdate(GameContext* ctx, float delta_time) {
+  input_hint_->OnFixedUpdate(ctx, delta_time);
+  x_button_input_hints_->OnFixedUpdate(ctx, delta_time);
+}
 
 void StatusUI::OnRender(GameContext* ctx, Camera*) {
   auto& rr = ctx->render_resource_manager->renderer;
@@ -542,4 +565,11 @@ void StatusUI::OnRender(GameContext* ctx, Camera*) {
     color::setOpacity(color::white, opacity_)
   });
 #pragma endregion
+  
+  if (is_x_input_) {
+    x_button_input_hints_->OnRender(ctx);
+  }
+  else {
+    input_hint_->OnRender(ctx);
+  }
 }

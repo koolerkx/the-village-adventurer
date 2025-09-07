@@ -12,6 +12,7 @@ import graphic.utils.types;
 import game.types;
 import game.scene_object.skill;
 import game.player.buff;
+import game.ui.component.input_hint;
 
 std::unordered_map<std::string, UV> texture_map = {
   // HP Bar
@@ -164,6 +165,10 @@ private:
   float experience_bar_percentage_current_ = 0.0f;
 
   int player_level_ = 1;
+  
+  bool is_x_input_ = false;
+  std::unique_ptr<InputHintComponent> input_hint_ = nullptr;
+  std::unique_ptr<InputHintComponent> x_button_input_hints_ = nullptr;
 
 public:
   void SetHpPercentage(float percentage) {
@@ -282,4 +287,6 @@ public:
     }
     player_level_ = level;
   }
+  
+  void SetIsXInput(bool is_x_input) { is_x_input_ = is_x_input; }
 };

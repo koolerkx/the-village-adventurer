@@ -8,9 +8,14 @@ import game.scene_manager;
 import game.scene_game;
 import game.audio.audio_clip;
 
+TitleScene::TitleScene(bool is_default_x_input) {
+  is_x_input_ = is_default_x_input;
+}
+
 void TitleScene::OnEnter(GameContext* ctx) {
   std::cout << "TitleScene> OnEnter" << std::endl;
   title_ui_ = std::make_unique<TitleUI>(ctx);
+  title_ui_->SetIsXInput(is_x_input_);
 
   SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_title);
 }
@@ -21,12 +26,19 @@ void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {
 
   auto& ih = ctx->input_handler;
 
-  bool is_xinput_button_yes = ih->GetXInputButton(XButtonCode::A);
+  bool is_xinput_button_yes = ih->IsXInputButtonDown(XButtonCode::A);
   bool is_xinput_button_up = ih->GetXInputButton(XButtonCode::DPadUp) || ih->GetXInputAnalog().first.second > 0.0f;
   bool is_xinput_button_down = ih->GetXInputButton(XButtonCode::DPadDown) || ih->GetXInputAnalog().first.second < 0.0f;
+  bool is_xinput_button_any = is_xinput_button_yes || is_xinput_button_up || is_xinput_button_down;
+
+  bool is_keyboard_yes = ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE) || ctx->input_handler->IsKeyDown(
+    KeyCode::KK_ENTER);
+  bool is_keyboard_up = ctx->input_handler->GetKey(KeyCode::KK_W) || ctx->input_handler->GetKey(KeyCode::KK_UP);
+  bool is_keyboard_down = ctx->input_handler->GetKey(KeyCode::KK_S) || ctx->input_handler->GetKey(KeyCode::KK_DOWN);
+  bool is_keyboard_any = is_keyboard_yes || is_keyboard_up || is_keyboard_down;
 
   if (is_allow_control_) {
-    if ((ctx->input_handler->GetKey(KeyCode::KK_UP) || ctx->input_handler->GetKey(KeyCode::KK_W) || is_xinput_button_up)
+    if ((is_keyboard_up || is_xinput_button_up)
       && input_throttle_.CanCall()) {
       selected_option_++;
       selected_option_ %= static_cast<uint8_t>(options_count);
@@ -34,7 +46,7 @@ void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {
       am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
     }
 
-    if ((ctx->input_handler->GetKey(KeyCode::KK_DOWN) || ctx->input_handler->GetKey(KeyCode::KK_S) || is_xinput_button_down)
+    if ((is_keyboard_down || is_xinput_button_down)
       && input_throttle_.CanCall()) {
       selected_option_--;
       selected_option_ += static_cast<uint8_t>(options_count);
@@ -43,14 +55,17 @@ void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {
       am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
     }
 
-    if ((ctx->input_handler->IsKeyDown(KeyCode::KK_ENTER) || ctx->input_handler->IsKeyDown(KeyCode::KK_SPACE) || is_xinput_button_yes)
+    if ((is_keyboard_yes || is_xinput_button_yes)
       && enter_throttle_.CanCall()) {
       if (static_cast<SelectedOption>(selected_option_) == SelectedOption::START_GAME) {
         am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
-        title_ui_->SetFadeOverlayAlphaTarget(1.0f, color::black, [&is_allow_control = is_allow_control_]() -> void {
-          SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<GameScene>());
-          is_allow_control = false;
-        });
+        title_ui_->SetFadeOverlayAlphaTarget(1.0f, color::black,
+                                             [&is_allow_control = is_allow_control_, &is_x_input = is_x_input_
+                                             ]() -> void {
+                                               SceneManager::GetInstance().ChangeSceneDelayed(
+                                                 std::make_unique<GameScene>(is_x_input));
+                                               is_allow_control = false;
+                                             });
       }
       else if (static_cast<SelectedOption>(selected_option_) == SelectedOption::END_GAME) {
         am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
@@ -58,6 +73,14 @@ void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {
       }
     }
   }
+
+  if (is_xinput_button_any) {
+    is_x_input_ = true;
+  }
+  else if (is_keyboard_any) {
+    is_x_input_ = false;
+  }
+  title_ui_->SetIsXInput(is_x_input_);
 }
 
 void TitleScene::OnFixedUpdate(GameContext* ctx, float delta_time) {

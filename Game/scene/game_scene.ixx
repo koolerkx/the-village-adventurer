@@ -83,6 +83,7 @@ private:
 
   // input
   Throttle ui_throttle{0.2};
+
   struct GameInput {
     bool is_button_yes = false;
     bool is_button_no = false;
@@ -97,7 +98,11 @@ private:
     bool is_button_right_2 = false;
   } input;
 
+  bool is_x_input_ = false;
+
 public:
+  GameScene(bool is_default_x_input = false) { is_x_input_ = is_default_x_input; }
+  
   void OnEnter(GameContext* ctx) override;
   void OnUpdate(GameContext* ctx, float delta_time) override;
   void OnFixedUpdate(GameContext* ctx, float delta_time) override;

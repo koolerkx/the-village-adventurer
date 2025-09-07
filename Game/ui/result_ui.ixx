@@ -13,6 +13,8 @@ import graphic.utils.font;
 import graphic.utils.types;
 import game.types;
 
+import game.ui.component.input_hint;
+
 export class ResultUI {
 private:
   std::wstring font_key_;
@@ -75,6 +77,10 @@ private:
     return wss.str();
   }
 
+  bool is_x_input_ = false;
+  std::unique_ptr<InputHintComponent> input_hint_ = nullptr;
+  std::unique_ptr<InputHintComponent> x_button_input_hints_ = nullptr;
+  
 public:
   ResultUI(GameContext* ctx);
   void OnUpdate(GameContext* ctx, float delta_time);
@@ -108,4 +114,6 @@ public:
       fade_overlay_callback_ = cb;
     }
   }
+
+  void SetIsXInput(bool is_x_input) { is_x_input_ = is_x_input; }
 };

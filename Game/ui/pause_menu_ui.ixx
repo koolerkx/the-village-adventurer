@@ -12,6 +12,8 @@ import graphic.utils.font;
 import graphic.utils.types;
 import game.types;
 
+import game.ui.component.input_hint;
+
 export class PauseMenuUI {
 private:
   std::wstring font_key_;
@@ -33,6 +35,10 @@ private:
 
   float title_logo_floating_speed_ = 18.0f;
   float movement_acc_ = 0.0f;
+  
+  bool is_x_input_ = false;
+  std::unique_ptr<InputHintComponent> input_hint_ = nullptr;
+  std::unique_ptr<InputHintComponent> x_button_input_hints_ = nullptr;
 
 public:
   PauseMenuUI(GameContext* ctx);
@@ -48,4 +54,6 @@ public:
     selected_option_ = 0;
     movement_acc_ = 0.0f;
   }
+
+  void SetIsXInput(bool is_x_input) { is_x_input_ = is_x_input; }
 };
