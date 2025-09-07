@@ -179,6 +179,9 @@ private:
   int target_score_;
   int score_;
 
+  float intro_timeout_ = 2.0f;
+  float intro_text_opacity_ = 1.0f;
+
 public:
   void SetHpPercentage(float percentage) {
     if (std::abs(hp_percentage_target_ - percentage) > 0.00001f) {
