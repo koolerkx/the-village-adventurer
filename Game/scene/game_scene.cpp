@@ -747,8 +747,10 @@ void GameScene::UpdateInput(InputHandler* ih) {
 
   if (is_xinput_any) {
     ui_->SetIsXInput(true);
+    pause_menu_ui_->SetIsXInput(true);
   }
   else if (is_keyboard_any) {
     ui_->SetIsXInput(false);
+    pause_menu_ui_->SetIsXInput(false);
   }
 }

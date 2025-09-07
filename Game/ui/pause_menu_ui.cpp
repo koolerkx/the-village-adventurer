@@ -13,13 +13,35 @@ PauseMenuUI::PauseMenuUI(GameContext* ctx) {
   title_texture_id_ = tm->Load(L"assets/title.png");
   background_texture_id_ = tm->Load(L"assets/block_white.png");
   ui_texture_id_ = tm->Load(L"assets/ui.png");
+  
+  std::vector<InputHint> input_hints = {
+    InputHint{L"確認", {KeyCode::KK_SPACE, KeyCode::KK_ENTER}},
+    InputHint{L"選択", {KeyCode::KK_W, KeyCode::KK_S, KeyCode::KK_UP, KK_DOWN}}
+  };
+  std::vector<InputHint> x_button_input_hints = {
+    InputHint{L"確認", {XButtonCode::A}},
+    InputHint{L"選択", {XButtonCode::LeftThumb, XButtonCode::DPadUp, XButtonCode::DPadDown}},
+  };
+
+  input_hint_ = std::make_unique<InputHintComponent>(ctx, InputHintProps{
+                                                       1, input_hints, false, false
+                                                     });
+  x_button_input_hints_ = std::make_unique<InputHintComponent>(ctx, InputHintProps{
+                                                                 1, x_button_input_hints, false, false
+                                                               });
 }
 
-void PauseMenuUI::OnUpdate(GameContext*, float delta_time) {
+void PauseMenuUI::OnUpdate(GameContext* ctx, float delta_time) {
   movement_acc_ += delta_time;
+
+  input_hint_->OnUpdate(ctx, delta_time);
+  x_button_input_hints_->OnUpdate(ctx, delta_time);
 }
 
-void PauseMenuUI::OnFixedUpdate(GameContext*, float) {}
+void PauseMenuUI::OnFixedUpdate(GameContext* ctx, float delta_time) {
+  input_hint_->OnFixedUpdate(ctx, delta_time);
+  x_button_input_hints_->OnFixedUpdate(ctx, delta_time);
+}
 
 void PauseMenuUI::OnRender(GameContext* ctx, Camera*) {
   auto& rr = ctx->render_resource_manager->renderer;
@@ -163,4 +185,11 @@ void PauseMenuUI::OnRender(GameContext* ctx, Camera*) {
     {{selected_uv_pos_.x, selected_uv_pos_.y}, {selected_uv_size_.x, selected_uv_size_.y}},
     color::white
   });
+  
+  if (is_x_input_) {
+    x_button_input_hints_->OnRender(ctx);
+  }
+  else {
+    input_hint_->OnRender(ctx);
+  }
 }
