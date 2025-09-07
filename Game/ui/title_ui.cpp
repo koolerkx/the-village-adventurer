@@ -72,6 +72,14 @@ void TitleUI::OnUpdate(GameContext* ctx, float delta_time) {
       cb();
     }
   }
+  
+  opacity_ = interpolation::UpdateSmoothValue(
+    opacity_,
+    1.0f,
+    delta_time,
+    interpolation::SmoothType::EaseOut,
+    0.5f
+  );
 
   input_hint_->OnUpdate(ctx, delta_time);
   x_button_input_hints_->OnUpdate(ctx, delta_time);
@@ -122,7 +130,6 @@ void TitleUI::OnRender(GameContext* ctx, Camera*) {
       {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height)}
     },
     {{uv_horizontal_offset_ * 1.2f, 0}, {576, 324}},
-    color::white
   });
 
   rr->DrawSprite(RenderItem{
@@ -137,7 +144,7 @@ void TitleUI::OnRender(GameContext* ctx, Camera*) {
       {450, 300}
     },
     {{0, 0}, {300, 200}},
-    color::white
+    color::setOpacity(color::white, opacity_)
   });
 
   // Start Button
@@ -155,14 +162,14 @@ void TitleUI::OnRender(GameContext* ctx, Camera*) {
       {256, 64},
     },
     {{frame_uv_pos_.x, frame_uv_pos_.y}, {frame_uv_size_.x, frame_uv_size_.y}},
-    color::white
+    color::setOpacity(color::white, opacity_)
   });
 
   auto start_text_props = StringSpriteProps{
     .pixel_size = 24.0f,
     .letter_spacing = 0.0f,
     .line_height = 0.0f,
-    .color = color::white
+    .color = color::setOpacity(color::white, opacity_)
   };
 
   auto start_text_size = default_font_->GetStringSize(L"ゲームスタート", {}, start_text_props);
@@ -186,7 +193,7 @@ void TitleUI::OnRender(GameContext* ctx, Camera*) {
     .pixel_size = 24.0f,
     .letter_spacing = 0.0f,
     .line_height = 0.0f,
-    .color = color::white
+    .color = color::setOpacity(color::white, opacity_)
   };
 
   rr->DrawSprite(RenderItem{
@@ -200,7 +207,7 @@ void TitleUI::OnRender(GameContext* ctx, Camera*) {
       {256, 64}
     },
     {{frame_uv_pos_.x, frame_uv_pos_.y}, {frame_uv_size_.x, frame_uv_size_.y}},
-    color::white
+    color::setOpacity(color::white, opacity_)
   });
 
   auto end_text_size = default_font_->GetStringSize(L"ゲーム終了", {}, end_text_props);
@@ -235,7 +242,7 @@ void TitleUI::OnRender(GameContext* ctx, Camera*) {
       {selected_width, selected_height},
     },
     {{selected_uv_pos_.x, selected_uv_pos_.y}, {selected_uv_size_.x, selected_uv_size_.y}},
-    color::white
+    color::setOpacity(color::white, opacity_)
   });
 
   // Version
@@ -263,7 +270,7 @@ void TitleUI::OnRender(GameContext* ctx, Camera*) {
       .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0},
     },
     {{0, 0}, {1000, 1000}},
-    color::white
+    color::setOpacity(color::white, opacity_)
   });
 
   if (is_x_input_) {

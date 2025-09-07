@@ -55,11 +55,14 @@ private:
   std::unique_ptr<InputHintComponent> input_hint_ = nullptr;
   std::unique_ptr<InputHintComponent> x_button_input_hints_ = nullptr;
 
+  float opacity_ = 0.0f;
+
 public:
   TitleUI(GameContext* ctx, bool is_flash_start);
   void OnUpdate(GameContext* ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, float delta_time);
   void OnRender(GameContext* ctx, Camera* camera);
+
   void SetSelectedOption(uint8_t option) {
     selected_option_ = option;
   }
