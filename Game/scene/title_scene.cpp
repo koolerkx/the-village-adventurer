@@ -9,13 +9,13 @@ import game.scene_game;
 import game.audio.audio_clip;
 
 TitleScene::TitleScene(bool is_default_x_input) {
-  is_default_show_x_input_instruction_ = is_default_x_input;
+  is_x_input_ = is_default_x_input;
 }
 
 void TitleScene::OnEnter(GameContext* ctx) {
   std::cout << "TitleScene> OnEnter" << std::endl;
   title_ui_ = std::make_unique<TitleUI>(ctx);
-  title_ui_->SetIsXInput(is_default_show_x_input_instruction_);
+  title_ui_->SetIsXInput(is_x_input_);
 
   SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_title);
 }
@@ -59,10 +59,13 @@ void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {
       && enter_throttle_.CanCall()) {
       if (static_cast<SelectedOption>(selected_option_) == SelectedOption::START_GAME) {
         am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
-        title_ui_->SetFadeOverlayAlphaTarget(1.0f, color::black, [&is_allow_control = is_allow_control_]() -> void {
-          SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<GameScene>());
-          is_allow_control = false;
-        });
+        title_ui_->SetFadeOverlayAlphaTarget(1.0f, color::black,
+                                             [&is_allow_control = is_allow_control_, &is_x_input = is_x_input_
+                                             ]() -> void {
+                                               SceneManager::GetInstance().ChangeSceneDelayed(
+                                                 std::make_unique<GameScene>(is_x_input));
+                                               is_allow_control = false;
+                                             });
       }
       else if (static_cast<SelectedOption>(selected_option_) == SelectedOption::END_GAME) {
         am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
@@ -72,11 +75,12 @@ void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {
   }
 
   if (is_xinput_button_any) {
-    title_ui_->SetIsXInput(true);
+    is_x_input_ = true;
   }
   else if (is_keyboard_any) {
-    title_ui_->SetIsXInput(false);
+    is_x_input_ = false;
   }
+  title_ui_->SetIsXInput(is_x_input_);
 }
 
 void TitleScene::OnFixedUpdate(GameContext* ctx, float delta_time) {

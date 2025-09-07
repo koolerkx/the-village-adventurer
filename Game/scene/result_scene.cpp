@@ -85,8 +85,8 @@ void ResultScene::OnUpdate(GameContext* ctx, float delta_time) {
     if ((is_keyboard_yes || is_xinput_button_yes) && enter_throttle_.CanCall()) {
       if (static_cast<SelectedOption>(selected_option_) == SelectedOption::RESTART) {
         am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
-        result_ui_->SetFadeOverlayAlphaTarget(1.0f, color::black, []() -> void {
-          SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<GameScene>());
+        result_ui_->SetFadeOverlayAlphaTarget(1.0f, color::black, [&is_x_input = is_x_input_]() -> void {
+          SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<GameScene>(is_x_input));
         });
       }
       else if (static_cast<SelectedOption>(selected_option_) == SelectedOption::BACK_TO_TITLE) {

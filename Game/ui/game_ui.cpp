@@ -23,6 +23,29 @@ GameUI::GameUI(GameContext* ctx, SceneContext*, std::wstring texture_path) {
   default_font_ = Font::GetFont(font_key_);
 
   fade_overlay_texture_id_ = ctx->render_resource_manager->texture_manager->Load(L"assets/block_white.png");
+
+  std::vector<InputHint> input_hints = {
+    InputHint{L"移動", {KeyCode::KK_W, KeyCode::KK_S, KeyCode::KK_A, KeyCode::KK_D}},
+    InputHint{L"    ", {KeyCode::KK_UP, KeyCode::KK_DOWN, KeyCode::KK_LEFT, KeyCode::KK_RIGHT}},
+    InputHint{L"攻撃", {KeyCode::KK_SPACE, KeyCode::KK_ENTER}},
+    InputHint{L"スキル選択", {KeyCode::KK_Q, KeyCode::KK_E}},
+    InputHint{L"キャラ情報", {KeyCode::KK_I, KeyCode::KK_R}},
+    InputHint{L"一時停止", {KeyCode::KK_ESCAPE}},
+  };
+  std::vector<InputHint> x_button_input_hints = {
+    InputHint{L"移動", {XButtonCode::LeftThumb}},
+    InputHint{L"攻撃", {XButtonCode::A}},
+    InputHint{L"スキル選択", {XButtonCode::LB, XButtonCode::RB, XButtonCode::Y, XButtonCode::B}},
+    InputHint{L"キャラ情報", {XButtonCode::X, XButtonCode::Back}},
+    InputHint{L"一時停止", {XButtonCode::Start}},
+  };
+
+  input_hint_ = std::make_unique<InputHintComponent>(ctx, InputHintProps{
+                                                       1, input_hints, false, true
+                                                     });
+  x_button_input_hints_ = std::make_unique<InputHintComponent>(ctx, InputHintProps{
+                                                                 1, x_button_input_hints, false, true
+                                                               });
 }
 
 void GameUI::OnUpdate(GameContext* ctx, SceneContext*, float delta_time, Camera* camera) {
@@ -174,9 +197,12 @@ void GameUI::OnUpdate(GameContext* ctx, SceneContext*, float delta_time, Camera*
       1.0f
     );
   }
+
+  input_hint_->OnUpdate(ctx, delta_time);
+  x_button_input_hints_->OnUpdate(ctx, delta_time);
 }
 
-void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
+void GameUI::OnFixedUpdate(GameContext* ctx, SceneContext*, float delta_time) {
   // workaround: fixed flash rate in one tick, TODO: use setTimeout instead
   if (is_get_damage_frame_ && is_hp_flashing_) {
     is_hp_flashing_ = false;
@@ -223,6 +249,9 @@ void GameUI::OnFixedUpdate(GameContext*, SceneContext*, float delta_time) {
       });
     }
   }
+
+  input_hint_->OnFixedUpdate(ctx, delta_time);
+  x_button_input_hints_->OnFixedUpdate(ctx, delta_time);
 }
 
 void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera) {
@@ -506,89 +535,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       color::setOpacity(color::white, ui_opacity_current_)
     });
   }
-
-  // Session: Right Bottom
-  // Input Hint: Background
-  constexpr float hint_box_margin = 24;
-
-  constexpr float hint_box_width = 224;
-  constexpr float hint_box_height = 122;
-  constexpr float hint_box_x = -hint_box_margin - hint_box_width;
-  constexpr float hint_box_y = -hint_box_margin - hint_box_height;
-
-  render_items.emplace_back(RenderInstanceItem{
-    Transform{
-      .position = {-hint_box_margin - hint_box_width, -hint_box_margin - hint_box_height, 0},
-      .size = {hint_box_width, hint_box_height},
-      .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
-    },
-    texture_map["Block"], color::setOpacity(color::black, 0.25f * ui_opacity_current_)
-  });
-  // Input Hint: Corner
-  render_items.emplace_back(RenderInstanceItem{
-    Transform{
-      .position = {-hint_box_margin - hint_box_width + 8, -hint_box_margin - hint_box_height + 8, 0},
-      .size = {49, 22},
-      .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
-    },
-    texture_map["Corner"],
-    color::setOpacity(color::white, ui_opacity_current_)
-  });
-  // Input Hint: Key
-  constexpr float key_left_padding = 106;
-  constexpr float key_gap = 8;
-  constexpr float key_size = 20;
-
-  const std::vector<UV> moving_keys = {
-    texture_map["KeyboardWUp"],
-    texture_map["KeyboardAUp"],
-    texture_map["KeyboardSUp"],
-    texture_map["KeyboardDUp"],
-  };
-
-  for (int i = 0; i < moving_keys.size(); i++) {
-    constexpr float moving_keys_y = -hint_box_margin - hint_box_height + 50;
-
-    render_items.emplace_back(RenderInstanceItem{
-      Transform{
-        .position = {-hint_box_margin - hint_box_width + key_left_padding + i * (key_size + key_gap), moving_keys_y, 0},
-        .size = {20, 20},
-        .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
-      },
-      moving_keys[i],
-      color::setOpacity(color::white, ui_opacity_current_)
-    });
-  }
-
-  render_items.emplace_back(RenderInstanceItem{
-    Transform{
-      .position = {-hint_box_margin - hint_box_width + key_left_padding, -hint_box_margin - hint_box_height + 74, 0},
-      .size = {40, 20},
-      .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
-    },
-    texture_map["KeyboardSpaceUp"],
-    color::setOpacity(color::white, ui_opacity_current_)
-  });
-
-  const std::vector<UV> skill_switch = {
-    texture_map["KeyboardQ"],
-    texture_map["KeyboardE"],
-  };
-
-  for (int i = 0; i < skill_switch.size(); i++) {
-    constexpr float skill_switch_y = -hint_box_margin - hint_box_height + 98;
-
-    render_items.emplace_back(RenderInstanceItem{
-      Transform{
-        .position = {-hint_box_margin - hint_box_width + 122 + i * (key_size + key_gap), skill_switch_y, 0},
-        .size = {20, 20},
-        .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
-      },
-      skill_switch[i],
-      color::setOpacity(color::white, ui_opacity_current_)
-    });
-  }
-
+  
   // Session: Upper
   // Experience Bar
   render_items.emplace_back(RenderInstanceItem{
@@ -601,6 +548,12 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   });
 
   rr->DrawSpritesInstanced(render_items, texture_id_, {}, true);
+
+  if (is_x_input_) {
+    x_button_input_hints_->OnRender(ctx);
+  } else {
+    input_hint_->OnRender(ctx);
+  }
 
   // On Top of instanced Draw
   // Session: Left Upper
@@ -752,36 +705,6 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                    .position_anchor = {static_cast<float>(ctx->window_width), 0, 0}
                  }, StringSpriteProps{
                    .pixel_size = 22.0f,
-                   .letter_spacing = 0.0f,
-                   .line_height = 0.0f,
-                   .color = color::setOpacity(color::white, ui_opacity_current_)
-                 });
-  }
-
-  // Session: Right Bottom
-  // Hint: text
-  constexpr float hint_box_left_padding = 32;
-  constexpr float hint_box_top_padding = 26;
-  constexpr float line_size = 16.0f;
-  constexpr float line_gap = 8;
-
-  const std::array<std::wstring, 4> instruction_texts = {
-    L"操作説明",
-    L"移動する",
-    L"攻撃する",
-    L"スキル選択",
-  };
-
-  for (int i = 0; i < instruction_texts.size(); i++) {
-    rr->DrawFont(instruction_texts[i], font_key_,
-                 Transform{
-                   .position = {
-                     hint_box_x + hint_box_left_padding,
-                     hint_box_y + (line_size * i) + (line_gap * i) + hint_box_top_padding, 0
-                   },
-                   .position_anchor = {static_cast<float>(ctx->window_width), static_cast<float>(ctx->window_height), 0}
-                 }, StringSpriteProps{
-                   .pixel_size = line_size,
                    .letter_spacing = 0.0f,
                    .line_height = 0.0f,
                    .color = color::setOpacity(color::white, ui_opacity_current_)

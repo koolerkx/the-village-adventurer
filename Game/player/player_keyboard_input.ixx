@@ -14,7 +14,13 @@ export struct PlayerInputConfig {
   Key left = KeyCode::KK_A;
   Key right = KeyCode::KK_D;
 
+  Key up_2 = KeyCode::KK_UP;
+  Key down_2 = KeyCode::KK_DOWN;
+  Key left_2 = KeyCode::KK_LEFT;
+  Key right_2 = KeyCode::KK_RIGHT;
+
   Key attack = KeyCode::KK_SPACE;
+  Key attack_2 = KeyCode::KK_ENTER;
   Key switch_skill_right = KeyCode::KK_E;
   Key switch_skill_left = KeyCode::KK_Q;
 #if defined(DEBUG) || defined(_DEBUG)
@@ -33,12 +39,16 @@ public:
     PlayerIntent intent;
 
     const bool up = get(props.up);
+    const bool up_2 = get(props.up_2);
     const bool down = get(props.down);
+    const bool down_2 = get(props.down_2);
     const bool left = get(props.left);
+    const bool left_2 = get(props.left_2);
     const bool right = get(props.right);
+    const bool right_2 = get(props.right_2);
 
-    intent.move_x = (right ? 1.f : 0.f) + (left ? -1.f : 0.f);
-    intent.move_y = (down ? 1.f : 0.f) + (up ? -1.f : 0.f);
+    intent.move_x = (right || right_2 ? 1.f : 0.f) + (left || left_2 ? -1.f : 0.f);
+    intent.move_y = (down || down_2 ? 1.f : 0.f) + (up || up_2 ? -1.f : 0.f);
 
     // handle hypothesis
     float len = std::hypot(intent.move_x, intent.move_y);
@@ -49,8 +59,9 @@ public:
     }
 
     // button state
-    intent.attack = step_button(props.attack, prev_attack_);
-    prev_attack_ = intent.attack.held;
+    intent.attack.held = get(props.attack) || get(props.attack_2);
+    intent.attack.pressed = GetKeyDown(props.attack) || GetKeyDown(props.attack_2);
+    intent.attack.released = GetKeyUp(props.attack) || GetKeyUp(props.attack_2);
 
     intent.switch_skill_left = step_button(props.switch_skill_left, prev_skill_switch_left_);
     prev_skill_switch_left_ = intent.switch_skill_left.held;
@@ -75,7 +86,6 @@ private:
   GameContext* game_context_;
   PlayerInputConfig props;
 
-  bool prev_attack_ = false;
   bool prev_skill_switch_left_ = false;
   bool prev_skill_switch_right_ = false;
   bool prev_damage_ = false;
@@ -86,8 +96,16 @@ private:
     return game_context_->input_handler->GetKey(k);
   }
 
+  bool GetKeyDown(Key k) const {
+    return game_context_->input_handler->IsKeyDown(k);
+  }
+
+  bool GetKeyUp(Key k) const {
+    return game_context_->input_handler->IsKeyUp(k);
+  }
+
   ButtonState step_button(Key k, bool prevHeld) const {
-    const bool now = get(k);    
+    const bool now = get(k);
     ButtonState st;
     st.held = now;
     st.pressed = (!prevHeld && now);

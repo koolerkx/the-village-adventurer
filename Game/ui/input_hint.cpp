@@ -12,6 +12,9 @@ InputHintComponent::InputHintComponent(GameContext* ctx, const InputHintProps& p
   auto& tm = ctx->render_resource_manager->texture_manager;
   ui_texture_id_ = tm->Load(L"assets/ui.png");
 
+  float max_row_width = 0;
+  auto text_props = StringSpriteProps{.pixel_size = font_size};
+
   // Init input hints cache
   for (const auto& input_hint : props.input_hints) {
     input_hints.emplace_back(DisplayInputHint{
@@ -41,7 +44,14 @@ InputHintComponent::InputHintComponent(GameContext* ctx, const InputHintProps& p
       | std::ranges::to<std::vector>(),
       .is_pressed = std::vector<bool>(input_hint.keys.size(), false)
     });
+
+    float label_width = default_font_->GetStringSize(input_hint.label, {}, text_props).width;
+    float content_width = label_width + keys_left_padding + (key_size + key_gap) * input_hint.keys.size();
+    float row_width = content_width + box_padding * 2 + row_padding_left;
+
+    max_row_width = std::max(max_row_width, row_width);
   }
+  box_width_ = max_row_width;
 }
 
 void InputHintComponent::OnUpdate(GameContext* ctx, float) {
@@ -73,7 +83,7 @@ void InputHintComponent::OnRender(GameContext* ctx) {
   // Background
   constexpr UV background_uv = UV{{96, 297}, {8, 8}};
   float background_height = box_padding * 2 + row_margin_top + (key_size + row_gap) * input_hints.size();
-  float background_width = 224;
+  float background_width = box_width_;
 
   float box_x = left_aligned_ ? box_margin : static_cast<float>(ctx->window_width) - background_width - box_margin;
   float box_y = top_aligned_ ? box_margin : static_cast<float>(ctx->window_height) - background_height - box_margin;
@@ -105,7 +115,7 @@ void InputHintComponent::OnRender(GameContext* ctx) {
   // Texts
   items.clear();
   auto label_text_props = StringSpriteProps{
-    .pixel_size = 18.0f,
+    .pixel_size = font_size,
     .line_height = key_size,
     .color = color::setOpacity(color::white, opacity_)
   };

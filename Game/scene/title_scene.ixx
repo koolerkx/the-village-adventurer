@@ -24,7 +24,7 @@ private:
   Throttle enter_throttle_{0.2f};
   bool is_allow_control_ = true;
 
-  bool is_default_show_x_input_instruction_ = false;
+  bool is_x_input_ = false;
 public:
   TitleScene(bool is_default_x_input = false);
 
