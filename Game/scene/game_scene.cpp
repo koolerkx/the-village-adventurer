@@ -263,7 +263,7 @@ void GameScene::HandlePlayerMovementAndCollisions(GameContext* ctx, float delta_
 
     switch (reward_type) {
     case chest::RewardType::HEAL:
-      player_->Heal(helper::GetRandomNumberByOffset(player_->GetMaxHp() * 0.1f, 5.0f));
+      player_->Heal(helper::GetRandomNumberByOffset(player_->GetMaxHp() * 0.2f, 5.0f));
       break;
     case chest::RewardType::BUFF_ATTACK_POWER: {
       PlayerBuff pb;

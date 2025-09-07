@@ -28,7 +28,7 @@ namespace chest {
       case RewardType::BUFF_MOVING_SPEED:
         return L"宝箱：移動速度UP";
       case RewardType::HEAL:
-        return L"宝箱：HP回復１０％";
+        return L"宝箱：HP回復20％";
       case RewardType::INVINCIBLE:
         return L"宝箱：無敵状態";
       }
@@ -58,7 +58,7 @@ namespace chest {
     case RewardType::BUFF_MOVING_SPEED:
       return L"宝箱を開けた！『移動速度UP』を手に入れた！";
     case RewardType::HEAL:
-      return L"宝箱を開けた！HPが10%回復した！";
+      return L"宝箱を開けた！HPが20%回復した！";
     case RewardType::INVINCIBLE:
       return L"宝箱を開けた！一定時間『無敵状態』になった！";
     }
