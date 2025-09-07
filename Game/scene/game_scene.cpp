@@ -267,6 +267,7 @@ void GameScene::HandlePlayerMovementAndCollisions(GameContext* ctx, float delta_
       break;
     case chest::RewardType::DAMAGE: {
       player_->Damage(helper::GetRandomNumberByOffset(player_->GetMaxHp() * 0.05f, 5.0f));
+      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::fail, fo.position, 0.5f);
     }
     case chest::RewardType::BUFF_ATTACK_POWER: {
       PlayerBuff pb;

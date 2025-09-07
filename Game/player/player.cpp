@@ -88,6 +88,9 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
       ctx->input_handler->SetXInputVibration(VIBRATION_LOW, VIBRATION_HIGH);
       scene_ctx->vibration_timeout = 0.075f;
     }
+    else if (it.attack.held && cooldowns[selected_skill_id_] > 0 && attack_throttle_.CanCall()) {
+      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::empty, {}, 0.75);
+    }
 
 #if defined(DEBUG) || defined(_DEBUG)
     if (it.damage_debug.pressed) Damage(10);
