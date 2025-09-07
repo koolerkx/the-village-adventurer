@@ -23,6 +23,7 @@
         <ClCompile Include="mobs\dummy.ixx"/>
         <ClCompile Include="mobs\slime_green.ixx"/>
         <ClCompile Include="player\level.ixx" />
+        <ClCompile Include="player\level_multiplier.ixx" />
         <ClCompile Include="player\player_buff.ixx" />
         <ClCompile Include="player\player_factory.ixx"/>
         <ClCompile Include="player\player_input_composite.ixx" />

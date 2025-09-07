@@ -27,9 +27,9 @@ private:
   
   float uv_horizontal_offset_ = 0;
 
-  float swirl_twists_ = 1;
-  float swirl_radius_ = 0.25;
-  const float swirl_speed_ = 0.3;
+  float swirl_twists_ = 1.0f;
+  float swirl_radius_ = 0.25f;
+  const float swirl_speed_ = 0.3f;
   
   State state_ = State::RECOMMENDATION;
 

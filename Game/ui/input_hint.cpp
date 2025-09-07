@@ -73,7 +73,7 @@ void InputHintComponent::OnUpdate(GameContext* ctx, float) {
   }
 }
 
-void InputHintComponent::OnFixedUpdate(GameContext* ctx, float delta_time) {}
+void InputHintComponent::OnFixedUpdate(GameContext*, float) {}
 
 void InputHintComponent::OnRender(GameContext* ctx) {
   auto& rr = ctx->render_resource_manager->renderer;

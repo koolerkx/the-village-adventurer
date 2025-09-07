@@ -102,13 +102,12 @@ private:
 
   int selected_skill_id_ = 0;
   SKILL_TYPE selected_skill_type_ = AVAILABLE_SKILLS[selected_skill_id_];
+  std::vector<float> cooldowns = {0, 0};
 
   // Game data
   float health_ = 100.0f;
   float max_health_ = 100.0f;
-
   float defense = DEFAULT_DEFENSE;
-
   float base_attack = 10;
 
   // buffs
@@ -252,4 +251,8 @@ public:
   int GetMaxExperience() const { return max_experience_; }
 
   std::vector<player_level::PlayerAbility> GetLevelUpAbilities() { return level_up_abilities_; }
+
+  std::vector<float> GetCooldowns() const {
+    return cooldowns;
+  }
 };

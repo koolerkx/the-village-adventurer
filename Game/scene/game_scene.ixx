@@ -82,7 +82,7 @@ private:
   bool is_allow_status_ui_control_ = false;
 
   // input
-  Throttle ui_throttle{0.2};
+  Throttle ui_throttle{0.2f};
 
   struct GameInput {
     bool is_button_yes = false;

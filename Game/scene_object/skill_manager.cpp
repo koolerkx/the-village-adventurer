@@ -130,7 +130,7 @@ void SkillManager::PlaySkill(SKILL_TYPE type, Vector2 position, float rotation) 
   auto& data = result->second;
 
   SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(data.skill_se, position);
-  
+
   auto transform = data.base_transform;
   transform.position = {position.x, position.y, 0};
   transform.rotation_radian += rotation;
@@ -177,7 +177,8 @@ void SkillManager::PlaySkill(SKILL_TYPE type, Vector2 position, float rotation) 
   inserted->collider.owner = inserted; // HACK: workaround handle the object lifecycle
 }
 
-void SkillManager::HandleDestroyCollision(SkillHitbox* skill, GameContext* ctx, float& vibration_timeout, std::optional<Vector2> next_position) {
+void SkillManager::HandleDestroyCollision(SkillHitbox* skill, GameContext* ctx, float& vibration_timeout,
+                                          std::optional<Vector2> next_position) {
   skill->is_destroy_on_next = true;
 
   Vector2 next_pos;
@@ -209,4 +210,12 @@ std::vector<Collider<SkillHitbox>> SkillManager::GetColliders() {
   });
 
   return colliders;
+}
+
+float SkillManager::GetSkillCooldown(SKILL_TYPE type) {
+  auto result = skill_data.find(type);
+  if (result == skill_data.end()) { return 1.0f; }
+  auto& data = result->second;
+
+  return data.cooldown;
 }

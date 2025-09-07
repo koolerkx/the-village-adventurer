@@ -25,7 +25,7 @@ void SplashScene::OnEnter(GameContext* ctx) {
   ui_texture_id_ = tm->Load(L"assets/ui.png");
 }
 
-void SplashScene::OnUpdate(GameContext* ctx, float delta_time) {
+void SplashScene::OnUpdate(GameContext*, float delta_time) {
   if (recommendation_timeout_ > 0.1) {
     recommendation_opacity_ = interpolation::UpdateSmoothValue(
       recommendation_opacity_,
@@ -83,14 +83,14 @@ void SplashScene::OnUpdate(GameContext* ctx, float delta_time) {
     name_timeout_ -= delta_time;
   }
   if (name_timeout_ < 0) {
-    name_opacity_ -= 0.5 * delta_time;
+    name_opacity_ -= 0.5f * delta_time;
   }
   if (name_timeout_ < 0 && name_opacity_ < 0.05) {
     SceneManager::GetInstance().ChangeSceneDelayed(std::make_unique<TitleScene>(false, false));
   }
 }
 
-void SplashScene::OnFixedUpdate(GameContext* ctx, float delta_time) {}
+void SplashScene::OnFixedUpdate(GameContext*, float) {}
 
 void SplashScene::OnRender(GameContext* ctx) {
   auto& rr = ctx->render_resource_manager->renderer;
@@ -228,4 +228,4 @@ void SplashScene::OnRender(GameContext* ctx) {
                }, {});
 }
 
-void SplashScene::OnExit(GameContext* ctx) {}
+void SplashScene::OnExit(GameContext*) {}

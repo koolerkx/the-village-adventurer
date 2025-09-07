@@ -10,11 +10,11 @@ export using XButtonCode = XButton;
 export constexpr int VIBRATION_MAX = 65535;
 export constexpr int VIBRATION_MIN = 0;
 
-export constexpr int VIBRATION_HIGH = VIBRATION_MAX * 0.75;
-export constexpr int VIBRATION_HALF = VIBRATION_MAX * 0.5;
-export constexpr int VIBRATION_UPPER_LOW = VIBRATION_MAX * 0.4;
-export constexpr int VIBRATION_LOW = VIBRATION_MAX * 0.25;
-export constexpr int VIBRATION_LOWER_LOW = VIBRATION_MAX * 0.1;
+export constexpr int VIBRATION_HIGH = static_cast<int>(VIBRATION_MAX * 0.75f);
+export constexpr int VIBRATION_HALF = static_cast<int>(VIBRATION_MAX * 0.5f);
+export constexpr int VIBRATION_UPPER_LOW = static_cast<int>(VIBRATION_MAX * 0.4f);
+export constexpr int VIBRATION_LOW = static_cast<int>(VIBRATION_MAX * 0.25f);
+export constexpr int VIBRATION_LOWER_LOW = static_cast<int>(VIBRATION_MAX * 0.1f);
 
 export class InputHandler {
 private:

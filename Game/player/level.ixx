@@ -44,7 +44,7 @@ export namespace player_level {
     case OptionType::HP_UP:
       return L"Å‘åHPã¸";
     case OptionType::HEAL:
-      return L"HP‰ñ•œ50“";
+      return L"HP‘S‰ñ•œ";
     }
     return L"ƒGƒ‰[";
   };
