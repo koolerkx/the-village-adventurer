@@ -14,7 +14,6 @@ TitleScene::TitleScene(bool is_default_x_input, bool is_flash_start) {
 }
 
 void TitleScene::OnEnter(GameContext* ctx) {
-  std::cout << "TitleScene> OnEnter" << std::endl;
   title_ui_ = std::make_unique<TitleUI>(ctx, is_flash_start_);
   title_ui_->SetIsXInput(is_x_input_);
 
@@ -41,7 +40,7 @@ void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {
   if (is_allow_control_) {
     if ((is_keyboard_up || is_xinput_button_up)
       && input_throttle_.CanCall()) {
-      selected_option_++;
+      selected_option_--;
       selected_option_ %= static_cast<uint8_t>(options_count);
       title_ui_->SetSelectedOption(selected_option_);
       am->PlayAudioClip(audio_clip::keyboard_click, {0, 0}, 0.25);
@@ -49,7 +48,7 @@ void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {
 
     if ((is_keyboard_down || is_xinput_button_down)
       && input_throttle_.CanCall()) {
-      selected_option_--;
+      selected_option_++;
       selected_option_ += static_cast<uint8_t>(options_count);
       selected_option_ %= static_cast<uint8_t>(options_count);
       title_ui_->SetSelectedOption(selected_option_);
@@ -68,12 +67,36 @@ void TitleScene::OnUpdate(GameContext* ctx, float delta_time) {
                                                is_allow_control = false;
                                              });
       }
+      else if (static_cast<SelectedOption>(selected_option_) == SelectedOption::SHOW_CREDIT) {
+        am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
+        is_show_credit_ = true;
+        is_allow_control_ = false;
+        title_ui_->SetIsShowCredit(true);
+        title_ui_->SetCreditOffsetY(0);
+      }
       else if (static_cast<SelectedOption>(selected_option_) == SelectedOption::END_GAME) {
         am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
         SceneManager::GetInstance().SetLeave(true);
       }
     }
   }
+  
+  if (is_show_credit_ && (is_keyboard_yes || is_xinput_button_yes) && enter_throttle_.CanCall()) {
+    am->PlayAudioClip(audio_clip::equip_3, {0, 0}, 0.75);
+    is_show_credit_ = false;
+    title_ui_->SetIsShowCredit(false);
+    is_allow_control_ = true;
+  }
+
+  constexpr float scroll_speed = 150.0f;
+  float credit_offset_y = title_ui_->GetCreditOffsetY();
+
+  float scroll_speed_factor = std::clamp(
+    (is_xinput_button_up || is_keyboard_up ? 1.0f : 0.0f)
+    + (is_xinput_button_down || is_keyboard_down ? -1.0f : 0.0f), -1.0f, 1.0f);
+
+  float new_y = std::clamp(credit_offset_y + scroll_speed_factor * scroll_speed * delta_time, -820.0f, -200.0f);
+  title_ui_->SetCreditOffsetY(new_y);
 
   if (is_xinput_button_any) {
     is_x_input_ = true;
@@ -92,6 +115,4 @@ void TitleScene::OnRender(GameContext* ctx) {
   title_ui_->OnRender(ctx, {});
 }
 
-void TitleScene::OnExit(GameContext*) {
-  std::cout << "TitleScene> OnExit" << std::endl;
-}
+void TitleScene::OnExit(GameContext*) {}

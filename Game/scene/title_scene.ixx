@@ -10,6 +10,7 @@ import game.utils.throttle;
 
 enum class SelectedOption: uint8_t {
   START_GAME,
+  SHOW_CREDIT,
   END_GAME
 };
 
@@ -17,7 +18,7 @@ export class TitleScene : public IScene {
 private:
   std::unique_ptr<TitleUI> title_ui_{nullptr};
 
-  const int options_count = 2;
+  const int options_count = 3;
   uint8_t selected_option_ = 0;
 
   Throttle input_throttle_{0.3f};
@@ -26,6 +27,9 @@ private:
 
   bool is_x_input_ = false;
   bool is_flash_start_ = false;
+
+  bool is_show_credit_ = false;
+
 public:
   TitleScene(bool is_default_x_input = false, bool is_flash_start = true);
 

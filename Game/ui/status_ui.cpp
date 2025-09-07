@@ -565,7 +565,7 @@ void StatusUI::OnRender(GameContext* ctx, Camera*) {
     color::setOpacity(color::white, opacity_)
   });
 #pragma endregion
-  
+
   if (is_x_input_) {
     x_button_input_hints_->OnRender(ctx);
   }

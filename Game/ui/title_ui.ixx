@@ -27,6 +27,8 @@ private:
   FixedPoolIndexType ui_texture_id_;
   FixedPoolIndexType overlay_texture_id_;
   FixedPoolIndexType criware_logo_texture_id_;
+  
+  FixedPoolIndexType logo_texture_id_;
 
   const Vector2 frame_uv_pos_ = {224, 146};
   const Vector2 frame_uv_size_ = {64, 16};
@@ -54,8 +56,13 @@ private:
   bool is_x_input_ = false;
   std::unique_ptr<InputHintComponent> input_hint_ = nullptr;
   std::unique_ptr<InputHintComponent> x_button_input_hints_ = nullptr;
+  std::unique_ptr<InputHintComponent> input_hint_for_credit_ = nullptr;
+  std::unique_ptr<InputHintComponent> x_button_input_hints_for_credit_ = nullptr;
 
   float opacity_ = 0.0f;
+
+  bool is_show_credit_ = false;
+  float credit_offset_y_ = -200.0f;
 
 public:
   TitleUI(GameContext* ctx, bool is_flash_start);
@@ -81,4 +88,8 @@ public:
   }
 
   void SetIsXInput(bool is_x_input) { is_x_input_ = is_x_input; }
+
+  void SetIsShowCredit(bool is_show_credit) { is_show_credit_ = is_show_credit; }
+  float GetCreditOffsetY() const { return credit_offset_y_; }
+  void SetCreditOffsetY(float offset_y) { credit_offset_y_ = offset_y; }
 };
