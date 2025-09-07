@@ -252,6 +252,10 @@ void GameUI::OnFixedUpdate(GameContext* ctx, SceneContext*, float delta_time) {
     }
   }
 
+  if (score_ < target_score_) {
+    score_++;
+  }
+
   input_hint_->OnFixedUpdate(ctx, delta_time);
   x_button_input_hints_->OnFixedUpdate(ctx, delta_time);
 }
@@ -384,7 +388,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   render_items.emplace_back(RenderInstanceItem{
     Transform{
       .position = {-315 / 2, 24, 0},
-      .size = {315, 45},
+      .size = {315, 85},
       .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
     },
     texture_map["Block"], color::setOpacity(color::black, 0.25f * ui_opacity_current_)
@@ -678,6 +682,21 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .line_height = 0.0f,
                  .color = color::setOpacity(color::white, ui_opacity_current_)
                });
+
+  wss.str(L"");
+  wss << L"スコア：" << score_;
+  StringSpriteSize score_size = default_font_->GetStringSize(wss.str(), {}, {28.0f});
+  rr->DrawFont(wss.str(), font_key_,
+               Transform{
+                 .position = {-score_size.width / 2, 75, 0},
+                 .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
+               }, StringSpriteProps{
+                 .pixel_size = 28.0f,
+                 .letter_spacing = 0.0f,
+                 .line_height = 0.0f,
+                 .color = color::setOpacity(color::white, ui_opacity_current_)
+               });
+
 
   if (is_showing_area_message_) {
     StringSpriteSize area_message_size = default_font_->GetStringSize(area_message_, {}, {20.0f});

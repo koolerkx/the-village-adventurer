@@ -172,6 +172,9 @@ private:
 
   float global_attack_cooldown_ = 0.0f;
   std::vector<float> cooldowns_;
+
+  int target_score_;
+  int score_;
   
 public:
   void SetHpPercentage(float percentage) {
@@ -196,6 +199,10 @@ public:
       << L":"
       << std::setw(2) << std::setfill(L'0') << seconds;
     timer_text_ = wss.str();
+  }
+
+  void SetScore(int score) {
+    target_score_ = score;
   }
 
   void AddLogText(std::wstring text, COLOR color) {

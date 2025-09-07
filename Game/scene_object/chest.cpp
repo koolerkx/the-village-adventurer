@@ -33,7 +33,7 @@ namespace chest {
       case RewardType::INVINCIBLE:
         return L"宝箱：無敵状態";
       case RewardType::DAMAGE:
-        return L"宝箱：無敵状態";
+        return L"罠に当たってしまった";
       }
       return {};
   }
