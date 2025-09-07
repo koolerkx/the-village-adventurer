@@ -27,6 +27,8 @@ private:
   FixedPoolIndexType ui_texture_id_;
   FixedPoolIndexType overlay_texture_id_;
   FixedPoolIndexType criware_logo_texture_id_;
+  
+  FixedPoolIndexType logo_texture_id_;
 
   const Vector2 frame_uv_pos_ = {224, 146};
   const Vector2 frame_uv_size_ = {64, 16};
@@ -35,7 +37,7 @@ private:
   const Vector2 selected_uv_size_ = {60, 23};
 
   float uv_offset_speed_ = 0.0f;
-  const float uv_offset_speed_target_ = 25.0f;
+  const float uv_offset_speed_target_ = 10.0f;
   float uv_horizontal_offset_ = 0;
 
   float title_logo_floating_speed_ = 18.0f;
@@ -54,12 +56,20 @@ private:
   bool is_x_input_ = false;
   std::unique_ptr<InputHintComponent> input_hint_ = nullptr;
   std::unique_ptr<InputHintComponent> x_button_input_hints_ = nullptr;
+  std::unique_ptr<InputHintComponent> input_hint_for_credit_ = nullptr;
+  std::unique_ptr<InputHintComponent> x_button_input_hints_for_credit_ = nullptr;
+
+  float opacity_ = 0.0f;
+
+  bool is_show_credit_ = false;
+  float credit_offset_y_ = -200.0f;
 
 public:
   TitleUI(GameContext* ctx, bool is_flash_start);
   void OnUpdate(GameContext* ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, float delta_time);
   void OnRender(GameContext* ctx, Camera* camera);
+
   void SetSelectedOption(uint8_t option) {
     selected_option_ = option;
   }
@@ -78,4 +88,8 @@ public:
   }
 
   void SetIsXInput(bool is_x_input) { is_x_input_ = is_x_input; }
+
+  void SetIsShowCredit(bool is_show_credit) { is_show_credit_ = is_show_credit; }
+  float GetCreditOffsetY() const { return credit_offset_y_; }
+  void SetCreditOffsetY(float offset_y) { credit_offset_y_ = offset_y; }
 };
