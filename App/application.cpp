@@ -19,8 +19,8 @@ import game.scene.splash_scene;
 constexpr const char* config_filepath = "./config.yaml";
 
 // Load from config
-static constexpr char WINDOW_CLASS[] = "GameWindow"; // メインウインドウクラス名
-static constexpr char TITLE[] = "Game";              // 	タイトルバーのテクスト
+static constexpr char WINDOW_CLASS[] = "村の冒険者 | The Village Adventurer"; // メインウインドウクラス名
+static constexpr char TITLE[] = "村の冒険者 | The Village Adventurer";              // 	タイトルバーのテクスト
 // constexpr unsigned int WINDOW_WIDTH = 1280;
 // constexpr unsigned int WINDOW_HEIGHT = 720;
 
