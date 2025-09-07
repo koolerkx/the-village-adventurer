@@ -148,7 +148,7 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
                            .player_position = player_->GetPositionVector(),
                            .is_player_invincible = player_->GetIsInvincible()
                          });
-  
+
   UpdateUI(ctx, delta_time);
 
   if (is_end_) {
@@ -265,6 +265,9 @@ void GameScene::HandlePlayerMovementAndCollisions(GameContext* ctx, float delta_
     case chest::RewardType::HEAL:
       player_->Heal(helper::GetRandomNumberByOffset(player_->GetMaxHp() * 0.2f, 5.0f));
       break;
+    case chest::RewardType::DAMAGE: {
+      player_->Damage(helper::GetRandomNumberByOffset(player_->GetMaxHp() * 0.05f, 5.0f));
+    }
     case chest::RewardType::BUFF_ATTACK_POWER: {
       PlayerBuff pb;
       pb.type = BuffType::ATTACK_POWER;
@@ -455,7 +458,8 @@ void GameScene::HandleMobHitPlayerCollision(GameContext* ctx, float) {
 
                                if (p->GetIsInvincible()) return;
 
-                               float damage = helper::GetRandomNumberByOffset(m->damage * multiplier::GetMobAttackMultiplier(p->GetLevel()), 5.0f);
+                               float damage = helper::GetRandomNumberByOffset(
+                                 m->damage * multiplier::GetMobAttackMultiplier(p->GetLevel()), 5.0f);
 
                                std::wstringstream wss;
                                wss << L"プレイヤーが "

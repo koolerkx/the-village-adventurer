@@ -11,7 +11,8 @@ export namespace chest {
     // BUFF_ATTACK_SPEED,
     BUFF_MOVING_SPEED,
     HEAL,
-    INVINCIBLE
+    INVINCIBLE,
+    DAMAGE
   };
 
   RewardType GetRandomRewardType();
