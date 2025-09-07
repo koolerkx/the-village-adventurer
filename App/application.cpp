@@ -13,7 +13,7 @@ import app.loader.yaml;
 import graphic.direct3D;
 import graphic.utils.types;
 import game.scene;
-import game.title_scene;
+import game.scene.splash_scene;
 
 // config
 constexpr const char* config_filepath = "./config.yaml";
@@ -156,7 +156,7 @@ bool Application::Init() {
   initial_context->window_height = config.graphic.window_size_height;
 
   SceneManager::Init(std::move(
-                       std::make_unique<TitleScene>()
+                       std::make_unique<SplashScene>()
                      ),
                      std::move(initial_context),
                      std::make_unique<GameConfig>(GameConfig{
@@ -217,7 +217,7 @@ Application::~Application() {}
 void Application::OnUpdate(float delta_time) {
   input_handler_->OnUpdate();
 
-  if (input_handler_->IsKeyDown(KK_F11)) {
+  if (input_handler_->IsKeyDown(KeyCode::KK_F11)) {
     if (window_state_ == BORDERLESS) {
       ExitBorderless();
       window_state_ = WINDOWED;
