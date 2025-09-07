@@ -198,6 +198,8 @@ void GameUI::OnUpdate(GameContext* ctx, SceneContext*, float delta_time, Camera*
     );
   }
 
+  input_hint_->SetOpacity(ui_opacity_current_);
+  x_button_input_hints_->SetOpacity(ui_opacity_current_);
   input_hint_->OnUpdate(ctx, delta_time);
   x_button_input_hints_->OnUpdate(ctx, delta_time);
 }
