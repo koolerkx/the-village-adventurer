@@ -646,7 +646,7 @@ void GameScene::HandleLevelUpSelection(player_level::OptionType type) {
     });
     break;
   case player_level::OptionType::HEAL:
-    player_->Heal(player_->GetMaxHp() * 0.5f);
+    player_->Heal(player_->GetMaxHp() * 1.0f);
     break;
   }
 }
