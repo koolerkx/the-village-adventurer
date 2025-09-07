@@ -34,7 +34,7 @@ HRESULT Dx11Wrapper::CreateSwapChain(HWND hwnd) {
   fullscreen_desc.RefreshRate.Numerator = 60;
   fullscreen_desc.RefreshRate.Denominator = 1;
   fullscreen_desc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-  fullscreen_desc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+  fullscreen_desc.Scaling = DXGI_MODE_SCALING_CENTERED;
   fullscreen_desc.Windowed = TRUE;
 
   HRESULT hr = dxgi_factory_->CreateSwapChainForHwnd(
