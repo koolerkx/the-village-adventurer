@@ -676,7 +676,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                    .pixel_size = 20.0f,
                    .letter_spacing = 0.0f,
                    .line_height = 0.0f,
-                   .color = color::setOpacity(color::white, ui_opacity_current_)
+                   .color = color::setOpacity(color::white, area_message_opacity_current_ * ui_opacity_current_)
                  });
   }
 
