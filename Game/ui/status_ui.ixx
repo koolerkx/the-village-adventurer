@@ -12,6 +12,7 @@ import graphic.utils.types;
 import game.types;
 import game.player.level;
 import game.player.buff;
+import game.ui.component.input_hint;
 
 struct StatusUIActiveProps {
   float hp;
@@ -71,6 +72,10 @@ private:
   int timer_elapsed_minute_ = 0;
   int timer_elapsed_seconds_ = 0;
 
+  bool is_x_input_ = false;
+  std::unique_ptr<InputHintComponent> input_hint_ = nullptr;
+  std::unique_ptr<InputHintComponent> x_button_input_hints_ = nullptr;
+
 public:
   StatusUI(GameContext* ctx);
   void OnUpdate(GameContext* ctx, float delta_time);
@@ -125,4 +130,6 @@ public:
 
     fade_end_cb_ = cb;
   }
+
+  void SetIsXInput(bool is_x_input) { is_x_input_ = is_x_input; }
 };
