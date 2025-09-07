@@ -458,7 +458,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     color::setOpacity(color::white, ui_opacity_current_)
   });
   // Attack Hint: Space bar
-  float atk_hint_space_bar_width = is_x_input_ ? 18 : 36;
+  float atk_hint_space_bar_width = is_x_input_ ? 18.0f : 36.0f;
   render_items.emplace_back(RenderInstanceItem{
     Transform{
       .position = {-atk_hint_background_width / 2 + 72, -82 - 18 - 7, 0},
