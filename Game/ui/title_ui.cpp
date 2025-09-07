@@ -29,11 +29,13 @@ TitleUI::TitleUI(GameContext* ctx, bool is_flash_start) {
 
   std::vector<InputHint> input_hints = {
     InputHint{L"確認", {KeyCode::KK_SPACE, KeyCode::KK_ENTER}},
-    InputHint{L"選択", {KeyCode::KK_W, KeyCode::KK_S, KeyCode::KK_UP, KK_DOWN}}
+    InputHint{L"選択", {KeyCode::KK_W, KeyCode::KK_S, KeyCode::KK_UP, KK_DOWN}},
+    InputHint{L"全画面切替", {KeyCode::KK_F11}}
   };
   std::vector<InputHint> x_button_input_hints = {
     InputHint{L"確認", {XButtonCode::A}},
     InputHint{L"選択", {XButtonCode::LeftThumb, XButtonCode::DPadUp, XButtonCode::DPadDown}},
+    InputHint{L"全画面切替", {KeyCode::KK_F11}}
   };
 
   input_hint_ = std::make_unique<InputHintComponent>(ctx, InputHintProps{
