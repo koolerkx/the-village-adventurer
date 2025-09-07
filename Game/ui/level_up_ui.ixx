@@ -13,6 +13,7 @@ import graphic.utils.types;
 import game.types;
 import game.utils.helper;
 import game.player.level;
+import game.ui.component.input_hint;
 
 // kamifubuki64 animation data
 constexpr int frame = 36;
@@ -63,6 +64,10 @@ private:
   float opacity_target_ = 1.0f;
 
   std::function<void()> fade_in_callback_ = {};
+  
+  bool is_x_input_ = false;
+  std::unique_ptr<InputHintComponent> input_hint_ = nullptr;
+  std::unique_ptr<InputHintComponent> x_button_input_hints_ = nullptr;
 
 public:
   LevelUpUI(GameContext* ctx);
@@ -92,4 +97,6 @@ public:
     opacity_current_ = 0.0f;
     fade_in_callback_ = cb;
   }
+
+  void SetIsXInput(bool is_x_input) { is_x_input_ = is_x_input; }
 };

@@ -14,9 +14,25 @@ LevelUpUI::LevelUpUI(GameContext* ctx) {
   background_texture_id_ = tm->Load(L"assets/block_white.png");
   kamifubuki_texture_id_ = tm->Load(L"assets/kamifubuki64.png");
   ui_texture_id_ = tm->Load(L"assets/ui.png");
+
+  std::vector<InputHint> input_hints = {
+    InputHint{L"確認", {KeyCode::KK_SPACE, KeyCode::KK_ENTER}},
+    InputHint{L"選択", {KeyCode::KK_A, KeyCode::KK_D, KeyCode::KK_LEFT, KeyCode::KK_RIGHT}}
+  };
+  std::vector<InputHint> x_button_input_hints = {
+    InputHint{L"確認", {XButtonCode::A}},
+    InputHint{L"選択", {XButtonCode::LeftThumb, XButtonCode::DPadLeft, XButtonCode::DPadRight}},
+  };
+
+  input_hint_ = std::make_unique<InputHintComponent>(ctx, InputHintProps{
+                                                       1, input_hints, false, false
+                                                     });
+  x_button_input_hints_ = std::make_unique<InputHintComponent>(ctx, InputHintProps{
+                                                                 1, x_button_input_hints, false, false
+                                                               });
 }
 
-void LevelUpUI::OnUpdate(GameContext*, float delta_time) {
+void LevelUpUI::OnUpdate(GameContext* ctx, float delta_time) {
   movement_acc_ += delta_time;
 
   kamifubuki_frame_timeout -= delta_time;
@@ -36,9 +52,15 @@ void LevelUpUI::OnUpdate(GameContext*, float delta_time) {
   if (opacity_target_ - opacity_current_ <= 0.95) {
     fade_in_callback_();
   }
+
+  input_hint_->OnUpdate(ctx, delta_time);
+  x_button_input_hints_->OnUpdate(ctx, delta_time);
 }
 
-void LevelUpUI::OnFixedUpdate(GameContext*, float) {}
+void LevelUpUI::OnFixedUpdate(GameContext* ctx, float delta_time) {
+  input_hint_->OnFixedUpdate(ctx, delta_time);
+  x_button_input_hints_->OnFixedUpdate(ctx, delta_time);
+}
 
 void LevelUpUI::OnRender(GameContext* ctx, Camera*) {
   auto& rr = ctx->render_resource_manager->renderer;
@@ -403,4 +425,11 @@ void LevelUpUI::OnRender(GameContext* ctx, Camera*) {
 
 
 #pragma endregion
+  
+  if (is_x_input_) {
+    x_button_input_hints_->OnRender(ctx);
+  }
+  else {
+    input_hint_->OnRender(ctx);
+  }
 }
