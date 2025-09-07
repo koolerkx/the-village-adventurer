@@ -37,6 +37,13 @@ export const std::vector<SKILL_TYPE> AVAILABLE_SKILLS = {
   SKILL_TYPE::FIREBALL
 };
 
+struct PlayerInvincibleTrajector {
+  POSITION position;
+  UV uv;
+  COLOR color;
+  float timeout = 0.4f;
+};
+
 export class Player {
 private:
   FixedPoolIndexType texture_id_ = 0;
@@ -85,6 +92,8 @@ private:
     color::yellow300, color::amber300, color::orange300, color::deepOrange300, color::brown300, color::grey300,
     color::blueGrey300
   };
+  std::vector<PlayerInvincibleTrajector> invincible_trajector_;
+  float invincible_trajector_timer_ = 0.1f;
 
   Vector2 direction_;
   Vector2 direction_facing_ = {0, 1}; // default facing down

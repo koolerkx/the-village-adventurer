@@ -306,7 +306,7 @@ void ResultUI::OnRender(GameContext* ctx, Camera*) {
   });
 
   // Version
-  std::wstring version_text = L"v0.1";
+  std::wstring version_text = L"v0.2";
   auto version_text_size = default_font_->GetStringSize(version_text, {}, end_text_props);
   constexpr float version_text_padding = 10.0f;
 

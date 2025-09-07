@@ -37,7 +37,7 @@ AudioManager::AudioManager() {
   criAtomEx_SetUserAllocator(user_alloc_func, user_free_func, nullptr);
 
   CriAtomExConfig_WASAPI ex_cfg{};
-  ex_cfg.atom_ex.max_virtual_voices = 48;
+  ex_cfg.atom_ex.max_virtual_voices = CRIATOMEX_MAX_VOICES_PER_POOL;
   criAtomEx_SetDefaultConfig_WASAPI(&ex_cfg);
   criAtomEx_Initialize_WASAPI(&ex_cfg, nullptr, 0);
 
@@ -46,7 +46,7 @@ AudioManager::AudioManager() {
 
   CriAtomExStandardVoicePoolConfig vp_cfg{};
   criAtomExVoicePool_SetDefaultConfigForStandardVoicePool(&vp_cfg);
-  vp_cfg.num_voices = 256;
+  vp_cfg.num_voices = CRIATOMEX_MAX_VOICES_PER_POOL;
   vp_cfg.player_config.max_sampling_rate = 70000;
   pool_ = criAtomExVoicePool_AllocateStandardVoicePool(&vp_cfg, nullptr, 0);
 

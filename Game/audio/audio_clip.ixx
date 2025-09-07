@@ -41,6 +41,8 @@ export enum class audio_clip: int {
   bgm_action_1       = CRI_GAMECUESHEET_0_BGM_ACTION_1,
   bgm_pause_menu     = CRI_GAMECUESHEET_0_BGM_PAUSE_MENU,
   buff1              = CRI_GAMECUESHEET_0_BUFF1,
+  fail              = CRI_GAMECUESHEET_0_FAIL,
+  empty              = CRI_GAMECUESHEET_0_EMPTY,
 };
 #else
 
@@ -81,7 +83,9 @@ export enum class audio_clip: int {
   select_se_1 = 31,
   bgm_action_1 = 32,
   bgm_pause_menu = 33,
-  buff1 = 34, 
+  buff1 = 34,
+  fail = 35,
+  empty = 36,
 };
 
 #endif

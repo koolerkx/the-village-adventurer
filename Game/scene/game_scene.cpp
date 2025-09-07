@@ -267,6 +267,7 @@ void GameScene::HandlePlayerMovementAndCollisions(GameContext* ctx, float delta_
       break;
     case chest::RewardType::DAMAGE: {
       player_->Damage(helper::GetRandomNumberByOffset(player_->GetMaxHp() * 0.05f, 5.0f));
+      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::fail, fo.position, 0.5f);
     }
     case chest::RewardType::BUFF_ATTACK_POWER: {
       PlayerBuff pb;
@@ -699,6 +700,20 @@ void GameScene::UpdateUI(GameContext* ctx, float delta_time) {
 
   timer_elapsed_ += delta_time;
   ui_->SetTimerText(timer_elapsed_);
+
+  int total_seconds = static_cast<int>(timer_elapsed_);
+
+  constexpr int score_multiplier_monster = 100;
+  constexpr int score_multiplier_level = 200;
+  constexpr int score_multiplier_time = 10;
+
+  int minutes_ = (total_seconds % 3600) / 60;
+
+  int score =
+    monster_killed_ * score_multiplier_monster
+    + player_->GetLevel() * score_multiplier_level
+    + minutes_ * score_multiplier_time;
+  ui_->SetScore(score);
 
   ui_->SetSkillSelected(player_->GetSelectedSkillId());
   ui_->UpdatePlayerBuffs(player_->GetBuffs());

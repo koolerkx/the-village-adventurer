@@ -252,6 +252,25 @@ void GameUI::OnFixedUpdate(GameContext* ctx, SceneContext*, float delta_time) {
     }
   }
 
+  {
+    if (ui_opacity_current_ >= 0.95) {
+      intro_timeout_ -= delta_time;
+    }
+    if (intro_timeout_ <= 0) {
+      intro_text_opacity_ = interpolation::UpdateSmoothValue(
+        intro_text_opacity_,
+        0,
+        delta_time,
+        interpolation::SmoothType::EaseOut,
+        0.25f
+      );
+    }
+  }
+
+  if (score_ < target_score_) {
+    score_++;
+  }
+
   input_hint_->OnFixedUpdate(ctx, delta_time);
   x_button_input_hints_->OnFixedUpdate(ctx, delta_time);
 }
@@ -384,7 +403,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
   render_items.emplace_back(RenderInstanceItem{
     Transform{
       .position = {-315 / 2, 24, 0},
-      .size = {315, 45},
+      .size = {315, 85},
       .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
     },
     texture_map["Block"], color::setOpacity(color::black, 0.25f * ui_opacity_current_)
@@ -439,13 +458,14 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     color::setOpacity(color::white, ui_opacity_current_)
   });
   // Attack Hint: Space bar
+  float atk_hint_space_bar_width = is_x_input_ ? 18.0f : 36.0f;
   render_items.emplace_back(RenderInstanceItem{
     Transform{
       .position = {-atk_hint_background_width / 2 + 72, -82 - 18 - 7, 0},
-      .size = {36, 18},
+      .size = {atk_hint_space_bar_width, 18},
       .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
     },
-    texture_map["KeyboardSpaceUp"],
+    is_x_input_ ? texture_map["XInputA"] : texture_map["KeyboardSpaceUp"],
     color::setOpacity(color::white, ui_opacity_current_)
   });
 
@@ -510,7 +530,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
         .size = {24, 24},
         .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
       },
-      texture_map["KeyboardQ"],
+      is_x_input_ ? texture_map["XInputLB"] : texture_map["KeyboardQ"],
       color::setOpacity(color::white, ui_opacity_current_)
     });
 
@@ -521,7 +541,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
         .size = {24, 24},
         .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
       },
-      texture_map["KeyboardE"],
+      is_x_input_ ? texture_map["XInputRB"] : texture_map["KeyboardE"],
       color::setOpacity(color::white, ui_opacity_current_)
     });
   }
@@ -679,6 +699,21 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .color = color::setOpacity(color::white, ui_opacity_current_)
                });
 
+  wss.str(L"");
+  wss << L"スコア：" << score_;
+  StringSpriteSize score_size = default_font_->GetStringSize(wss.str(), {}, {28.0f});
+  rr->DrawFont(wss.str(), font_key_,
+               Transform{
+                 .position = {-score_size.width / 2, 75, 0},
+                 .position_anchor = {static_cast<float>(ctx->window_width) / 2, 0, 0}
+               }, StringSpriteProps{
+                 .pixel_size = 28.0f,
+                 .letter_spacing = 0.0f,
+                 .line_height = 0.0f,
+                 .color = color::setOpacity(color::white, ui_opacity_current_)
+               });
+
+
   if (is_showing_area_message_) {
     StringSpriteSize area_message_size = default_font_->GetStringSize(area_message_, {}, {20.0f});
     rr->DrawFont(area_message_, font_key_,
@@ -795,7 +830,31 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     );
   }
 
+  // Intro Message
+  wss.str(L"");
+  wss << L"魔物を倒して、さらに世界の奥へ！\n";
+  wss << L"　　　　村の出口は北だ\n";
+  wss << L"　　　　冒険の始まりだ";
+  auto intro_text_props = StringSpriteProps{
+    .pixel_size = 24.0f,
+    .line_height = 30.0f,
+    .color = color::setOpacity(color::white, intro_text_opacity_)
+  };
 
+  auto intro_text_size = default_font_->GetStringSize(wss.str(), {}, intro_text_props);
+
+  rr->DrawFont(
+    wss.str(),
+    font_key_,
+    Transform{
+      .position = {
+        static_cast<float>(ctx->window_width) / 2 - intro_text_size.width / 2,
+        static_cast<float>(ctx->window_height) / 2 - intro_text_size.height / 2,
+        0
+      }
+    }, intro_text_props
+  );
+  
   rr->DrawSprite(RenderItem{
                    fade_overlay_texture_id_,
                    Transform{

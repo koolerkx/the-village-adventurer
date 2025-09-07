@@ -88,6 +88,9 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
       ctx->input_handler->SetXInputVibration(VIBRATION_LOW, VIBRATION_HIGH);
       scene_ctx->vibration_timeout = 0.075f;
     }
+    else if (it.attack.held && cooldowns[selected_skill_id_] > 0 && attack_throttle_.CanCall()) {
+      SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::empty, {}, 0.75);
+    }
 
 #if defined(DEBUG) || defined(_DEBUG)
     if (it.damage_debug.pressed) Damage(10);
@@ -103,11 +106,24 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
   UpdateActiveBuffs(buffs_, delta_time);
 
   // Update invincible
-  if (GetIsInvincible() && invincible_color_switch_timer_ <= 0) {
-    invincible_color_idx_ = (invincible_color_idx_ + 1) % invincible_color_lists_.size();
-    invincible_color_switch_timer_ += 0.05f;
+  for (auto& t : invincible_trajector_) {
+    t.timeout -= delta_time;
   }
-  invincible_color_switch_timer_ -= delta_time;
+  std::erase_if(invincible_trajector_, [](const PlayerInvincibleTrajector t) { return t.timeout <= 0; });
+
+  if (GetIsInvincible()) {
+    if (invincible_color_switch_timer_ <= 0) {
+      invincible_color_idx_ = (invincible_color_idx_ + 1) % invincible_color_lists_.size();
+      invincible_color_switch_timer_ = 0.05f;
+    }
+    invincible_color_switch_timer_ -= delta_time;
+
+    invincible_trajector_timer_ -= delta_time;
+    if (invincible_trajector_timer_ < 0.0f) {
+      invincible_trajector_timer_ = 0.075f;
+      invincible_trajector_.push_back({transform_.position, uv_, invincible_color_lists_[invincible_color_idx_]});
+    }
+  }
 }
 
 void Player::OnFixedUpdate(GameContext*, SceneContext*, float) {
@@ -146,6 +162,18 @@ void Player::OnRender(GameContext* ctx, SceneContext*, Camera* camera) {
   }
 
   CameraProps props = camera->GetCameraProps();
+
+  for (auto& t : invincible_trajector_) {
+    Transform transform = transform_;
+    transform.position = t.position;
+    rr->DrawSprite(RenderItem{
+                     texture_id_,
+                     transform,
+                     t.uv,
+                     color::setOpacity(t.color, 0.75)
+                   }, props);
+  }
+
   // props.algin_pivot = AlginPivot::CENTER_CENTER;
   rr->DrawSprite(RenderItem{
                    texture_id_,
