@@ -51,16 +51,14 @@ private:
   std::function<void()> fade_overlay_callback_ = {};
 
   bool is_x_input_ = false;
+  std::unique_ptr<InputHintComponent> input_hint_ = nullptr;
+  std::unique_ptr<InputHintComponent> x_button_input_hints_ = nullptr;
 
 public:
   TitleUI(GameContext* ctx);
   void OnUpdate(GameContext* ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, float delta_time);
   void OnRender(GameContext* ctx, Camera* camera);
-
-  std::unique_ptr<InputHintComponent> input_hint_ = nullptr;
-  std::unique_ptr<InputHintComponent> x_button_input_hints_ = nullptr;
-
   void SetSelectedOption(uint8_t option) {
     selected_option_ = option;
   }

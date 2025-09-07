@@ -8,9 +8,14 @@ import game.scene_manager;
 import game.scene_game;
 import game.audio.audio_clip;
 
+TitleScene::TitleScene(bool is_default_x_input) {
+  is_default_show_x_input_instruction_ = is_default_x_input;
+}
+
 void TitleScene::OnEnter(GameContext* ctx) {
   std::cout << "TitleScene> OnEnter" << std::endl;
   title_ui_ = std::make_unique<TitleUI>(ctx);
+  title_ui_->SetIsXInput(is_default_show_x_input_instruction_);
 
   SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_title);
 }

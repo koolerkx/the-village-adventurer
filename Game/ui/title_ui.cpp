@@ -28,7 +28,7 @@ TitleUI::TitleUI(GameContext* ctx) {
   };
   std::vector<InputHint> x_button_input_hints = {
     InputHint{L"確認", {XButtonCode::A}},
-    InputHint{L"選択", {XButtonCode::DPadUp, XButtonCode::DPadDown, XButtonCode::LeftThumb}}
+    InputHint{L"選択", {XButtonCode::LeftThumb, XButtonCode::DPadUp, XButtonCode::DPadDown}}
   };
 
   input_hint_ = std::make_unique<InputHintComponent>(ctx, InputHintProps{
