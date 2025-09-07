@@ -28,7 +28,7 @@ Renderer::Renderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext,
   texture_manager_ = texture_manager;
 
   CreateBlendStates();
-  
+
   vertex_num_ = vertex_num;
 
   // 頂点バッファ生成
@@ -297,9 +297,9 @@ void Renderer::DrawSprite(const FixedPoolIndexType texture_id,
   device_context_->Draw(vertex_num_, 0);
 }
 
-void Renderer::DrawSprite(RenderItem render_item, CameraProps camera_props) {
+void Renderer::DrawSprite(RenderItem render_item, CameraProps camera_props, PixelShaderType ps_type) {
   texture_manager_->SetShaderById(render_item.texture_id);
-  shader_manager_->Begin();
+  shader_manager_->Begin(VertexShaderType::Default, ps_type);
 
   // 頂点バッファをロックする
   D3D11_MAPPED_SUBRESOURCE msr;
@@ -592,7 +592,7 @@ void Renderer::DrawPolygon(const std::array<POSITION, 4>& points,
 }
 
 void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transform transform, StringSpriteProps props,
-                        CameraProps camera_props) {
+                        CameraProps camera_props, PixelShaderType ps_type) {
   Font* font = Font::GetFont(font_key);
 
   if (props.is_draw_rect) {
@@ -607,15 +607,15 @@ void Renderer::DrawFont(const std::wstring& str, std::wstring font_key, Transfor
 
     DrawRects(ary, camera_props);
   }
-
+  
   std::vector<RenderInstanceItem> items = font->MakeStringRenderInstanceItems(str, transform, props);
   std::span<RenderInstanceItem> items_span = std::span(items.data(), items.size());
-  DrawSpritesInstanced(items_span, font->GetTextureId(), camera_props);
+  DrawSpritesInstanced(items_span, font->GetTextureId(), camera_props, true , ps_type);
 }
 
 void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_items,
                                     FixedPoolIndexType texture_id,
-                                    CameraProps camera_props, bool is_half_pixel_offset_correction) {
+                                    CameraProps camera_props, bool is_half_pixel_offset_correction, PixelShaderType ps_type) {
   if (render_items.empty()) return;
   if (render_items.size() > instance_buffer_can_store_) {
     CreateInstanceBuffer(instance_buffer_can_store_ * 2);
@@ -623,7 +623,7 @@ void Renderer::DrawSpritesInstanced(const std::span<RenderInstanceItem> render_i
 
   texture_manager_->SetShaderById(texture_id);
 
-  shader_manager_->Begin(VertexShaderType::Instance);
+  shader_manager_->Begin(VertexShaderType::Instance, ps_type);
 
   shader_manager_->SetProjectionMatrix(MakeProjectMatrix(window_size_, camera_props, is_half_pixel_offset_correction));
   shader_manager_->SetWorldMatrix(DirectX::XMMatrixIdentity()); // FIXME
@@ -713,7 +713,7 @@ void Renderer::ResetScissorRect() const {
   device_context_->RSSetScissorRects(1, &scissor_rect);
 }
 
-void Renderer::SetAdditiveBlending() const {  
+void Renderer::SetAdditiveBlending() const {
   device_context_->OMSetBlendState(blend_state_add_.Get(), {}, 0xffffffff);
 }
 

@@ -43,6 +43,8 @@
         <ClCompile Include="scene\game_scene_context.ixx"/>
         <ClCompile Include="scene\result_scene.cpp"/>
         <ClCompile Include="scene\result_scene.ixx"/>
+        <ClCompile Include="scene\splash_sceen.cpp" />
+        <ClCompile Include="scene\splash_scene.ixx" />
         <ClCompile Include="scene\title_scene.cpp"/>
         <ClCompile Include="scene\title_scene.ixx"/>
         <ClCompile Include="scene.ixx"/>

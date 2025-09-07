@@ -36,6 +36,9 @@
         <FxCompile Include="shaders\shader_pixel_2d.hlsl">
             <ShaderType>Pixel</ShaderType>
         </FxCompile>
+        <FxCompile Include="shaders\swirl_pixel.hlsl">
+            <ShaderType>Pixel</ShaderType>
+        </FxCompile>
         <FxCompile Include="shaders\shader_vertex_2d.hlsl">
             <ShaderType>Vertex</ShaderType>
         </FxCompile>

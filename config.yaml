@@ -9,6 +9,7 @@ config:
       vertex_shader: "assets/shaders/shader_vertex_2d.cso"
       instanced_vertex_shader: "assets/shaders/instanced_shader_vertex_2d.cso"
       pixel_shader: "assets/shaders/shader_pixel_2d.cso"
+      swirl_pixel_shader: "assets/shaders/swirl_pixel.cso"
   map:
     default_map: "town"
     map_texture: "assets/field.png"

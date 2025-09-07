@@ -52,6 +52,9 @@ ShaderManager::ShaderManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
   CreateConstantBuffer();
 
   CreatePixelShader(config.pixel_shader, pixel_shader_.GetAddressOf());
+  CreatePixelShader(config.swirl_pixel_shader, swirl_pixel_shader_.GetAddressOf());
+  CreatePSConstantBuffers();
+  
   CreateSamplerState();
 }
 
@@ -135,6 +138,30 @@ void ShaderManager::CreatePixelShader(std::string filename, ID3D11PixelShader** 
   }
 }
 
+void ShaderManager::CreatePSConstantBuffers() {
+  D3D11_BUFFER_DESC cb{};
+  cb.ByteWidth = sizeof(SwirlParams);
+  cb.Usage = D3D11_USAGE_DYNAMIC;
+  cb.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  cb.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+  SwirlParams init{};
+  init.swirlCenter1 = {0.25f, 0.25f};
+  init.swirlRadius1 = 0.25f;
+  init.swirlTwists1 = 1.0f;
+  init.swirlCenter2 = {0.75f, 0.75f};
+  init.swirlRadius2 = 0.25f;
+  init.swirlTwists2 = 1.0f;
+
+  D3D11_SUBRESOURCE_DATA srd{};
+  srd.pSysMem = &init;
+
+  auto hr = device_->CreateBuffer(&cb, &srd, ps_cbuffer_swirl_.GetAddressOf());
+  if (FAILED(hr) || !ps_cbuffer_swirl_) {
+    ps_cbuffer_swirl_.Reset();
+  }
+}
+
 void ShaderManager::CreateSamplerState() {
   // サンプラーステート設定
   D3D11_SAMPLER_DESC sampler_desc{};
@@ -155,7 +182,7 @@ void ShaderManager::CreateSamplerState() {
   device_->CreateSamplerState(&sampler_desc, sampler_state_.GetAddressOf());
 }
 
-void ShaderManager::Begin(VertexShaderType type) {
+void ShaderManager::Begin(VertexShaderType type, PixelShaderType ps_type) {
   switch (type) {
   case VertexShaderType::Instance:
     // 頂点シェーダーとピクセルシェーダーを描画パイプラインに設定
@@ -171,7 +198,14 @@ void ShaderManager::Begin(VertexShaderType type) {
     break;
   }
 
-  device_context_->PSSetShader(pixel_shader_.Get(), nullptr, 0);
+  switch (ps_type) {
+  case PixelShaderType::Default:
+    device_context_->PSSetShader(pixel_shader_.Get(), nullptr, 0);
+    break;
+  case PixelShaderType::Swirl:
+    device_context_->PSSetShader(swirl_pixel_shader_.Get(), nullptr, 0);
+    break;
+  }
 
   // 定数バッファを描画パイプラインに設定
   device_context_->VSSetConstantBuffers(0, 1, vs_constant_buffer_0_.GetAddressOf());
@@ -198,4 +232,23 @@ void ShaderManager::SetWorldMatrix(const DirectX::XMMATRIX& matrix) const {
   XMStoreFloat4x4(&transpose, XMMatrixTranspose(matrix));
 
   device_context_->UpdateSubresource(vs_constant_buffer_1_.Get(), 0, nullptr, &transpose, 0, 0);
+}
+
+void ShaderManager::SetSwirlShader(
+  const DirectX::XMFLOAT2 center1, const float radius1, const float twists1,
+  const DirectX::XMFLOAT2 center2, const float radius2, const float twists2) const {
+  device_context_->PSSetShader(swirl_pixel_shader_.Get(), nullptr, 0);
+
+  SwirlParams params = {
+    center1, radius1, twists1,
+    center2, radius2, twists2,
+  };
+
+  D3D11_MAPPED_SUBRESOURCE mapped{};
+  device_context_->Map(ps_cbuffer_swirl_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+  std::memcpy(mapped.pData, &params, sizeof(SwirlParams));
+  device_context_->Unmap(ps_cbuffer_swirl_.Get(), 0);
+
+  ID3D11Buffer* psCBs[] = {ps_cbuffer_swirl_.Get()};
+  device_context_->PSSetConstantBuffers(1, 1, psCBs);
 }
