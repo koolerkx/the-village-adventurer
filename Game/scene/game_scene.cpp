@@ -24,6 +24,7 @@ import game.utils.helper;
 import game.player.buff;
 import game.title_scene;
 import game.player.level;
+import game.level.level_multiplier;
 
 void GameScene::OnEnter(GameContext* ctx) {
   ctx->allow_control = false;
@@ -112,13 +113,16 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
     return;
   }
 
-  if (player_->GetLevel() != player_level_prev_) {
+  if (player_->GetLevel() != player_level_prev_ && player_->GetHp() > 0) {
     player_level_prev_ = player_->GetLevel();
     level_up_selected_option_ = 1;
     level_up_ui_->Reset();
     is_show_level_up_ui = true;
     is_allow_level_up_ui_control_ = false;
     is_allow_pause_ = false;
+
+    // Set enemy
+    mob_manager_->SetMobLevel(player_->GetLevel());
 
     SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::select_se_1);
     SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_pause_menu);
@@ -451,15 +455,17 @@ void GameScene::HandleMobHitPlayerCollision(GameContext* ctx, float) {
 
                                if (p->GetIsInvincible()) return;
 
+                               float damage = helper::GetRandomNumberByOffset(m->damage * multiplier::GetMobAttackMultiplier(p->GetLevel()), 5.0f);
+
                                std::wstringstream wss;
                                wss << L"プレイヤーが "
-                                 << std::fixed << std::setprecision(2) << m->damage
+                                 << std::fixed << std::setprecision(2) << damage
                                  << L" ダメージを受けた！";
 
                                ui->AddLogText(wss.str(),
                                               color::redA700);
 
-                               float hp = p->Damage(m->damage);
+                               float hp = p->Damage(damage);
                                SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(
                                  audio_clip::hit_2, p->GetPositionVector());
                                scene_ctx->vibration_timeout = 0.1f;

@@ -13,6 +13,7 @@ import game.types;
 import game.scene_game.context;
 import game.player;
 import game.math;
+import game.level.level_multiplier;
 
 export enum class MobActionState: char {
   IDLE_LEFT,
@@ -191,6 +192,8 @@ private:
 
   void SyncCollider(MobState& mob_state);
 
+  int mob_level_ = 1;
+
 public:
   MobManager(GameContext* ctx) {
     texture_id_ = ctx->render_resource_manager->texture_manager->Load(L"assets/mobs.png"); // extract path
@@ -200,7 +203,8 @@ public:
   void CreateActiveArea(TileMapObjectProps);
 
   void OnUpdate(GameContext* ctx, float delta_time, OnUpdateProps props);
-  void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time, Collider<Player> player_collider, bool is_player_invincible);
+  void OnFixedUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time, Collider<Player> player_collider,
+                     bool is_player_invincible);
   void OnRender(GameContext* ctx, Camera* camera);
 
   int MakeDamage(MobState& mob_state, int damage, const std::move_only_function<void()> post_action);
@@ -209,4 +213,12 @@ public:
   std::vector<Collider<MobState>> GetColliders();
   std::vector<Collider<MobHitBox>> GetHitBoxColliders();
   std::vector<Collider<ActiveArea>> GetActiveAreaColliders();
+
+  void SetMobLevel(int mob_level) {
+    mobs_pool_.ForEach([&old_ml = mob_level_, &new_ml = mob_level](MobState& mob_state) -> void {
+      mob_state.hp = mob_state.hp / multiplier::GetMobHPMultiplier(old_ml) * multiplier::GetMobHPMultiplier(new_ml);
+      mob_state.max_hp = mob_state.hp / multiplier::GetMobHPMultiplier(old_ml) * multiplier::GetMobHPMultiplier(new_ml);
+    });
+    mob_level_ = mob_level;
+  }
 };
