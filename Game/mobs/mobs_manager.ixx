@@ -216,8 +216,8 @@ public:
 
   void SetMobLevel(int mob_level) {
     mobs_pool_.ForEach([&old_ml = mob_level_, &new_ml = mob_level](MobState& mob_state) -> void {
-      mob_state.hp = mob_state.hp / multiplier::GetMobHPMultiplier(old_ml) * multiplier::GetMobHPMultiplier(new_ml);
-      mob_state.max_hp = mob_state.hp / multiplier::GetMobHPMultiplier(old_ml) * multiplier::GetMobHPMultiplier(new_ml);
+      mob_state.hp = static_cast<int>(static_cast<float>(mob_state.hp) / multiplier::GetMobHPMultiplier(old_ml) * multiplier::GetMobHPMultiplier(new_ml));
+      mob_state.max_hp = static_cast<int>(static_cast<float>(mob_state.max_hp) / multiplier::GetMobHPMultiplier(old_ml) * multiplier::GetMobHPMultiplier(new_ml));
     });
     mob_level_ = mob_level;
   }
