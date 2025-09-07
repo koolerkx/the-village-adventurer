@@ -148,7 +148,7 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
                            .player_position = player_->GetPositionVector(),
                            .is_player_invincible = player_->GetIsInvincible()
                          });
-
+  
   UpdateUI(ctx, delta_time);
 
   if (is_end_) {
@@ -310,7 +310,7 @@ void GameScene::HandlePlayerMovementAndCollisions(GameContext* ctx, float delta_
     });
   };
 
-  std::function<void(FieldObject&)> on_collide_wall = [&](FieldObject& fo) {
+  std::function<void(FieldObject&)> on_collide_wall = [&](FieldObject&) {
     ctx->input_handler->SetXInputVibration(VIBRATION_LOWER_LOW, VIBRATION_LOW);
     scene_context->vibration_timeout = 0.1f;
   };
@@ -702,6 +702,7 @@ void GameScene::UpdateUI(GameContext* ctx, float delta_time) {
   ui_->OnUpdate(ctx, scene_context.get(), delta_time, camera_.get());
   ui_->SetExperienceBarPercentage(player_->GetExperiencePercentage());
   ui_->SetPlayerLevel(player_->GetLevel());
+  ui_->SetAttackCooldowns(player_->GetCooldowns());
 }
 
 void GameScene::UpdateInput(InputHandler* ih) {

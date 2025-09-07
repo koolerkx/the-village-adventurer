@@ -386,12 +386,14 @@ void StatusUI::OnRender(GameContext* ctx, Camera*) {
     wss << player_level::GetAbilityDescription(a.type);
     if (a.type == player_level::Ability::HP_UP) {
       wss << " ";
-      wss << static_cast<int>(a.value);
+      wss << std::fixed << std::setprecision(2);
+      wss << a.value;
       wss << " ";
     }
     else {
       wss << " ";
-      wss << static_cast<int>(a.multiplier);
+      wss << std::fixed << std::setprecision(2);
+      wss << a.multiplier;
       wss << L" 倍";
     }
     wss << L"\n";
