@@ -39,6 +39,10 @@ Player::Player(FixedPoolIndexType texture_id,
 
 void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_time) {
   if (ctx->allow_control) {
+    for (auto& cooldown : cooldowns) {
+      if (cooldown > 0) cooldown -= delta_time;
+    }
+
     const PlayerIntent it = input_->Intent(delta_time);
 
     // movement
@@ -73,13 +77,14 @@ void Player::OnUpdate(GameContext* ctx, SceneContext* scene_ctx, float delta_tim
     }
 
     // skill attack
-    if (it.attack.held && attack_throttle_.CanCall()) {
+    if (it.attack.held && cooldowns[selected_skill_id_] <= 0 && attack_throttle_.CanCall()) {
       scene_ctx->skill_manager->PlaySkill(
         selected_skill_type_,
         {transform_.position.x, transform_.position.y},
         scene_object::GetPlayerRotationByDirection(direction_facing_) // Right = 0
       );
 
+      cooldowns[selected_skill_id_] = scene_ctx->skill_manager->GetSkillCooldown(selected_skill_type_);
       ctx->input_handler->SetXInputVibration(VIBRATION_LOW, VIBRATION_HIGH);
       scene_ctx->vibration_timeout = 0.075f;
     }

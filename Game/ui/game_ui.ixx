@@ -170,6 +170,9 @@ private:
   std::unique_ptr<InputHintComponent> input_hint_ = nullptr;
   std::unique_ptr<InputHintComponent> x_button_input_hints_ = nullptr;
 
+  float global_attack_cooldown_ = 0.0f;
+  std::vector<float> cooldowns_;
+  
 public:
   void SetHpPercentage(float percentage) {
     if (std::abs(hp_percentage_target_ - percentage) > 0.00001f) {
@@ -249,6 +252,7 @@ public:
       auto it = skill_data.find(d);
       if (it != skill_data.end()) {
         skill_uvs_.push_back(it->second.icon_uv);
+        cooldowns_.push_back(0);
       }
     }
   }
@@ -289,4 +293,8 @@ public:
   }
   
   void SetIsXInput(bool is_x_input) { is_x_input_ = is_x_input; }
+
+  void SetAttackCooldowns(std::vector<float> cooldowns) {
+    cooldowns_ = cooldowns;
+  }
 };

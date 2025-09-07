@@ -81,8 +81,8 @@ export const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
   {
     SKILL_TYPE::FIREBALL, {
       .name = L"‰Î‚Ì‹Ê",
-      .cooldown = 1.0f,
-      .damage = 5,
+      .cooldown = 3.0f,
+      .damage = 20,
       .is_stick_to_player = false,
       .is_loop = true,
       .is_destroy_by_wall = true,
@@ -107,7 +107,7 @@ export const std::unordered_map<SKILL_TYPE, SkillData> skill_data = {
     SKILL_TYPE::EXPLOSION, {
       .name = L"‰Î‚Ì‹Ê(”š”­)",
       .cooldown = 1.0f,
-      .damage = 2,
+      .damage = 5,
       .is_stick_to_player = false,
       .is_loop = false,
       .is_destroy_by_wall = false,
@@ -143,4 +143,6 @@ public:
   void HandleDestroyCollision(SkillHitbox* skill, GameContext* ctx, float& vibration_timeout, std::optional<Vector2> next_position = std::nullopt);
 
   std::vector<Collider<SkillHitbox>> GetColliders();
+
+  float GetSkillCooldown(SKILL_TYPE type);
 };

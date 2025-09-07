@@ -476,6 +476,18 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
         color::setOpacity(color::white, ui_opacity_current_)
       });
 
+      if (cooldowns_[i] > 0) {
+        render_items.emplace_back(RenderInstanceItem{
+          Transform{
+            .position = {skill_slot_position.x + 2, skill_slot_position.y + 2, 0},
+            .size = {44, 44},
+            .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
+          },
+          texture_map["Block"],
+          color::setOpacity(color::black, ui_opacity_current_ * 0.7f)
+        });
+      }
+
       if (skill_selected_ != i) continue;
 
       render_items.emplace_back(RenderInstanceItem{
@@ -537,7 +549,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
       color::setOpacity(color::white, ui_opacity_current_)
     });
   }
-  
+
   // Session: Upper
   // Experience Bar
   render_items.emplace_back(RenderInstanceItem{
@@ -553,7 +565,8 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
 
   if (is_x_input_) {
     x_button_input_hints_->OnRender(ctx);
-  } else {
+  }
+  else {
     input_hint_->OnRender(ctx);
   }
 
@@ -694,6 +707,40 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
                  .line_height = 22.0f,
                  .color = color::setOpacity(color::white, ui_opacity_current_)
                });
+
+  // Session Center Bottom
+  // Cooldown
+  float skill_slot_width = static_cast<float>(48 * skill_count_ + (skill_count_ - 1) * skill_slot_gap);
+  for (int i = 0; i < skill_count_; ++i) {
+    if (is_show_skill_ && cooldowns_[i] > 0) {
+      POSITION skill_slot_position = {-skill_slot_width / 2 + i * (48 + skill_slot_gap), -24 - 48, 0};
+
+      float cooldown = cooldowns_[i];
+
+      wss.str(L"");
+      wss << std::fixed << std::setprecision(2);
+      // wss << global_attack_cooldown_;
+      wss << cooldown;
+
+      StringSpriteSize cooldown_text_size = default_font_->GetStringSize(wss.str(), {}, {18.0f});
+
+      rr->DrawFont(wss.str(), font_key_,
+                   Transform{
+                     .position = {
+                       skill_slot_position.x + (48 - cooldown_text_size.width) / 2,
+                       skill_slot_position.y + (48 - cooldown_text_size.height) / 2, 0
+                     },
+                     .position_anchor = {
+                       static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0
+                     }
+                   }, StringSpriteProps{
+                     .pixel_size = 18.0f,
+                     .letter_spacing = 0.0f,
+                     .line_height = 0.0f,
+                     .color = color::setOpacity(color::white, ui_opacity_current_)
+                   });
+    }
+  }
 
   // Session: Right Upper
   // Coin: Text
