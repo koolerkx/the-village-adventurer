@@ -15,6 +15,8 @@ import graphic.utils.color;
 import graphic.texture;
 import graphic.utils.font;
 
+export using PSType = PixelShaderType;
+
 // 頂点構造体
 export struct Vertex {
   POSITION position; // 頂点座標
@@ -83,7 +85,7 @@ public:
                   const Transform& transform, const UV& uv,
                   const COLOR& color);
 
-  void DrawSprite(RenderItem render_item, CameraProps camera_props = {});
+  void DrawSprite(RenderItem render_item, CameraProps camera_props = {}, PixelShaderType ps_type = PixelShaderType::Default);
 
   void DrawLine(const POSITION& start, const POSITION& end, const COLOR& color);
   void DrawLineCircle(POSITION center, float radius, const COLOR& color, CameraProps camera_props = {});
@@ -108,17 +110,22 @@ public:
 
   // Instanced Indexed Draw
   void DrawFont(const std::wstring& str, std::wstring font_key, Transform transform,
-                StringSpriteProps props, CameraProps camera_props = {});
+                StringSpriteProps props, CameraProps camera_props = {}, PixelShaderType ps_type = PixelShaderType::Default);
 
   // Instanced Indexed Draw
   void DrawSpritesInstanced(std::span<RenderInstanceItem> render_items,
                             FixedPoolIndexType texture_id,
                             CameraProps camera_props = {},
-                            bool is_half_pixel_offset_correction = false);
+                            bool is_half_pixel_offset_correction = false, PixelShaderType ps_type = PixelShaderType::Default);
 
   void SetScissorRect(float left, float top, float right, float bottom) const;
   void ResetScissorRect() const;
 
   void SetAdditiveBlending() const;
   void SetMultiplicativeBlending() const;
+
+  void SetSwirlParams(const DirectX::XMFLOAT2 center1, const float radius1, const float twists1,
+                      const DirectX::XMFLOAT2 center2, const float radius2, const float twists2) const {
+    shader_manager_->SetSwirlShader(center1, radius1, twists1, center2, radius2, twists2);
+  }
 };

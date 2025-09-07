@@ -16,6 +16,20 @@ export enum class VertexShaderType {
   Default
 };
 
+export enum class PixelShaderType {
+  Default,
+  Swirl
+};
+
+struct alignas(32) SwirlParams {
+  DirectX::XMFLOAT2 swirlCenter1; // (u, v)
+  float swirlRadius1;
+  float swirlTwists1;
+  DirectX::XMFLOAT2 swirlCenter2; // (u, v)
+  float swirlRadius2;
+  float swirlTwists2;
+};
+
 export class ShaderManager {
 private:
   ComPtr<ID3D11Device> device_ = nullptr;
@@ -26,6 +40,9 @@ private:
   ComPtr<ID3D11InputLayout> input_layout_ = nullptr;
   ComPtr<ID3D11Buffer> vs_constant_buffer_0_ = nullptr; // Projection
   ComPtr<ID3D11Buffer> vs_constant_buffer_1_ = nullptr; // World
+
+  // Pixel Shader
+  ComPtr<ID3D11Buffer> ps_cbuffer_swirl_;
 
   // instace draw shder
   ComPtr<ID3D11VertexShader> instance_vertex_shader_ = nullptr;
@@ -40,16 +57,20 @@ private:
 
   // Pixel Shader
   ComPtr<ID3D11PixelShader> pixel_shader_ = nullptr;
+  ComPtr<ID3D11PixelShader> swirl_pixel_shader_ = nullptr;
 
   void CreatePixelShader(std::string filename, ID3D11PixelShader** pp_pixel_shader);
+  void CreatePSConstantBuffers();
 
   void CreateSamplerState();
 
 public:
   ShaderManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, Dx11WrapperConfig config);
 
-  void Begin(VertexShaderType type = VertexShaderType::Default);
+  void Begin(VertexShaderType type = VertexShaderType::Default, PixelShaderType ps_type = PixelShaderType::Default);
 
   void SetProjectionMatrix(const DirectX::XMMATRIX& matrix) const;
   void SetWorldMatrix(const DirectX::XMMATRIX& matrix) const;
+  void SetSwirlShader(const DirectX::XMFLOAT2 center1, const float radius1, const float twists1,
+                      const DirectX::XMFLOAT2 center2, const float radius2, const float twists2) const;
 };
