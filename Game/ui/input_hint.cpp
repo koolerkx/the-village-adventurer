@@ -49,11 +49,11 @@ void InputHintComponent::OnUpdate(GameContext* ctx, float) {
   for (DisplayInputHint& input_hint : input_hints) {
     for (int i = 0; i < input_hint.keys.size(); ++i) {
       auto key = input_hint.keys[i];
-      if (const auto k_code = std::get_if<KeyCode>(&key); input_handler->GetKey(*k_code)) {
+      if (const auto k_code = std::get_if<KeyCode>(&key); k_code && input_handler->GetKey(*k_code)) {
         input_hint.is_pressed[i] = true;
       }
       else if (const auto x_code = std::get_if<XButtonCode>(&key);
-        input_handler->IsXInputConnected() && input_handler->GetXInputButton(*x_code)) {
+        x_code && input_handler->IsXInputConnected() && input_handler->GetXInputButton(*x_code)) {
         input_hint.is_pressed[i] = true;
       }
       else {
@@ -133,8 +133,7 @@ void InputHintComponent::OnRender(GameContext* ctx) {
     std::vector<UV> key_uvs = input_hints[i].uvs;
 
     StringSpriteSize label_size = default_font_->GetStringSize(wss.str(), {}, label_text_props);
-    for (int j = 0; j < input_hints.size(); j++) {
-      // UV key_uv = key_uvs[j];
+    for (int j = 0; j < input_hints[i].keys.size(); j++) {
       UV key_uv = input_hints[i].is_pressed[j] ? input_hints[i].on_press_uvs[j] : input_hints[i].uvs[j];
 
       // Key width is based on the height of the key

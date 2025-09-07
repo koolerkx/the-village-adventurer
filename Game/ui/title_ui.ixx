@@ -49,7 +49,9 @@ private:
   float fade_overlay_alpha_target_ = 0.0f;
 
   std::function<void()> fade_overlay_callback_ = {};
-  
+
+  bool is_x_input_ = false;
+
 public:
   TitleUI(GameContext* ctx);
   void OnUpdate(GameContext* ctx, float delta_time);
@@ -57,6 +59,7 @@ public:
   void OnRender(GameContext* ctx, Camera* camera);
 
   std::unique_ptr<InputHintComponent> input_hint_ = nullptr;
+  std::unique_ptr<InputHintComponent> x_button_input_hints_ = nullptr;
 
   void SetSelectedOption(uint8_t option) {
     selected_option_ = option;
@@ -74,4 +77,6 @@ public:
       fade_overlay_callback_ = cb;
     }
   }
+
+  void SetIsXInput(bool is_x_input) { is_x_input_ = is_x_input; }
 };

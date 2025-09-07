@@ -26,10 +26,17 @@ TitleUI::TitleUI(GameContext* ctx) {
     InputHint{L"確認", {KeyCode::KK_SPACE, KeyCode::KK_ENTER}},
     InputHint{L"選択", {KeyCode::KK_W, KeyCode::KK_S, KeyCode::KK_UP, KK_DOWN}}
   };
+  std::vector<InputHint> x_button_input_hints = {
+    InputHint{L"確認", {XButtonCode::A}},
+    InputHint{L"選択", {XButtonCode::DPadUp, XButtonCode::DPadDown, XButtonCode::LeftThumb}}
+  };
 
   input_hint_ = std::make_unique<InputHintComponent>(ctx, InputHintProps{
                                                        1, input_hints, false, true
                                                      });
+  x_button_input_hints_ = std::make_unique<InputHintComponent>(ctx, InputHintProps{
+                                                                 1, x_button_input_hints, false, true
+                                                               });
 }
 
 void TitleUI::OnUpdate(GameContext* ctx, float delta_time) {
@@ -55,10 +62,12 @@ void TitleUI::OnUpdate(GameContext* ctx, float delta_time) {
   }
 
   input_hint_->OnUpdate(ctx, delta_time);
+  x_button_input_hints_->OnUpdate(ctx, delta_time);
 }
 
 void TitleUI::OnFixedUpdate(GameContext* ctx, float delta_time) {
   input_hint_->OnFixedUpdate(ctx, delta_time);
+  x_button_input_hints_->OnFixedUpdate(ctx, delta_time);
 }
 
 void TitleUI::OnRender(GameContext* ctx, Camera*) {
@@ -245,7 +254,12 @@ void TitleUI::OnRender(GameContext* ctx, Camera*) {
     color::white
   });
 
-  input_hint_->OnRender(ctx);
+  if (is_x_input_) {
+    x_button_input_hints_->OnRender(ctx);
+  }
+  else {
+    input_hint_->OnRender(ctx);
+  }
 
   // overlay
   rr->DrawSprite(RenderItem{

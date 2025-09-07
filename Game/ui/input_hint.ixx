@@ -49,11 +49,35 @@ std::unordered_map<KeyCode, UV> keyboard_key_on_press_to_uv = {
 };
 
 std::unordered_map<XButtonCode, UV> xbutton_key_to_uv = {
-  
+  {XButtonCode::X, UV{{528, 256}, {16, 16}}},
+  {XButtonCode::A, UV{{528, 272}, {16, 16}}},
+  {XButtonCode::B, UV{{528, 288}, {16, 16}}},
+  {XButtonCode::Y, UV{{528, 304}, {16, 16}}},
+  {XButtonCode::Start, UV{{528, 336}, {16, 16}}},
+  {XButtonCode::Back, UV{{528, 320}, {16, 16}}},
+  {XButtonCode::DPadLeft, UV{{640, 320}, {16, 16}}},
+  {XButtonCode::DPadRight, UV{{656, 320}, {16, 16}}},
+  {XButtonCode::DPadUp, UV{{640, 304}, {16, 16}}},
+  {XButtonCode::DPadDown, UV{{656, 304}, {16, 16}}},
+  {XButtonCode::LeftThumb, UV{{728, 296}, {16, 16}}},
+  {XButtonCode::LB, UV{{544, 464}, {16, 16}}},
+  {XButtonCode::RB, UV{{544, 480}, {16, 16}}},
 };
 
 std::unordered_map<XButtonCode, UV> xbutton_key_on_press_to_uv = {
-  
+  {XButtonCode::X, UV{{592, 256}, {16, 16}}},
+  {XButtonCode::A, UV{{592, 272}, {16, 16}}},
+  {XButtonCode::B, UV{{592, 288}, {16, 16}}},
+  {XButtonCode::Y, UV{{592, 304}, {16, 16}}},
+  {XButtonCode::Start, UV{{592, 336}, {16, 16}}},
+  {XButtonCode::Back, UV{{592, 320}, {16, 16}}},
+  {XButtonCode::DPadLeft, UV{{672, 320}, {16, 16}}},
+  {XButtonCode::DPadRight, UV{{688, 320}, {16, 16}}},
+  {XButtonCode::DPadUp, UV{{672, 304}, {16, 16}}},
+  {XButtonCode::DPadDown, UV{{688, 304}, {16, 16}}},
+  {XButtonCode::LeftThumb, UV{{728, 296}, {16, 16}}},
+  {XButtonCode::LB, UV{{592, 464}, {16, 16}}},
+  {XButtonCode::RB, UV{{592, 480}, {16, 16}}},
 };
 
 export struct InputHint {
