@@ -443,13 +443,14 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
     color::setOpacity(color::white, ui_opacity_current_)
   });
   // Attack Hint: Space bar
+  float atk_hint_space_bar_width = is_x_input_ ? 18 : 36;
   render_items.emplace_back(RenderInstanceItem{
     Transform{
       .position = {-atk_hint_background_width / 2 + 72, -82 - 18 - 7, 0},
-      .size = {36, 18},
+      .size = {atk_hint_space_bar_width, 18},
       .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
     },
-    texture_map["KeyboardSpaceUp"],
+    is_x_input_ ? texture_map["XInputA"] : texture_map["KeyboardSpaceUp"],
     color::setOpacity(color::white, ui_opacity_current_)
   });
 
@@ -514,7 +515,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
         .size = {24, 24},
         .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
       },
-      texture_map["KeyboardQ"],
+      is_x_input_ ? texture_map["XInputLB"] : texture_map["KeyboardQ"],
       color::setOpacity(color::white, ui_opacity_current_)
     });
 
@@ -525,7 +526,7 @@ void GameUI::OnRender(GameContext* ctx, SceneContext* scene_ctx, Camera* camera)
         .size = {24, 24},
         .position_anchor = {static_cast<float>(ctx->window_width) / 2, static_cast<float>(ctx->window_height), 0}
       },
-      texture_map["KeyboardE"],
+      is_x_input_ ? texture_map["XInputRB"] : texture_map["KeyboardE"],
       color::setOpacity(color::white, ui_opacity_current_)
     });
   }

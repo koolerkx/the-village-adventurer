@@ -36,6 +36,9 @@ std::unordered_map<std::string, UV> texture_map = {
   {"SkillSelected", UV{{384, 140}, {26, 26}}},
   {"KeyboardQ", UV{{0, 387}, {16, 16}}},
   {"KeyboardE", UV{{64, 355}, {16, 16}}},
+  {"XInputLB", UV{{528, 464}, {16, 16}}},
+  {"XInputRB", UV{{528, 480}, {16, 16}}},
+  {"XInputA", UV{{528, 272}, {16, 16}}},
 
   // Coin
   {"CoinWithoutStroke", UV{{476, 41}, {16, 18}}},
@@ -165,7 +168,7 @@ private:
   float experience_bar_percentage_current_ = 0.0f;
 
   int player_level_ = 1;
-  
+
   bool is_x_input_ = false;
   std::unique_ptr<InputHintComponent> input_hint_ = nullptr;
   std::unique_ptr<InputHintComponent> x_button_input_hints_ = nullptr;
@@ -175,7 +178,7 @@ private:
 
   int target_score_;
   int score_;
-  
+
 public:
   void SetHpPercentage(float percentage) {
     if (std::abs(hp_percentage_target_ - percentage) > 0.00001f) {
@@ -298,7 +301,7 @@ public:
     }
     player_level_ = level;
   }
-  
+
   void SetIsXInput(bool is_x_input) { is_x_input_ = is_x_input; }
 
   void SetAttackCooldowns(std::vector<float> cooldowns) {
