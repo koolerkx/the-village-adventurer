@@ -159,7 +159,7 @@ void TitleUI::OnRender(GameContext* ctx, Camera*) {
     Transform{
       {
         static_cast<float>(ctx->window_width) / 2 - 225,
-        static_cast<float>(ctx->window_height) / 2 - 280 +
+        static_cast<float>(ctx->window_height) / 2 - 300 +
         std::cos(1.5f * movement_acc_) * title_logo_floating_speed_,
         0
       },

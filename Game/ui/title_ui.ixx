@@ -37,7 +37,7 @@ private:
   const Vector2 selected_uv_size_ = {60, 23};
 
   float uv_offset_speed_ = 0.0f;
-  const float uv_offset_speed_target_ = 25.0f;
+  const float uv_offset_speed_target_ = 10.0f;
   float uv_horizontal_offset_ = 0;
 
   float title_logo_floating_speed_ = 18.0f;
