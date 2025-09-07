@@ -146,7 +146,8 @@ bool Application::Init() {
                                     .window_size_height{config.graphic.window_size_height},
                                     .vertex_shader = config.graphic.shader_files.vertex_shader,
                                     .instanced_vertex_shader = config.graphic.shader_files.instanced_vertex_shader,
-                                    .pixel_shader = config.graphic.shader_files.pixel_shader
+                                    .pixel_shader = config.graphic.shader_files.pixel_shader,
+                                    .swirl_pixel_shader = config.graphic.shader_files.swirl_pixel_shader
                                   }));
 
   std::unique_ptr<GameContext> initial_context = std::make_unique<GameContext>();

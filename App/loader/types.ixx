@@ -15,6 +15,7 @@ export struct ShaderFiles {
   std::string vertex_shader{"assets/shaders/shader_vertex_2d.cso"};
   std::string instanced_vertex_shader{"assets/shaders/instanced_shader_vertex_2d.cso"};
   std::string pixel_shader{"assets/shaders/shader_pixel_2d.cso"};
+  std::string swirl_pixel_shader{"assets/shaders/swirl_pixel.cso"};
 };
 
 export struct GraphicConfig {

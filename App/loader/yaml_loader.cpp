@@ -40,6 +40,8 @@ void YAMLConfigLoader::loadConfig(const std::string& config_path) {
             std::string>(config_.graphic.shader_files.instanced_vertex_shader);
         config_.graphic.shader_files.pixel_shader =
           shader_node["pixel_shader"].as<std::string>(config_.graphic.shader_files.pixel_shader);
+        config_.graphic.shader_files.swirl_pixel_shader =
+          shader_node["swirl_pixel_shader"].as<std::string>(config_.graphic.shader_files.swirl_pixel_shader);
       }
     }
 
