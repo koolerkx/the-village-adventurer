@@ -153,7 +153,7 @@ void LevelUpUI::OnRender(GameContext* ctx, Camera*) {
   };
   auto select_text_size = default_font_->GetStringSize(wss.str(), {}, select_text_props);
 
-  constexpr float option_1_x_offset = -(158 + button_width / 2);
+  constexpr float option_1_x_offset = -(150 + button_width / 2);
   float option1_x = win_size.x / 2 + option_1_x_offset;
   float option1_y = win_size.y / 2 + button_y_offset;
 
@@ -274,7 +274,7 @@ void LevelUpUI::OnRender(GameContext* ctx, Camera*) {
     ui_texture_id_,
     Transform{
       {
-        option1_x - 3 - box_width / 2,
+        option1_x - box_width / 2,
         box_y - box_height / 2,
         0
       },
@@ -291,7 +291,7 @@ void LevelUpUI::OnRender(GameContext* ctx, Camera*) {
     ui_texture_id_,
     Transform{
       {
-        option2_x - 3 - box_width / 2,
+        option2_x - box_width / 2,
         box_y - box_height / 2,
         0
       },
@@ -308,7 +308,7 @@ void LevelUpUI::OnRender(GameContext* ctx, Camera*) {
     ui_texture_id_,
     Transform{
       {
-        option3_x - 3 - box_width / 2,
+        option3_x - box_width / 2,
         box_y - box_height / 2,
         0
       },
@@ -330,7 +330,7 @@ void LevelUpUI::OnRender(GameContext* ctx, Camera*) {
     ui_texture_id_,
     Transform{
       {
-        option1_x - 3 - icon_width / 2,
+        option1_x - icon_width / 2,
         box_y + icon_y_offset - icon_height / 2,
         0
       },
@@ -344,7 +344,7 @@ void LevelUpUI::OnRender(GameContext* ctx, Camera*) {
     ui_texture_id_,
     Transform{
       {
-        option2_x - 3 - icon_width / 2,
+        option2_x - icon_width / 2,
         box_y + icon_y_offset - icon_height / 2,
         0
       },
@@ -358,7 +358,7 @@ void LevelUpUI::OnRender(GameContext* ctx, Camera*) {
     ui_texture_id_,
     Transform{
       {
-        option3_x - 3 - icon_width / 2,
+        option3_x - icon_width / 2,
         box_y + icon_y_offset - icon_height / 2,
         0
       },
