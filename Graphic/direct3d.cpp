@@ -25,14 +25,23 @@ HRESULT Dx11Wrapper::CreateSwapChain(HWND hwnd) {
   swapchain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // 何に使う、ここは絵を各場所で使う
   swapchain_desc.SampleDesc.Count = 1;
   swapchain_desc.SampleDesc.Quality = 0;
-  swapchain_desc.SwapEffect = config_.vsync ? DXGI_SWAP_EFFECT_FLIP_DISCARD : DXGI_SWAP_EFFECT_DISCARD;
+  // swapchain_desc.SwapEffect = config_.vsync ? DXGI_SWAP_EFFECT_FLIP_DISCARD : DXGI_SWAP_EFFECT_DISCARD;
+  swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD; // FIXME: Workaround for full screen freezing
+  
   // swapchain_desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
+
+  DXGI_SWAP_CHAIN_FULLSCREEN_DESC fullscreen_desc;
+  fullscreen_desc.RefreshRate.Numerator = 60;
+  fullscreen_desc.RefreshRate.Denominator = 1;
+  fullscreen_desc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+  fullscreen_desc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+  fullscreen_desc.Windowed = TRUE;
 
   HRESULT hr = dxgi_factory_->CreateSwapChainForHwnd(
     device_.Get(),
     hwnd,
     &swapchain_desc,
-    nullptr,
+    &fullscreen_desc,
     nullptr,
     swapchain_.ReleaseAndGetAddressOf()
   );
@@ -222,7 +231,12 @@ void Dx11Wrapper::BeginDraw() {
 }
 
 void Dx11Wrapper::EndDraw() const {
-  (void)swapchain_->Present(config_.vsync ? 1 : 0, 0);
+  // HRESULT hr = swapchain_->Present(config_.vsync ? 1 : 0, 0);
+  HRESULT hr = swapchain_->Present(1, 0);
+
+  if (FAILED(hr)) {
+    std::cerr << hr << std::endl;
+  }
 }
 
 void Dx11Wrapper::Dispatch(std::move_only_function<void(ResourceManager*)> func) {

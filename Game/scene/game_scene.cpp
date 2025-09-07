@@ -230,16 +230,19 @@ namespace {
                           auto on_enter_field_object) {
     if (v == 0.0f) return;
 
+    const float moved_distance = v * delta;
     p.SetTransform([&](Transform& t) {
-      if (axis == Axis::X) t.position.x += v * delta;
-      else t.position.y += v * delta;
+      if (axis == Axis::X) t.position.x += moved_distance;
+      else t.position.y += moved_distance;
     });
 
     collision::HandleDetection(p.GetCollider(), colliders,
-                               [&](Player* player, FieldObject* fo, collision::CollisionResult res) {
+                               [&](Player* player, FieldObject* fo, collision::CollisionResult) {
                                  player->SetTransform([&](Transform& t) {
-                                   if (axis == Axis::X) t.position.x += res.mtv.x;
-                                   else t.position.y += res.mtv.y;
+                                   // if (axis == Axis::X) t.position.x += res.mtv.x;
+                                   // else t.position.y += res.mtv.y;
+                                   if (axis == Axis::X) t.position.x -= moved_distance;
+                                   else t.position.y -= moved_distance;
                                  });
                                  on_enter_field_object(fo);
                                });
