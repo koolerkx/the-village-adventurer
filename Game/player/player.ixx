@@ -162,12 +162,12 @@ public:
       * player_level::GetLevelAbilityMultiplier(level_up_abilities_, player_level::Ability::DEFENSE)
       + player_level::GetLevelAbilityValue(level_up_abilities_, player_level::Ability::DEFENSE);
 
-    health_ = std::max(health_ - damage, 0.0f);
+    health_ = std::max(health_ - std::max(damage, 1.0f), 0.0f);
     return health_;
   }
 
   float Heal(float amount) {
-    health_ = std::min(health_ + amount, GetMaxHp());
+    health_ = std::min(health_ + std::max(amount, 0.0f), GetMaxHp());
     SceneManager::GetInstance().GetAudioManager()->PlayAudioClip(audio_clip::buff1, {}, 0.5);
     return health_;
   }
