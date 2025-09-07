@@ -312,28 +312,28 @@ void StatusUI::OnRender(GameContext* ctx, Camera*) {
 
   // HP
   wss << L"HP　：";
-  wss << props_.hp;
+  wss << static_cast<int>(props_.hp);
   wss << L" / ";
-  wss << props_.max_hp;
+  wss << static_cast<int>(props_.max_hp);
   wss << L"\n";
 
   // Defense
   wss << L"防御力　：";
-  wss << props_.defense;
+  wss << static_cast<int>(props_.defense);
   // wss << L" + ";
   // wss << L"20";
   wss << L"\n";
 
   // Attack
   wss << L"攻撃力　：";
-  wss << props_.attack;
+  wss << static_cast<int>(props_.attack);
   // wss << L" + ";
   // wss << L"20";
   wss << L"\n";
 
   // Moving
   wss << L"移動速度：";
-  wss << props_.speed;
+  wss << static_cast<int>(props_.speed);
   // wss << L" + ";
   // wss << L"20";
   wss << L"\n";
@@ -386,12 +386,12 @@ void StatusUI::OnRender(GameContext* ctx, Camera*) {
     wss << player_level::GetAbilityDescription(a.type);
     if (a.type == player_level::Ability::HP_UP) {
       wss << " ";
-      wss << a.value;
+      wss << static_cast<int>(a.value);
       wss << " ";
     }
     else {
       wss << " ";
-      wss << a.multiplier;
+      wss << static_cast<int>(a.multiplier);
       wss << L" 倍";
     }
     wss << L"\n";
