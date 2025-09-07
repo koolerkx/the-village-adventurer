@@ -152,10 +152,11 @@ void GameScene::OnUpdate(GameContext* ctx, float delta_time) {
     ctx->allow_control = false;
 
     ui_->SetFadeOverlayAlphaTarget(1.0f, color::black,
-                                   [&timer_elapsed = timer_elapsed_, &monster_killed = monster_killed_]() {
+                                   [&timer_elapsed = timer_elapsed_,
+                                     &monster_killed = monster_killed_, &player=player_]() {
                                      SceneManager::GetInstance().ChangeSceneDelayed(
                                        std::make_unique<ResultScene>(ResultSceneProps{
-                                         monster_killed, static_cast<float>(timer_elapsed)
+                                         monster_killed, static_cast<float>(timer_elapsed), player->GetLevel()
                                        }));
                                    });
   }
