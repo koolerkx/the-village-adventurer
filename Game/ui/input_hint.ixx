@@ -40,6 +40,7 @@ std::unordered_map<KeyCode, UV> keyboard_key_to_uv = {
   {KeyCode::KK_I, UV{{560, 48}, {16, 16}}},
   {KeyCode::KK_R, UV{{576, 64}, {16, 16}}},
   {KeyCode::KK_ESCAPE, UV{{720, 0}, {32, 16}}},
+  {KeyCode::KK_F11, UV{{656, 16}, {16, 16}}},
 };
 
 std::unordered_map<KeyCode, UV> keyboard_key_on_press_to_uv = {
@@ -58,6 +59,7 @@ std::unordered_map<KeyCode, UV> keyboard_key_on_press_to_uv = {
   {KeyCode::KK_I, UV{{560, 160}, {16, 16}}},
   {KeyCode::KK_R, UV{{576, 176}, {16, 16}}},
   {KeyCode::KK_ESCAPE, UV{{720, 64}, {32, 16}}},
+  {KeyCode::KK_F11, UV{{656, 128}, {16, 16}}},
 };
 
 std::unordered_map<XButtonCode, UV> xbutton_key_to_uv = {
