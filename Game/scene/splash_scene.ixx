@@ -8,8 +8,9 @@ import game.scene;
 import graphic.utils.font;
 
 enum class State: uint8_t {
+  RECOMMENDATION,
+  SWIRL,
   AUTHOR_PRESENT,
-  RECOMMENDATION
 };
 
 export class SplashScene : public IScene {
@@ -24,9 +25,21 @@ private:
   
   FixedPoolIndexType ui_texture_id_;
   
-  const float uv_offset_speed_ = 25.0f;
   float uv_horizontal_offset_ = 0;
 
+  float swirl_twists_ = 1;
+  float swirl_radius_ = 0.25;
+  const float swirl_speed_ = 0.3;
+  
+  State state_ = State::RECOMMENDATION;
+
+  float recommendation_opacity_ = 0.0f;
+  float recommendation_timeout_ = 1.0f;
+  float overlay_opacity_ = 1.0f;
+
+  float name_opacity_ = 0.0f;
+  float name_timeout_ = 1.0f;
+  
 public:
   SplashScene();
   

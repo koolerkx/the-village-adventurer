@@ -5,7 +5,11 @@ module game.ui.title_ui;
 import std;
 import game.ui.interpolation;
 
-TitleUI::TitleUI(GameContext* ctx) {
+TitleUI::TitleUI(GameContext* ctx, bool is_flash_start) {
+  if (!is_flash_start) {
+    fade_overlay_alpha_current_ = 0;
+  }
+
   auto [font_spritemap_filename, font_metadata_filename] = defined_font_map[DefinedFont::FUSION_PIXEL_FONT_DEBUG];
   font_key_ = Font::MakeFontGetKey(font_spritemap_filename, font_metadata_filename,
                                    ctx->render_resource_manager->texture_manager.get());
@@ -40,6 +44,14 @@ TitleUI::TitleUI(GameContext* ctx) {
 }
 
 void TitleUI::OnUpdate(GameContext* ctx, float delta_time) {
+  uv_offset_speed_ = interpolation::UpdateSmoothValue(
+    uv_offset_speed_,
+    uv_offset_speed_target_,
+    delta_time,
+    interpolation::SmoothType::EaseOut,
+    1.0f
+  );
+
   uv_horizontal_offset_ += delta_time * uv_offset_speed_;
 
   movement_acc_ += delta_time;

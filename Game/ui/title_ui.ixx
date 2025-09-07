@@ -34,7 +34,8 @@ private:
   const Vector2 selected_uv_pos_ = {384, 117};
   const Vector2 selected_uv_size_ = {60, 23};
 
-  const float uv_offset_speed_ = 25.0f;
+  float uv_offset_speed_ = 0.0f;
+  const float uv_offset_speed_target_ = 25.0f;
   float uv_horizontal_offset_ = 0;
 
   float title_logo_floating_speed_ = 18.0f;
@@ -55,7 +56,7 @@ private:
   std::unique_ptr<InputHintComponent> x_button_input_hints_ = nullptr;
 
 public:
-  TitleUI(GameContext* ctx);
+  TitleUI(GameContext* ctx, bool is_flash_start);
   void OnUpdate(GameContext* ctx, float delta_time);
   void OnFixedUpdate(GameContext* ctx, float delta_time);
   void OnRender(GameContext* ctx, Camera* camera);

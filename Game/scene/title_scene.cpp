@@ -8,13 +8,14 @@ import game.scene_manager;
 import game.scene_game;
 import game.audio.audio_clip;
 
-TitleScene::TitleScene(bool is_default_x_input) {
+TitleScene::TitleScene(bool is_default_x_input, bool is_flash_start) {
   is_x_input_ = is_default_x_input;
+  is_flash_start_ = is_flash_start;
 }
 
 void TitleScene::OnEnter(GameContext* ctx) {
   std::cout << "TitleScene> OnEnter" << std::endl;
-  title_ui_ = std::make_unique<TitleUI>(ctx);
+  title_ui_ = std::make_unique<TitleUI>(ctx, is_flash_start_);
   title_ui_->SetIsXInput(is_x_input_);
 
   SceneManager::GetInstance().GetAudioManager()->PlayBGM(audio_clip::bgm_title);

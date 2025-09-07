@@ -25,8 +25,9 @@ private:
   bool is_allow_control_ = true;
 
   bool is_x_input_ = false;
+  bool is_flash_start_ = false;
 public:
-  TitleScene(bool is_default_x_input = false);
+  TitleScene(bool is_default_x_input = false, bool is_flash_start = true);
 
   void OnEnter(GameContext* ctx) override;
   void OnUpdate(GameContext* ctx, float delta_time) override;
